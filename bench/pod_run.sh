@@ -64,7 +64,7 @@ boot(){ # $1 label -> writes $OUT/boot_$1_s, returns 1 on failure
 if [ "${SKIP_BOOT:-0}" = 1 ]; then log "SKIP_BOOT, using the running patched server"; else
 boot stock || exit 1
 if [ "${DRY:-0}" = 1 ]; then echo "dry run, patch skipped" > $OUT/patch.log; else
-python3 $HERE/engine/$ENGINE/apply_patch.py | tee $OUT/patch.log; fi
+python3 $HERE/engine/$ENGINE/apply_patch.py > $OUT/patch.log 2>&1 || { log "patch FAILED"; cat $OUT/patch.log; exit 1; }; cat $OUT/patch.log; fi
 boot patched || exit 1
 fi
 python3 $HERE/bench/hot_swap_bench.py --engine $ENGINE --base http://127.0.0.1:$PORT --iters ${ITERS:-20} --settle-s ${SETTLE:-10} --gap-s ${GAP:-2} --out $OUT/hot_swap.json
