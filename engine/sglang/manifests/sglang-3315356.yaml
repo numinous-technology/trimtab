@@ -1,0 +1,79 @@
+# trimtab knob manifest for SGLang master commit 3315356 (2026-09-01).
+# klass is hot or cold. hot means the scheduler loop reads the value every
+# step and trimtab can change it live. cold means the value is baked into
+# GPU memory layout or graph capture at boot and needs a reinit.
+# verified_at records the scheduler.py line where the per-step read was
+# confirmed, since a knob is only hot if the loop actually reads it.
+
+engine: sglang
+engine_commit: "3315356"
+
+knobs:
+  - field: max_running_requests
+    klass: hot
+    verified_at: "scheduler.py 2274, 2302, 3626"
+    validator:
+      type: int
+      min: 1
+      max_source: boot_value   # the physical ceiling recorded at first call
+    note: logical cap under the KV pool and captured graphs allocated at boot
+
+  - field: max_queued_requests
+    klass: hot
+    verified_at: "scheduler.py 3077"
+    validator:
+      type: int
+      min: 0
+
+  - field: chunked_prefill_size
+    klass: hot
+    verified_at: "scheduler.py 3600"
+    validator:
+      type: int
+      min: 1
+
+  # stock set_internal_state allowlist, present upstream before trimtab
+  - field: pp_max_micro_batch_size
+    klass: hot
+    origin: upstream
+  - field: speculative_accept_threshold_single
+    klass: hot
+    origin: upstream
+  - field: speculative_accept_threshold_acc
+    klass: hot
+    origin: upstream
+  - field: dspark_force_budget_frac
+    klass: hot
+    origin: upstream
+  - field: dspark_clear_info_records
+    klass: hot
+    origin: upstream
+
+  # candidates for later trimtab versions, snapshotted at init today so a
+  # live change needs more than an attribute write
+  - field: schedule_policy
+    klass: deferred
+    note: snapshotted into a SchedulePolicy object at init, scheduler.py 1299
+
+  - field: tp_size
+    klass: cold
+  - field: ep_size
+    klass: cold
+  - field: quantization
+    klass: cold
+  - field: kv_cache_dtype
+    klass: cold
+  - field: mem_fraction_static
+    klass: cold
+  - field: max_total_num_tokens
+    klass: cold
+  - field: cuda_graph_max_bs
+    klass: cold
+  - field: attention_backend
+    klass: cold
+  - field: speculative_algorithm
+    klass: cold
+  - field: speculative_draft_model_path
+    klass: cold
+  - field: page_size
+    klass: cold
