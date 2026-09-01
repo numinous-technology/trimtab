@@ -20,6 +20,8 @@ import sys
 
 from . import manifest
 from .adapters import make_adapter
+from .canary import Canary
+from .metrics import SGLANG_MAP, VLLM_MAP, PrometheusMetrics
 from .reconciler import Reconciler
 from .store import Store
 
@@ -81,6 +83,34 @@ def cmd_status(a):
     print(json.dumps(Store(a.db).status(a.group), indent=1))
 
 
+def _canary(a):
+    urls = parse_kv(a.metrics or [])
+    metrics = PrometheusMetrics(urls, SGLANG_MAP if a.engine == "sglang" else VLLM_MAP)
+    replicas = a.replicas.split(",")
+    return Canary(Store(a.db), metrics, a.group, replicas)
+
+
+def cmd_canary_start(a):
+    gates = json.loads(a.gates)
+    cid = _canary(a).start(a.version, a.scope.split(","), gates, a.window)
+    print(json.dumps({"canary_id": cid, "candidate_version_id": a.version, "scope": a.scope.split(","), "window_s": a.window}))
+
+
+def cmd_canary_observe(a):
+    decision, findings = _canary(a).observe(a.canary_id, samples=a.samples)
+    print(json.dumps({"canary_id": a.canary_id, "decision": decision, "findings": findings}, indent=1))
+    sys.exit(0 if decision == "promoted" else 1)
+
+
+def cmd_canary_abort(a):
+    _canary(a).abort(a.canary_id)
+    print(json.dumps({"canary_id": a.canary_id, "decision": "reverted"}))
+
+
+def cmd_canary_show(a):
+    print(json.dumps(Store(a.db).canary(a.canary_id), indent=1))
+
+
 def cmd_daemon(a):
     rec = Reconciler(Store(a.db), manifest.find(a.engine), make_adapter(a.engine, a.url), a.replica, a.group)
     if a.once:
@@ -110,6 +140,19 @@ def main(argv=None):
     s = sub.add_parser("status"); db(s); s.set_defaults(f=cmd_status)
     s = sub.add_parser("daemon"); db(s); eng(s); s.add_argument("--replica", required=True)
     s.add_argument("--interval", type=float, default=1.0); s.add_argument("--once", action="store_true"); s.set_defaults(f=cmd_daemon)
+
+    def can(sp):
+        db(sp)
+        sp.add_argument("--engine", required=True, choices=sorted(manifest_engines()))
+        sp.add_argument("--replicas", required=True, help="comma separated replica ids in the group")
+        sp.add_argument("--metrics", nargs="*", help="replica=http://host:port/metrics")
+
+    c = sub.add_parser("canary"); cs = c.add_subparsers(dest="sub", required=True)
+    s = cs.add_parser("start"); can(s); s.add_argument("version", type=int); s.add_argument("--scope", required=True)
+    s.add_argument("--gates", required=True, help="json list of gates"); s.add_argument("--window", type=float, default=300); s.set_defaults(f=cmd_canary_start)
+    s = cs.add_parser("observe"); can(s); s.add_argument("canary_id", type=int); s.add_argument("--samples", type=int, default=5); s.set_defaults(f=cmd_canary_observe)
+    s = cs.add_parser("abort"); can(s); s.add_argument("canary_id", type=int); s.set_defaults(f=cmd_canary_abort)
+    s = cs.add_parser("show"); db(s); s.add_argument("canary_id", type=int); s.set_defaults(f=cmd_canary_show)
 
     a = p.parse_args(argv)
     a.f(a)
