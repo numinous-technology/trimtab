@@ -47,10 +47,20 @@ group's desired version and is a no-op when already there. A CLI. A mock
 engine that speaks both control surfaces without a GPU, which is what the
 tests and the bench run against on CPU.
 
-Test status. 18 tests pass across both mock engines, covering apply, read
-back, ceiling rejection, unknown knobs, idempotent reconcile, rollback, cold
-fields reported as needs_reinit, manifest rejection never touching the engine,
-and the CLI end to end. The bench script and the on-pod runner both run in a
+Also built. A canary orchestrator that runs a candidate on a subset of
+replicas through per-replica overrides, samples Prometheus metrics from both
+sides over a window, decides against gates expressed as data, promotes on pass
+and reverts on fail. A Prometheus scraper that turns engine /metrics into
+counter rates and histogram quantiles. A supervisor (trimtabd) that owns the
+engine process, applies hot fields live, and relaunches with new flags for
+cold fields, with weights warm on local disk so the relaunch skips the image
+pull and weight download that make a redeploy slow. GPU-resident reinit is
+not claimed, neither engine exposes an in-process path for it yet.
+
+Test status. 32 tests pass on CPU. Adapters, manifest, store, reconciler,
+canary over a three-replica mock fleet, metrics parsing and quantiles,
+supervisor against a real subprocess including cold relaunch and crash
+recovery, and the CLI end to end including canary and supervise. The bench script and the on-pod runner both run in a
 dry mode against the mock engine with zero dropped requests at 32 concurrent
 load threads. GPU numbers are not yet measured and nothing here claims them.
 
@@ -77,6 +87,21 @@ python3 -m trimtab.cli propose  --db t.db --group prod --reason "lower cap" max_
 python3 -m trimtab.cli promote  --db t.db --group prod 1
 python3 -m trimtab.cli daemon   --db t.db --group prod --engine sglang --url http://localhost:30000 --replica r0
 python3 -m trimtab.cli rollback --db t.db --group prod 1
+```
+
+Canary a candidate on one replica, gates as data, promote on pass, revert on fail
+
+```
+python3 -m trimtab.cli canary start   --db t.db --group prod --engine sglang --replicas r0,r1,r2 \
+    --metrics r0=http://a:30000/metrics r1=http://b:30000/metrics r2=http://c:30000/metrics \
+    2 --scope r0 --window 300 --gates '[{"metric":"p99_ttft_ms","max_ratio":1.25},{"metric":"throughput","min_ratio":0.9}]'
+python3 -m trimtab.cli canary observe --db t.db --group prod --engine sglang --replicas r0,r1,r2 --metrics ... 1
+```
+
+Run the engine under trimtabd, which relaunches it for cold fields and applies hot ones live
+
+```
+python3 -m trimtab.cli supervise --db t.db --group prod --engine sglang --model Qwen/Qwen3.8-27B-FP8 --port 30000 --replica r0
 ```
 
 Measure it under load
