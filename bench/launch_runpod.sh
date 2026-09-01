@@ -28,7 +28,8 @@ OUT=$(runpodctl create pod --name $NAME --secureCloud --gpuType "$GPU" --imageNa
 echo "$OUT"
 POD=$(echo "$OUT" | grep -oP 'pod "\K[^"]+') || { echo "create failed"; exit 1; }
 fi
-trap 'echo "removing pod $POD"; runpodctl remove pod $POD >/dev/null 2>&1' EXIT
+cleanup(){ if [ "${KEEP:-0}" = 1 ]; then echo "KEEP=1, pod $POD left running, remove with: runpodctl remove pod $POD"; else echo "removing pod $POD"; runpodctl remove pod $POD >/dev/null 2>&1; fi; }
+trap cleanup EXIT
 T0=$(date +%s)
 
 RP_KEY=$(grep -oP "apikey\s*=\s*['\"]\K[^'\"]+" ~/.runpod/config.toml)
