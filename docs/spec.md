@@ -249,7 +249,10 @@ M3, control plane service with store, versioning, diff, rollback.
 
 M4, canary orchestrator with gates and auto-rollback.
 
-M5, a second engine (vLLM) behind the same manifest and adapter interface.
+M5, vLLM. Done alongside M1 rather than after, since reading vLLM main showed
+the same shape as SGLang (caps snapshotted at init, read per step, an existing
+utility RPC dispatched by method name). Patch, manifest, adapter, and tests
+exist. GPU verification pending with the rest.
 
 ## Open source plan
 
@@ -269,12 +272,12 @@ with published results. What stays ours. Multi-cluster and multi-tenant fleet
 management, hosted control plane, and the recipe corpus of measured configs
 from our pricing work.
 
-The stack. Python for the engine patch and adapters, since SGLang is Python
-and the patch must be upstreamable. Go for trimtabd and the control plane
-service, one static binary per component, no venv as a production dependency.
-gRPC between components with a REST gateway for humans. Postgres for the
-store, with an embedded SQLite dev mode so the quickstart needs zero
-infrastructure. CUE for manifests if contributors tolerate it, YAML with JSON
+The stack. Python throughout for v1. Both engine patches must be Python, and
+one language means one test suite and a mock engine that exercises the real
+adapter code. A Go static binary for the daemon was the original plan and is
+deferred until operators ask for a venv-free install. Postgres for the store
+in a deployment, SQLite with the same schema for dev and single node, so the
+quickstart needs zero infrastructure. CUE for manifests if contributors tolerate it, YAML with JSON
 schema if not. Prometheus for metrics. Ship both a docker-compose quickstart
 and a Kubernetes operator, because half the audience lives on k8s and the
 other half runs bare pods on RunPod and Modal and bounces off anything
