@@ -1,0 +1,64 @@
+Fetching 81 files:   0%|          | 0/81 [00:00<?, ?it/s]Fetching 81 files:  68%|██████▊   | 55/81 [00:00<00:00, 540.67it/s]Fetching 81 files: 100%|██████████| 81/81 [00:00<00:00, 525.44it/s]
+[20:24:09] weights at /workspace/Qwen_Qwen3.8-27B-FP8 (1s)
+[20:26:41] boot stock ready in 147s
+already patched, nothing to do (/sgl-workspace/sglang/python/sglang/srt/managers/scheduler.py)
+bench/pod_run.sh: line 29:  4151 Killed                  python3 -m sglang.launch_server --model-path $MD --host 0.0.0.0 --port $PORT --mem-fraction-static 0.85 > $OUT/server_$1.log 2>&1
+[20:29:12] boot patched ready in 146s
+engine=sglang boot max_running_requests=24
+iter  0 target=8     api=   53.6ms effect=  138.5ms http=200 ok=True
+iter  1 target=24    api=    5.0ms effect=   46.6ms http=200 ok=True
+iter  2 target=8     api=   18.2ms effect=   58.8ms http=200 ok=True
+iter  3 target=24    api=    5.5ms effect=   43.9ms http=200 ok=True
+iter  4 target=8     api=   14.7ms effect=  103.9ms http=200 ok=True
+iter  5 target=24    api=   17.0ms effect=   90.1ms http=200 ok=True
+iter  6 target=8     api=    4.7ms effect=   80.9ms http=200 ok=True
+iter  7 target=24    api=    9.6ms effect=   48.5ms http=200 ok=True
+iter  8 target=8     api=   15.9ms effect=   87.6ms http=200 ok=True
+iter  9 target=24    api=   26.3ms effect=  109.8ms http=200 ok=True
+iter 10 target=8     api=   27.1ms effect=   70.7ms http=200 ok=True
+iter 11 target=24    api=    9.4ms effect=  106.2ms http=200 ok=True
+iter 12 target=8     api=   50.0ms effect=   93.8ms http=200 ok=True
+iter 13 target=24    api=   16.0ms effect=  112.4ms http=200 ok=True
+iter 14 target=8     api=    3.9ms effect=   83.3ms http=200 ok=True
+iter 15 target=24    api=   29.4ms effect=  126.4ms http=200 ok=True
+iter 16 target=8     api=   34.4ms effect=   78.0ms http=200 ok=True
+iter 17 target=24    api=    8.5ms effect=   87.0ms http=200 ok=True
+iter 18 target=8     api=   15.4ms effect=   94.9ms http=200 ok=True
+iter 19 target=24    api=   18.1ms effect=   62.5ms http=200 ok=True
+{
+ "engine": "sglang",
+ "cap_knob": "max_running_requests",
+ "boot_value": 24,
+ "iters": 20,
+ "all_ok": true,
+ "api_ms_median": 15.95,
+ "api_ms_p95": 49.99,
+ "effect_ms_median": 87.28,
+ "effect_ms_p95": 126.38,
+ "background_completed": 489,
+ "background_failed": 0
+}
+{
+ "engine": "sglang",
+ "model": "Qwen/Qwen3.8-27B-FP8",
+ "gpu": "NVIDIA H100 80GB HBM3, 81559 MiB, 580.126.09",
+ "engine_version": "0.5.18",
+ "download_s": 1,
+ "boot_stock_s": 147,
+ "boot_patched_s": 146,
+ "bench_exit": 0
+}
+{
+ "engine": "sglang",
+ "cap_knob": "max_running_requests",
+ "boot_value": 24,
+ "iters": 20,
+ "all_ok": true,
+ "api_ms_median": 15.95,
+ "api_ms_p95": 49.99,
+ "effect_ms_median": 87.28,
+ "effect_ms_p95": 126.38,
+ "background_completed": 489,
+ "background_failed": 0
+}
+[20:30:16] done, results in /root/trimtab_results/sglang.json

@@ -1,0 +1,165 @@
+{
+ "engine": "sglang",
+ "model": "Qwen/Qwen3.8-27B-FP8",
+ "gpu": "NVIDIA H100 80GB HBM3, 81559 MiB, 580.126.09",
+ "engine_version": "0.5.18",
+ "download_s": 1,
+ "boot_stock_s": 147,
+ "boot_patched_s": 146,
+ "bench_exit": 0,
+ "hot_swap": {
+  "engine": "sglang",
+  "cap_knob": "max_running_requests",
+  "boot_value": 24,
+  "iters": 20,
+  "all_ok": true,
+  "api_ms_median": 15.95,
+  "api_ms_p95": 49.99,
+  "effect_ms_median": 87.28,
+  "effect_ms_p95": 126.38,
+  "background_completed": 489,
+  "background_failed": 0,
+  "rows": [
+   {
+    "target": 8,
+    "api_ms": 53.556995932012796,
+    "effect_ms": 138.4985437616706,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 24,
+    "api_ms": 4.969372879713774,
+    "effect_ms": 46.585837844759226,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 18.21595011278987,
+    "effect_ms": 58.75253491103649,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 24,
+    "api_ms": 5.477010738104582,
+    "effect_ms": 43.8559427857399,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 14.689863193780184,
+    "effect_ms": 103.92290819436312,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 24,
+    "api_ms": 16.95258403196931,
+    "effect_ms": 90.11493995785713,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 4.72234794870019,
+    "effect_ms": 80.85184823721647,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 24,
+    "api_ms": 9.648508857935667,
+    "effect_ms": 48.453643918037415,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 15.941955149173737,
+    "effect_ms": 87.60537393391132,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 24,
+    "api_ms": 26.342909317463636,
+    "effect_ms": 109.84259843826294,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 27.090589981526136,
+    "effect_ms": 70.71955176070333,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 24,
+    "api_ms": 9.400899056345224,
+    "effect_ms": 106.17944411933422,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 49.99189218506217,
+    "effect_ms": 93.83919695392251,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 24,
+    "api_ms": 15.959606971591711,
+    "effect_ms": 112.40965034812689,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 3.897304181009531,
+    "effect_ms": 83.31345207989216,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 24,
+    "api_ms": 29.419052880257368,
+    "effect_ms": 126.38234812766314,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 34.379235934466124,
+    "effect_ms": 77.96783605590463,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 24,
+    "api_ms": 8.46548704430461,
+    "effect_ms": 86.9598533026874,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 15.375332906842232,
+    "effect_ms": 94.94613856077194,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 24,
+    "api_ms": 18.11939338222146,
+    "effect_ms": 62.500562984496355,
+    "http": 200,
+    "ok": true
+   }
+  ]
+ }
+}
