@@ -24,6 +24,7 @@ from .canary import Canary
 from .metrics import SGLANG_MAP, VLLM_MAP, PrometheusMetrics
 from .reconciler import Reconciler
 from .store import Store
+from .supervisor import Supervisor
 
 
 def parse_kv(items):
@@ -119,6 +120,15 @@ def cmd_daemon(a):
     rec.run(a.interval)
 
 
+def cmd_supervise(a):
+    sup = Supervisor(Store(a.db), manifest.find(a.engine), launcher=a.launcher or a.engine, adapter_engine=a.engine,
+                     model=a.model, port=a.port, replica_id=a.replica, group=a.group,
+                     extra_flags=a.extra_flag or [], drain_s=a.drain, log_path=a.engine_log)
+    if a.once:
+        print(sup.tick()); sup.stop(); return
+    sup.run(a.interval)
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(prog="trimtab")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -140,6 +150,14 @@ def main(argv=None):
     s = sub.add_parser("status"); db(s); s.set_defaults(f=cmd_status)
     s = sub.add_parser("daemon"); db(s); eng(s); s.add_argument("--replica", required=True)
     s.add_argument("--interval", type=float, default=1.0); s.add_argument("--once", action="store_true"); s.set_defaults(f=cmd_daemon)
+
+    s = sub.add_parser("supervise", help="trimtabd, own the engine process and converge it on desired state")
+    db(s); s.add_argument("--engine", required=True, choices=sorted(manifest_engines()))
+    s.add_argument("--launcher", choices=["sglang", "vllm", "mock"], help="defaults to --engine, mock for tests")
+    s.add_argument("--model", required=True); s.add_argument("--port", type=int, required=True)
+    s.add_argument("--replica", required=True); s.add_argument("--extra-flag", action="append", help="passed to the engine verbatim")
+    s.add_argument("--drain", type=float, default=0); s.add_argument("--engine-log", default="engine.log")
+    s.add_argument("--interval", type=float, default=1.0); s.add_argument("--once", action="store_true"); s.set_defaults(f=cmd_supervise)
 
     def can(sp):
         db(sp)

@@ -77,3 +77,16 @@ def test_canary_start_and_abort_via_cli(mock, tmp_path):
     assert tt("canary", "abort", *common, str(cid))[0] == 0
     tt("daemon", "--db", db, "--group", "g", "--engine", "sglang", "--url", url, "--replica", "r0", "--once")
     assert state.knobs["max_running_requests"] == boot
+
+
+def test_supervise_once_boots_mock_and_applies(tmp_path):
+    import socket
+    s = socket.socket(); s.bind(("127.0.0.1", 0)); port = s.getsockname()[1]; s.close()
+    db = str(tmp_path / "s.db")
+    _, out, _ = tt("propose", "--db", db, "--group", "g", "--reason", "cold", "max_total_num_tokens=2048", "max_running_requests=4")
+    tt("promote", "--db", db, "--group", "g", json.loads(out)["version_id"].__str__())
+    code, out, err = tt("supervise", "--db", db, "--group", "g", "--engine", "sglang", "--launcher", "mock", "--model", "m",
+                        "--port", str(port), "--replica", "r0", "--once", "--engine-log", str(tmp_path / "e.log"))
+    assert code == 0 and out.strip() == "healthy", err
+    _, out, _ = tt("status", "--db", db, "--group", "g")
+    assert json.loads(out)[0]["detail"].startswith("reinit_s=")
