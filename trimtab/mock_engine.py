@@ -82,7 +82,7 @@ def make_handler(state):
             body = self._body()
             if state.engine == "sglang" and self.path == "/set_internal_state":
                 applied, rejected = state.apply(body.get("server_args", {}))
-                return self._json(200, {"updated": not rejected})
+                return self._json(200, [not rejected])  # real SGLang returns one bool per rank
             if state.engine == "vllm" and self.path == "/trimtab/set_knobs":
                 applied, rejected = state.apply(body)
                 ok = not rejected

@@ -50,10 +50,12 @@ boot(){ # $1 label -> writes $OUT/boot_$1_s, returns 1 on failure
   log "boot $1 ready in $(cat $OUT/boot_$1_s)s"
 }
 
+if [ "${SKIP_BOOT:-0}" = 1 ]; then log "SKIP_BOOT, using the running patched server"; else
 boot stock || exit 1
 if [ "${DRY:-0}" = 1 ]; then echo "dry run, patch skipped" > $OUT/patch.log; else
 python3 $HERE/engine/$ENGINE/apply_patch.py | tee $OUT/patch.log; fi
 boot patched || exit 1
+fi
 python3 $HERE/bench/hot_swap_bench.py --engine $ENGINE --base http://127.0.0.1:$PORT --iters ${ITERS:-20} --settle-s ${SETTLE:-10} --gap-s ${GAP:-2} --out $OUT/hot_swap.json
 BENCH_EXIT=$?
 
@@ -74,5 +76,5 @@ json.dump(r, open("$R", "w"), indent=1)
 print(json.dumps({k: v for k, v in r.items() if k != "hot_swap"}, indent=1))
 print(json.dumps({k: v for k, v in r["hot_swap"].items() if k != "rows"}, indent=1))
 EOF
-pkill -9 -f "launch_server|vllm serve|vllm.entrypoints|trimtab.mock_engine" 2>/dev/null
+[ "${KEEP_SERVER:-0}" = 1 ] || pkill -9 -f "launch_server|vllm serve|vllm.entrypoints|trimtab.mock_engine" 2>/dev/null
 log "done, results in $R"

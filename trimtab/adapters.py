@@ -37,6 +37,15 @@ def _get(url, timeout):
         return json.loads(r.read())
 
 
+def _all_updated(body):
+    """SGLang fans the request out to every rank and returns one entry per
+    rank, either a bare bool or {"updated": bool}. Every rank must agree."""
+    entries = body if isinstance(body, list) else [body]
+    if not entries:
+        return False
+    return all(e if isinstance(e, bool) else bool(e.get("updated")) for e in entries)
+
+
 class SGLangAdapter:
     """POST /set_internal_state, read back through /get_server_info."""
 
@@ -50,7 +59,7 @@ class SGLangAdapter:
         t0 = time.perf_counter()
         status, body = _post(f"{self.base}/set_internal_state", {"server_args": changes}, self.timeout)
         ms = (time.perf_counter() - t0) * 1000
-        ok = status == 200 and bool(body.get("updated"))
+        ok = status == 200 and _all_updated(body)
         live = self.read_knobs() if ok else {}
         applied = {k: v for k, v in changes.items() if live.get(k) == v}
         rejected = {} if ok else {k: "engine rejected the update" for k in changes}
