@@ -242,12 +242,23 @@ bench proving a live max running requests and queue cap change under load,
 with the redeploy baseline measured on the same pod. This alone is a
 shippable, publishable result.
 
-M2, trimtabd with resident-weight cold reinit, all three residency paths
-measured.
+M2, trimtabd. Built as a supervisor that owns the engine process, applies hot
+fields live, and relaunches with new flags for cold fields, with weights warm
+on local disk. That is the pinned-host path. It skips the image pull and
+weight download that make a redeploy slow, and its cost is one engine boot
+against a warm page cache, which pod_run.sh measures as boot_patched_s next
+to boot_stock_s (cold disk after download). GPU-resident reinit is not built.
+Neither engine exposes an in-process pool rebuild, so claiming it would be a
+lie. It stays on the roadmap as an upstream conversation.
 
-M3, control plane service with store, versioning, diff, rollback.
+M3, store with versioning and rollback. Built on SQLite with the schema the
+Postgres deployment will share. The admin surface is the CLI. A network API
+comes when a second machine needs to talk to the store.
 
-M4, canary orchestrator with gates and auto-rollback.
+M4, canary orchestrator. Built. Per-replica overrides put a candidate on a
+subset, a Prometheus scraper turns engine metrics into rates and quantiles,
+gates are data, pass promotes to the group, fail reverts, and every gate
+produces a finding so a reviewer sees what was checked.
 
 M5, vLLM. Done alongside M1 rather than after, since reading vLLM main showed
 the same shape as SGLang (caps snapshotted at init, read per step, an existing
