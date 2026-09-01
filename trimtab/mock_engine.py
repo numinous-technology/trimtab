@@ -94,6 +94,8 @@ def make_handler(state):
 
 def serve(engine, port, host="127.0.0.1"):
     state = State(engine)
+    ThreadingHTTPServer.request_queue_size = 256
+    ThreadingHTTPServer.daemon_threads = True
     srv = ThreadingHTTPServer((host, port), make_handler(state))
     srv.state = state
     return srv
