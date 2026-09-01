@@ -21,11 +21,13 @@ NAME=trimtab-$TARGET-$ENGINE
 PUB=$(cat ~/.ssh/id_ed25519.pub)
 RES=$HERE/bench/results; mkdir -p $RES
 
+if [ -n "${POD:-}" ]; then echo "attaching to existing pod $POD"; else
 OUT=$(runpodctl create pod --name $NAME --secureCloud --gpuType "$GPU" --imageName "$IMAGE" \
   --containerDiskSize 60 --volumeSize 100 --volumePath /workspace --ports "22/tcp" --cost $COST --mem 64 --vcpu 12 \
   --args "bash -c 'apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq openssh-server >/dev/null 2>&1; mkdir -p /run/sshd /root/.ssh; echo $PUB > /root/.ssh/authorized_keys; chmod 600 /root/.ssh/authorized_keys; /usr/sbin/sshd -D'" 2>&1 | tail -1)
 echo "$OUT"
 POD=$(echo "$OUT" | grep -oP 'pod "\K[^"]+') || { echo "create failed"; exit 1; }
+fi
 trap 'echo "removing pod $POD"; runpodctl remove pod $POD >/dev/null 2>&1' EXIT
 T0=$(date +%s)
 
@@ -36,7 +38,7 @@ for p in json.load(sys.stdin):
         for x in (p.get('runtime') or {}).get('ports') or []:
             if x.get('privatePort')==22: print(x['ip'], x['publicPort'])"; }
 until read -r IP PORT < <(ssh_target) && [ -n "${IP:-}" ] && ssh -o StrictHostKeyChecking=no -o ConnectTimeout=8 -p $PORT root@$IP true 2>/dev/null; do
-  [ $(( $(date +%s) - T0 )) -gt 900 ] && { echo "ssh never came up"; exit 1; }; sleep 15
+  [ $(( $(date +%s) - T0 )) -gt ${SSH_WAIT:-2400} ] && { echo "ssh never came up"; exit 1; }; sleep 15
 done
 S="ssh -o StrictHostKeyChecking=no -p $PORT root@$IP"
 echo "ssh up at $IP:$PORT after $(( $(date +%s) - T0 ))s"
