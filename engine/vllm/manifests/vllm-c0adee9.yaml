@@ -1,0 +1,39 @@
+# trimtab knob manifest for vLLM main commit c0adee9 (2026-09-01).
+# See engine/sglang/manifests for the klass legend.
+
+engine: vllm
+engine_commit: "c0adee9"
+
+knobs:
+  - field: max_num_seqs
+    klass: hot
+    verified_at: "vllm/v1/core/sched/scheduler.py 792"
+    validator:
+      type: int
+      min: 1
+      max_source: boot_value
+    note: applied to scheduler.max_num_running_reqs
+
+  - field: max_num_batched_tokens
+    klass: hot
+    verified_at: "vllm/v1/core/sched/scheduler.py 440, 529"
+    validator:
+      type: int
+      min: 1
+      max_source: boot_value
+    note: applied to scheduler.max_num_scheduled_tokens
+
+  - field: tensor_parallel_size
+    klass: cold
+  - field: quantization
+    klass: cold
+  - field: kv_cache_dtype
+    klass: cold
+  - field: gpu_memory_utilization
+    klass: cold
+  - field: max_model_len
+    klass: cold
+  - field: cuda_graph_sizes
+    klass: cold
+  - field: speculative_config
+    klass: cold
