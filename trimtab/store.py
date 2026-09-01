@@ -25,6 +25,24 @@ create table if not exists desired_state(
   version_id integer not null,
   updated_at real not null
 );
+create table if not exists replica_override(
+  replica_id text primary key,
+  version_id integer not null,
+  canary_id integer not null
+);
+create table if not exists canary(
+  id integer primary key autoincrement,
+  replica_group text not null,
+  candidate_version_id integer not null,
+  baseline_version_id integer,
+  scope text not null,
+  gates text not null,
+  window_s real not null,
+  status text not null,
+  started_at real not null,
+  decided_at real,
+  decision text not null default ''
+);
 create table if not exists replica_status(
   replica_id text primary key,
   replica_group text not null,
@@ -82,6 +100,39 @@ class Store:
     def desired(self, group) -> ConfigVersion | None:
         row = self.db.execute("select version_id from desired_state where replica_group=?", (group,)).fetchone()
         return self.version(row[0]) if row else None
+
+    def desired_for(self, replica_id, group) -> ConfigVersion | None:
+        """A replica's target. A canary override wins over the group's desired."""
+        row = self.db.execute("select version_id from replica_override where replica_id=?", (replica_id,)).fetchone()
+        return self.version(row[0]) if row else self.desired(group)
+
+    def set_overrides(self, replica_ids, version_id, canary_id):
+        for r in replica_ids:
+            self.db.execute("insert or replace into replica_override(replica_id,version_id,canary_id) values(?,?,?)", (r, version_id, canary_id))
+        self.db.commit()
+
+    def clear_overrides(self, canary_id):
+        self.db.execute("delete from replica_override where canary_id=?", (canary_id,))
+        self.db.commit()
+
+    def open_canary(self, group, candidate_id, scope, gates, window_s) -> int:
+        base = self.desired(group)
+        cur = self.db.execute(
+            "insert into canary(replica_group,candidate_version_id,baseline_version_id,scope,gates,window_s,status,started_at) values(?,?,?,?,?,?,?,?)",
+            (group, candidate_id, base.id if base else None, json.dumps(sorted(scope)), json.dumps(gates), window_s, "observing", time.time()))
+        self.db.commit()
+        return cur.lastrowid
+
+    def canary(self, canary_id) -> dict:
+        r = self.db.execute("select * from canary where id=?", (canary_id,)).fetchone()
+        if r is None:
+            raise KeyError(f"no canary {canary_id}")
+        keys = ["id","replica_group","candidate_version_id","baseline_version_id","scope","gates","window_s","status","started_at","decided_at","decision"]
+        d = dict(zip(keys, r)); d["scope"] = json.loads(d["scope"]); d["gates"] = json.loads(d["gates"]); return d
+
+    def close_canary(self, canary_id, status, decision):
+        self.db.execute("update canary set status=?, decided_at=?, decision=? where id=?", (status, time.time(), decision, canary_id))
+        self.db.commit()
 
     def version(self, version_id) -> ConfigVersion:
         row = self.db.execute("select * from config_version where id=?", (version_id,)).fetchone()

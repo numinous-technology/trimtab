@@ -29,7 +29,7 @@ class Reconciler:
         self.last_result: ApplyResult | None = None
 
     def tick(self) -> str:
-        desired = self.store.desired(self.group)
+        desired = self.store.desired_for(self.replica_id, self.group)
         if desired is None or desired.id == self.applied_version_id:
             self.store.record_status(self.replica_id, self.group, self.applied_version_id, HEALTHY)
             return HEALTHY
