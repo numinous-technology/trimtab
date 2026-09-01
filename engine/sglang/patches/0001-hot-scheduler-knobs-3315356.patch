@@ -1,5 +1,5 @@
 diff --git a/python/sglang/srt/managers/scheduler.py b/python/sglang/srt/managers/scheduler.py
-index 454f754..773be12 100644
+index 454f754..2272030 100644
 --- a/python/sglang/srt/managers/scheduler.py
 +++ b/python/sglang/srt/managers/scheduler.py
 @@ -4790,6 +4790,12 @@ class Scheduler(
@@ -36,7 +36,7 @@ index 454f754..773be12 100644
          args_allow_update = set(
              [
                  "pp_max_micro_batch_size",
-@@ -5640,3 +5660,54 @@ def _make_abort_req(
+@@ -5640,3 +5660,52 @@ def _make_abort_req(
              num_output_tokens=len(req.output_ids),
          ),
      )
@@ -47,12 +47,10 @@ index 454f754..773be12 100644
 +
 +    Mutates ``args``, consuming the keys it handles, and returns
 +    ``(ok, messages)``. Handled knobs, all read by the scheduler loop on
-+    every step, verified against this file.
++    every step.
 +
 +    max_running_requests   logical cap on concurrent running requests,
 +                           valid range 1..the value allocated at boot
-+                           (the physical ceiling backed by the KV pool
-+                           and captured CUDA graphs)
 +    max_queued_requests    admission cap on the waiting queue, >= 0
 +    chunked_prefill_size   prefill chunk size for the next batch, > 0
 +    """
