@@ -27,7 +27,14 @@ fi
 log "weights at $MD ($(cat $OUT/download_s)s)"
 
 boot(){ # $1 label -> writes $OUT/boot_$1_s, returns 1 on failure
-  pkill -9 -f "launch_server|vllm serve|vllm.entrypoints|trimtab.mock_engine" 2>/dev/null; sleep ${KILL_WAIT:-5}
+  pkill -9 -f "launch_[s]erver|vllm [s]erve|vllm.[e]ntrypoints|[V]LLM|[E]ngineCore|trimtab.[m]ock_engine" 2>/dev/null; sleep ${KILL_WAIT:-5}
+  if [ "${DRY:-0}" != 1 ]; then  # wait until the previous engine's GPU memory is really gone
+    for _ in $(seq 1 30); do
+      used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1)
+      [ "${used:-0}" -lt 2000 ] && break; sleep 2
+    done
+    log "gpu memory used before boot $1: ${used}MiB"
+  fi
   local t0=$(date +%s)
   if [ "${DRY:-0}" = 1 ]; then
     python3 -m trimtab.mock_engine --engine $ENGINE --port $PORT > $OUT/server_$1.log 2>&1 &
@@ -42,7 +49,7 @@ boot(){ # $1 label -> writes $OUT/boot_$1_s, returns 1 on failure
     c=$(curl -s -m 3 -o /dev/null -w '%{http_code}' http://127.0.0.1:$PORT/health)
     [ "$c" = "200" ] && break
     grep -qE "Scheduler hit an exception|CUDA out of memory|Error|Traceback" $OUT/server_$1.log && sleep 20 && \
-      { c=$(curl -s -m 3 -o /dev/null -w '%{http_code}' http://127.0.0.1:$PORT/health); [ "$c" = "200" ] || { log "boot $1 FAILED"; tail -30 $OUT/server_$1.log; return 1; }; break; }
+      { c=$(curl -s -m 3 -o /dev/null -w '%{http_code}' http://127.0.0.1:$PORT/health); [ "$c" = "200" ] || { log "boot $1 FAILED"; grep -aE "Error|error|rror:|Traceback|OOM|memory" $OUT/server_$1.log | head -40; tail -20 $OUT/server_$1.log; return 1; }; break; }
     [ $(( $(date +%s) - t0 )) -gt 1800 ] && { log "boot $1 TIMEOUT"; return 1; }
     sleep 5
   done
@@ -76,5 +83,5 @@ json.dump(r, open("$R", "w"), indent=1)
 print(json.dumps({k: v for k, v in r.items() if k != "hot_swap"}, indent=1))
 print(json.dumps({k: v for k, v in r["hot_swap"].items() if k != "rows"}, indent=1))
 EOF
-[ "${KEEP_SERVER:-0}" = 1 ] || pkill -9 -f "launch_server|vllm serve|vllm.entrypoints|trimtab.mock_engine" 2>/dev/null
+[ "${KEEP_SERVER:-0}" = 1 ] || pkill -9 -f "launch_[s]erver|vllm [s]erve|vllm.[e]ntrypoints|[V]LLM|[E]ngineCore|trimtab.[m]ock_engine" 2>/dev/null
 log "done, results in $R"

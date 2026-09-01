@@ -1,39 +1,62 @@
-[20:52:54] weights at /workspace/Qwen_Qwen3.8-27B-FP8 (s)
-[20:56:10] boot stock ready in 191s
-[20:57:10] boot patched FAILED
-(APIServer pid=696)            ^^^^^^^^^^^^^^^^^^^^^
-(APIServer pid=696)   File "/usr/local/lib/python3.12/dist-packages/vllm/entrypoints/openai/api_server.py", line 163, in build_async_engine_client_from_engine_args
-(APIServer pid=696)     async_llm = AsyncLLM.from_vllm_config(
-(APIServer pid=696)                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
-(APIServer pid=696)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/async_llm.py", line 220, in from_vllm_config
-(APIServer pid=696)     return cls(
-(APIServer pid=696)            ^^^^
-(APIServer pid=696)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/async_llm.py", line 149, in __init__
-(APIServer pid=696)     self.engine_core = EngineCoreClient.make_async_mp_client(
-(APIServer pid=696)                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-(APIServer pid=696)   File "/usr/local/lib/python3.12/dist-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
-(APIServer pid=696)     return func(*args, **kwargs)
-(APIServer pid=696)            ^^^^^^^^^^^^^^^^^^^^^
-(APIServer pid=696)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/core_client.py", line 139, in make_async_mp_client
-(APIServer pid=696)     return AsyncMPClient(*client_args)
-(APIServer pid=696)            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-(APIServer pid=696)   File "/usr/local/lib/python3.12/dist-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
-(APIServer pid=696)     return func(*args, **kwargs)
-(APIServer pid=696)            ^^^^^^^^^^^^^^^^^^^^^
-(APIServer pid=696)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/core_client.py", line 990, in __init__
-(APIServer pid=696)     super().__init__(
-(APIServer pid=696)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/core_client.py", line 609, in __init__
-(APIServer pid=696)     with launch_core_engines(
-(APIServer pid=696)   File "/usr/lib/python3.12/contextlib.py", line 144, in __exit__
-(APIServer pid=696)     next(self.gen)
-(APIServer pid=696)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/utils.py", line 1206, in launch_core_engines
-(APIServer pid=696)     wait_for_engine_startup(
-(APIServer pid=696)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/utils.py", line 1286, in wait_for_engine_startup
-(APIServer pid=696)     raise RuntimeError(
-(APIServer pid=696) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
-Traceback (most recent call last):
-  File "<stdin>", line 1, in <module>
-ModuleNotFoundError: No module named 'huggingface_hub'
-cat: /root/trimtab_results/download_s: No such file or directory
-vllm is not installed in this environment
-bench/pod_run.sh: line 29:    18 Killed                  VLLM_SERVER_DEV_MODE=1 vllm serve $MD --served-model-name default --host 0.0.0.0 --port $PORT --gpu-memory-utilization 0.85 --max-model-len 16384 > $OUT/server_$1.log 2>&1
+[21:00:44] weights at /workspace/Qwen_Qwen3.8-27B-FP8 (6s)
+[21:03:50] boot stock ready in 181s
+core    patched
+serve   patched
+router  written /usr/local/lib/python3.12/dist-packages/vllm/entrypoints/serve/dev/trimtab/api_router.py
+[21:04:51] boot patched FAILED
+(APIServer pid=697)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=697)   File "/usr/local/lib/python3.12/dist-packages/vllm/entrypoints/openai/api_server.py", line 163, in build_async_engine_client_from_engine_args
+(APIServer pid=697)     async_llm = AsyncLLM.from_vllm_config(
+(APIServer pid=697)                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=697)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/async_llm.py", line 220, in from_vllm_config
+(APIServer pid=697)     return cls(
+(APIServer pid=697)            ^^^^
+(APIServer pid=697)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/async_llm.py", line 149, in __init__
+(APIServer pid=697)     self.engine_core = EngineCoreClient.make_async_mp_client(
+(APIServer pid=697)                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=697)   File "/usr/local/lib/python3.12/dist-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(APIServer pid=697)     return func(*args, **kwargs)
+(APIServer pid=697)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=697)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/core_client.py", line 139, in make_async_mp_client
+(APIServer pid=697)     return AsyncMPClient(*client_args)
+(APIServer pid=697)            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=697)   File "/usr/local/lib/python3.12/dist-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(APIServer pid=697)     return func(*args, **kwargs)
+(APIServer pid=697)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=697)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/core_client.py", line 990, in __init__
+(APIServer pid=697)     super().__init__(
+(APIServer pid=697)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/core_client.py", line 609, in __init__
+(APIServer pid=697)     with launch_core_engines(
+(APIServer pid=697)   File "/usr/lib/python3.12/contextlib.py", line 144, in __exit__
+(APIServer pid=697)     next(self.gen)
+(APIServer pid=697)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/utils.py", line 1206, in launch_core_engines
+(APIServer pid=697)     wait_for_engine_startup(
+(APIServer pid=697)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/utils.py", line 1286, in wait_for_engine_startup
+(APIServer pid=697)     raise RuntimeError(
+(APIServer pid=697) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+
+Fetching 81 files:   0%|          | 0/81 [00:00<?, ?it/s]
+Fetching 81 files:   1%|          | 1/81 [00:01<02:22,  1.78s/it]
+Fetching 81 files:   4%|▎         | 3/81 [00:02<00:43,  1.81it/s]
+Fetching 81 files:   6%|▌         | 5/81 [00:02<00:26,  2.91it/s]
+Fetching 81 files:  10%|▉         | 8/81 [00:02<00:15,  4.72it/s]
+Fetching 81 files:  19%|█▊        | 15/81 [00:02<00:06,  9.73it/s]
+Fetching 81 files:  25%|██▍       | 20/81 [00:02<00:04, 14.15it/s]
+Fetching 81 files:  28%|██▊       | 23/81 [00:03<00:04, 14.33it/s]
+Fetching 81 files:  35%|███▍      | 28/81 [00:03<00:02, 18.90it/s]
+Fetching 81 files:  38%|███▊      | 31/81 [00:03<00:02, 17.56it/s]
+Fetching 81 files:  46%|████▌     | 37/81 [00:03<00:02, 19.98it/s]
+Fetching 81 files:  51%|█████     | 41/81 [00:03<00:01, 22.54it/s]
+Fetching 81 files:  54%|█████▍    | 44/81 [00:04<00:01, 21.64it/s]
+Fetching 81 files:  58%|█████▊    | 47/81 [00:04<00:01, 21.83it/s]
+Fetching 81 files:  63%|██████▎   | 51/81 [00:04<00:01, 24.22it/s]
+Fetching 81 files:  67%|██████▋   | 54/81 [00:04<00:01, 22.57it/s]
+Fetching 81 files:  74%|███████▍  | 60/81 [00:04<00:00, 29.48it/s]
+Fetching 81 files:  79%|███████▉  | 64/81 [00:04<00:00, 23.28it/s]
+Fetching 81 files:  84%|████████▍ | 68/81 [00:04<00:00, 25.36it/s]
+Fetching 81 files:  88%|████████▊ | 71/81 [00:05<00:00, 24.96it/s]
+Fetching 81 files:  91%|█████████▏| 74/81 [00:05<00:00, 25.38it/s]
+Fetching 81 files:  95%|█████████▌| 77/81 [00:05<00:00, 23.24it/s]
+Fetching 81 files:  99%|█████████▉| 80/81 [00:05<00:00, 23.71it/s]
+Fetching 81 files: 100%|██████████| 81/81 [00:05<00:00, 14.62it/s]
+bench/pod_run.sh: line 29:    27 Killed                  VLLM_SERVER_DEV_MODE=1 vllm serve $MD --served-model-name default --host 0.0.0.0 --port $PORT --gpu-memory-utilization 0.85 --max-model-len 16384 > $OUT/server_$1.log 2>&1
