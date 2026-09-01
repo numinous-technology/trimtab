@@ -1,0 +1,165 @@
+{
+ "engine": "sglang",
+ "model": "Qwen/Qwen3.8-27B-FP8",
+ "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 97887 MiB, 595.91.07",
+ "engine_version": "0.5.18",
+ "download_s": 78,
+ "boot_stock_s": 141,
+ "boot_patched_s": 56,
+ "bench_exit": 0,
+ "hot_swap": {
+  "engine": "sglang",
+  "cap_knob": "max_running_requests",
+  "boot_value": 33,
+  "iters": 20,
+  "all_ok": true,
+  "api_ms_median": 19.36,
+  "api_ms_p95": 31.97,
+  "effect_ms_median": 78.72,
+  "effect_ms_p95": 99.72,
+  "background_completed": 429,
+  "background_failed": 0,
+  "rows": [
+   {
+    "target": 8,
+    "api_ms": 17.29816198348999,
+    "effect_ms": 79.30614205542952,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 33,
+    "api_ms": 23.381107952445745,
+    "effect_ms": 108.42823702841997,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 4.519143956713378,
+    "effect_ms": 63.429621048271656,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 33,
+    "api_ms": 31.96801897138357,
+    "effect_ms": 67.39575904794037,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 26.627639075741172,
+    "effect_ms": 62.39047693088651,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 33,
+    "api_ms": 3.0583019834011793,
+    "effect_ms": 84.07867408823222,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 22.940209950320423,
+    "effect_ms": 82.59864302817732,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 33,
+    "api_ms": 28.95961608737707,
+    "effect_ms": 90.34089010674506,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 8.27626301907003,
+    "effect_ms": 63.8525189133361,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 33,
+    "api_ms": 17.668709973804653,
+    "effect_ms": 76.64335693698376,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 11.72819291241467,
+    "effect_ms": 71.09764800406992,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 33,
+    "api_ms": 18.11953797005117,
+    "effect_ms": 74.93750692810863,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 28.559828992001712,
+    "effect_ms": 90.84052697289735,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 33,
+    "api_ms": 20.622793002985418,
+    "effect_ms": 83.51580798625946,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 5.025352002121508,
+    "effect_ms": 90.7937369775027,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 33,
+    "api_ms": 20.5992340343073,
+    "effect_ms": 99.72413594368845,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 14.602686977013946,
+    "effect_ms": 47.398931928910315,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 33,
+    "api_ms": 23.29335908871144,
+    "effect_ms": 78.12389906030148,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 42.429010034538805,
+    "effect_ms": 98.41102396603674,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 33,
+    "api_ms": 10.86879801005125,
+    "effect_ms": 45.205594040453434,
+    "http": 200,
+    "ok": true
+   }
+  ]
+ }
+}

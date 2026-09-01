@@ -1,0 +1,106 @@
+[20:33:15] weights at /workspace/Qwen_Qwen3.8-27B-FP8 (106s)
+[20:40:28] boot stock ready in 428s
+patched /sgl-workspace/sglang/python/sglang/srt/managers/scheduler.py
+backup at /sgl-workspace/sglang/python/sglang/srt/managers/scheduler.py.trimtab-orig
+[20:45:14] boot patched ready in 281s
+engine=sglang boot max_running_requests=80
+iter  0 target=8     api=   25.2ms effect=   59.3ms http=200 ok=True
+iter  1 target=80    api=   16.4ms effect=   54.8ms http=200 ok=True
+iter  2 target=8     api=   15.5ms effect=   53.1ms http=200 ok=True
+iter  3 target=80    api=   19.3ms effect=   96.4ms http=200 ok=True
+iter  4 target=8     api=   15.8ms effect=   53.1ms http=200 ok=True
+iter  5 target=80    api=   28.7ms effect=   71.1ms http=200 ok=True
+iter  6 target=8     api=   48.0ms effect=   91.9ms http=200 ok=True
+iter  7 target=80    api=   19.1ms effect=   63.2ms http=200 ok=True
+iter  8 target=8     api=   14.5ms effect=  136.1ms http=200 ok=True
+iter  9 target=80    api=   22.7ms effect=  123.8ms http=200 ok=True
+iter 10 target=8     api=   14.7ms effect=   87.5ms http=200 ok=True
+iter 11 target=80    api=   12.4ms effect=   92.6ms http=200 ok=True
+iter 12 target=8     api=   15.7ms effect=   50.1ms http=200 ok=True
+iter 13 target=80    api=   37.9ms effect=   96.9ms http=200 ok=True
+iter 14 target=8     api=   16.4ms effect=   77.3ms http=200 ok=True
+iter 15 target=80    api=   15.1ms effect=   90.4ms http=200 ok=True
+iter 16 target=8     api=   15.8ms effect=   53.4ms http=200 ok=True
+iter 17 target=80    api=   16.8ms effect=   96.0ms http=200 ok=True
+iter 18 target=8     api=   49.4ms effect=   79.5ms http=200 ok=True
+iter 19 target=80    api=   36.0ms effect=   76.8ms http=200 ok=True
+{
+ "engine": "sglang",
+ "cap_knob": "max_running_requests",
+ "boot_value": 80,
+ "iters": 20,
+ "all_ok": true,
+ "api_ms_median": 16.64,
+ "api_ms_p95": 47.96,
+ "effect_ms_median": 78.39,
+ "effect_ms_p95": 123.82,
+ "background_completed": 806,
+ "background_failed": 0
+}
+{
+ "engine": "sglang",
+ "model": "Qwen/Qwen3.8-27B-FP8",
+ "gpu": "NVIDIA B200, 183359 MiB, 580.95.05",
+ "engine_version": "0.5.18",
+ "download_s": 106,
+ "boot_stock_s": 428,
+ "boot_patched_s": 281,
+ "bench_exit": 0
+}
+{
+ "engine": "sglang",
+ "cap_knob": "max_running_requests",
+ "boot_value": 80,
+ "iters": 20,
+ "all_ok": true,
+ "api_ms_median": 16.64,
+ "api_ms_p95": 47.96,
+ "effect_ms_median": 78.39,
+ "effect_ms_p95": 123.82,
+ "background_completed": 806,
+ "background_failed": 0
+}
+[20:46:32] done, results in /root/trimtab_results/sglang.json
+etching 81 files:  40%|███▉      | 32/81 [00:36<00:59,  1.21s/it]
+Fetching 81 files:  41%|████      | 33/81 [00:37<00:55,  1.15s/it]
+Fetching 81 files:  42%|████▏     | 34/81 [00:41<01:22,  1.75s/it]
+Fetching 81 files:  43%|████▎     | 35/81 [00:41<01:05,  1.43s/it]
+Fetching 81 files:  44%|████▍     | 36/81 [00:42<00:54,  1.21s/it]
+Fetching 81 files:  46%|████▌     | 37/81 [00:43<00:47,  1.09s/it]
+Fetching 81 files:  47%|████▋     | 38/81 [00:45<00:59,  1.39s/it]
+Fetching 81 files:  48%|████▊     | 39/81 [00:47<01:06,  1.59s/it]
+Fetching 81 files:  52%|█████▏    | 42/81 [00:52<01:03,  1.64s/it]
+Fetching 81 files:  54%|█████▍    | 44/81 [00:52<00:41,  1.12s/it]
+Fetching 81 files:  56%|█████▌    | 45/81 [00:53<00:36,  1.03s/it]
+Fetching 81 files:  57%|█████▋    | 46/81 [00:54<00:36,  1.06s/it]
+Fetching 81 files:  58%|█████▊    | 47/81 [00:54<00:29,  1.15it/s]
+Fetching 81 files:  59%|█████▉    | 48/81 [00:57<00:40,  1.21s/it]
+Fetching 81 files:  60%|██████    | 49/81 [00:59<00:47,  1.48s/it]
+Fetching 81 files:  62%|██████▏   | 50/81 [01:01<00:48,  1.56s/it]
+Fetching 81 files:  63%|██████▎   | 51/81 [01:02<00:44,  1.50s/it]
+Fetching 81 files:  64%|██████▍   | 52/81 [01:03<00:38,  1.33s/it]
+Fetching 81 files:  65%|██████▌   | 53/81 [01:04<00:35,  1.28s/it]
+Fetching 81 files:  67%|██████▋   | 54/81 [01:04<00:27,  1.03s/it]
+Fetching 81 files:  68%|██████▊   | 55/81 [01:05<00:24,  1.07it/s]
+Fetching 81 files:  69%|██████▉   | 56/81 [01:07<00:27,  1.08s/it]
+Fetching 81 files:  70%|███████   | 57/81 [01:07<00:21,  1.14it/s]
+Fetching 81 files:  72%|███████▏  | 58/81 [01:10<00:35,  1.56s/it]
+Fetching 81 files:  73%|███████▎  | 59/81 [01:11<00:27,  1.26s/it]
+Fetching 81 files:  74%|███████▍  | 60/81 [01:14<00:36,  1.73s/it]
+Fetching 81 files:  77%|███████▋  | 62/81 [01:15<00:22,  1.18s/it]
+Fetching 81 files:  78%|███████▊  | 63/81 [01:15<00:19,  1.08s/it]
+Fetching 81 files:  79%|███████▉  | 64/81 [01:18<00:24,  1.44s/it]
+Fetching 81 files:  83%|████████▎ | 67/81 [01:19<00:11,  1.21it/s]
+Fetching 81 files:  85%|████████▌ | 69/81 [01:19<00:06,  1.76it/s]
+Fetching 81 files:  88%|████████▊ | 71/81 [01:21<00:07,  1.35it/s]
+Fetching 81 files:  89%|████████▉ | 72/81 [01:22<00:06,  1.42it/s]
+Fetching 81 files:  90%|█████████ | 73/81 [01:22<00:05,  1.59it/s]
+Fetching 81 files:  91%|█████████▏| 74/81 [01:22<00:03,  1.91it/s]
+Fetching 81 files:  94%|█████████▍| 76/81 [01:23<00:02,  1.90it/s]
+Fetching 81 files:  95%|█████████▌| 77/81 [01:24<00:02,  1.42it/s]
+Fetching 81 files:  96%|█████████▋| 78/81 [01:25<00:02,  1.48it/s]
+Fetching 81 files:  98%|█████████▊| 79/81 [01:27<00:02,  1.03s/it]
+Fetching 81 files:  99%|█████████▉| 80/81 [01:29<00:01,  1.30s/it]
+Fetching 81 files: 100%|██████████| 81/81 [01:44<00:00,  5.04s/it]
+Fetching 81 files: 100%|██████████| 81/81 [01:44<00:00,  1.29s/it]
+bench/pod_run.sh: line 29:   836 Killed                  python3 -m sglang.launch_server --model-path $MD --host 0.0.0.0 --port $PORT --mem-fraction-static 0.85 > $OUT/server_$1.log 2>&1

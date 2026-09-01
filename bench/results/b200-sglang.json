@@ -1,0 +1,165 @@
+{
+ "engine": "sglang",
+ "model": "Qwen/Qwen3.8-27B-FP8",
+ "gpu": "NVIDIA B200, 183359 MiB, 580.95.05",
+ "engine_version": "0.5.18",
+ "download_s": 106,
+ "boot_stock_s": 428,
+ "boot_patched_s": 281,
+ "bench_exit": 0,
+ "hot_swap": {
+  "engine": "sglang",
+  "cap_knob": "max_running_requests",
+  "boot_value": 80,
+  "iters": 20,
+  "all_ok": true,
+  "api_ms_median": 16.64,
+  "api_ms_p95": 47.96,
+  "effect_ms_median": 78.39,
+  "effect_ms_p95": 123.82,
+  "background_completed": 806,
+  "background_failed": 0,
+  "rows": [
+   {
+    "target": 8,
+    "api_ms": 25.206637999986015,
+    "effect_ms": 59.27354099992499,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 80,
+    "api_ms": 16.382691000103478,
+    "effect_ms": 54.817653999975846,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 15.451654000003145,
+    "effect_ms": 53.054313999950864,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 80,
+    "api_ms": 19.34206099997482,
+    "effect_ms": 96.36365400001523,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 15.779857999973501,
+    "effect_ms": 53.06345200006035,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 80,
+    "api_ms": 28.724452999995265,
+    "effect_ms": 71.0811610000519,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 47.95629700004156,
+    "effect_ms": 91.87085799999295,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 80,
+    "api_ms": 19.137939000074766,
+    "effect_ms": 63.207674999944174,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 14.548073000014483,
+    "effect_ms": 136.10270900005617,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 80,
+    "api_ms": 22.658776000071157,
+    "effect_ms": 123.81543399999373,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 14.681366999980128,
+    "effect_ms": 87.52666999998837,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 80,
+    "api_ms": 12.374080999961734,
+    "effect_ms": 92.55888199993478,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 15.700917000003756,
+    "effect_ms": 50.10555399996974,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 80,
+    "api_ms": 37.93137200000274,
+    "effect_ms": 96.88551299996107,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 16.433945000017047,
+    "effect_ms": 77.26299700004802,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 80,
+    "api_ms": 15.061878999972578,
+    "effect_ms": 90.44018099996265,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 15.825375999952485,
+    "effect_ms": 53.352075000020704,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 80,
+    "api_ms": 16.842168000039237,
+    "effect_ms": 95.98875900007897,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 8,
+    "api_ms": 49.43361599998752,
+    "effect_ms": 79.51159900005678,
+    "http": 200,
+    "ok": true
+   },
+   {
+    "target": 80,
+    "api_ms": 36.02920399998766,
+    "effect_ms": 76.79644400002417,
+    "http": 200,
+    "ok": true
+   }
+  ]
+ }
+}
