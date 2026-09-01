@@ -1,0 +1,39 @@
+[20:52:54] weights at /workspace/Qwen_Qwen3.8-27B-FP8 (s)
+[20:56:10] boot stock ready in 191s
+[20:57:10] boot patched FAILED
+(APIServer pid=696)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=696)   File "/usr/local/lib/python3.12/dist-packages/vllm/entrypoints/openai/api_server.py", line 163, in build_async_engine_client_from_engine_args
+(APIServer pid=696)     async_llm = AsyncLLM.from_vllm_config(
+(APIServer pid=696)                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=696)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/async_llm.py", line 220, in from_vllm_config
+(APIServer pid=696)     return cls(
+(APIServer pid=696)            ^^^^
+(APIServer pid=696)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/async_llm.py", line 149, in __init__
+(APIServer pid=696)     self.engine_core = EngineCoreClient.make_async_mp_client(
+(APIServer pid=696)                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=696)   File "/usr/local/lib/python3.12/dist-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(APIServer pid=696)     return func(*args, **kwargs)
+(APIServer pid=696)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=696)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/core_client.py", line 139, in make_async_mp_client
+(APIServer pid=696)     return AsyncMPClient(*client_args)
+(APIServer pid=696)            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=696)   File "/usr/local/lib/python3.12/dist-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(APIServer pid=696)     return func(*args, **kwargs)
+(APIServer pid=696)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=696)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/core_client.py", line 990, in __init__
+(APIServer pid=696)     super().__init__(
+(APIServer pid=696)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/core_client.py", line 609, in __init__
+(APIServer pid=696)     with launch_core_engines(
+(APIServer pid=696)   File "/usr/lib/python3.12/contextlib.py", line 144, in __exit__
+(APIServer pid=696)     next(self.gen)
+(APIServer pid=696)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/utils.py", line 1206, in launch_core_engines
+(APIServer pid=696)     wait_for_engine_startup(
+(APIServer pid=696)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/utils.py", line 1286, in wait_for_engine_startup
+(APIServer pid=696)     raise RuntimeError(
+(APIServer pid=696) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ModuleNotFoundError: No module named 'huggingface_hub'
+cat: /root/trimtab_results/download_s: No such file or directory
+vllm is not installed in this environment
+bench/pod_run.sh: line 29:    18 Killed                  VLLM_SERVER_DEV_MODE=1 vllm serve $MD --served-model-name default --host 0.0.0.0 --port $PORT --gpu-memory-utilization 0.85 --max-model-len 16384 > $OUT/server_$1.log 2>&1

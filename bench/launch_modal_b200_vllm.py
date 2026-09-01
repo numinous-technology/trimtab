@@ -29,7 +29,7 @@ app = modal.App("trimtab-b200-vllm")
 def run_bench(engine):
     # Modal prepends its own python; put the image's interpreter (where vllm lives) first again.
     env = {**os.environ, "ENGINE": engine, "MODEL": MODEL, "PYTHONPATH": "/root/trimtab",
-           "PATH": "/usr/local/bin:/usr/bin:/bin:" + os.environ.get("PATH", "")}
+           "PATH": "/usr/bin:/bin:/usr/local/bin:" + os.environ.get("PATH", "")}
     r = subprocess.run(["bash", "bench/pod_run.sh"], cwd="/root/trimtab", capture_output=True, text=True, env=env)
     WEIGHTS.commit()
     out = {"log_tail": r.stdout[-6000:] + r.stderr[-3000:], "exit": r.returncode}
