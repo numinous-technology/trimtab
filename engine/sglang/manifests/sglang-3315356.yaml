@@ -39,12 +39,18 @@ knobs:
   - field: speculative_accept_threshold_single
     klass: hot
     origin: upstream
+    validator:
+      type: float
   - field: speculative_accept_threshold_acc
     klass: hot
     origin: upstream
+    validator:
+      type: float
   - field: dspark_force_budget_frac
     klass: hot
     origin: upstream
+    validator:
+      type: float
   - field: dspark_clear_info_records
     klass: hot
     origin: upstream
