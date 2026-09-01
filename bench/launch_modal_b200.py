@@ -20,10 +20,10 @@ WEIGHTS = modal.Volume.from_name("weights-cache", create_if_missing=True)
 IGNORE = [".git", "bench/results", "__pycache__", "*.pyc"]
 
 sglang_image = (modal.Image.from_registry("lmsysorg/sglang:latest", add_python=None)
-                .pip_install("huggingface_hub")
+                .run_commands("python3 -m pip install -q huggingface_hub")
                 .add_local_dir(str(HERE), "/root/trimtab", copy=True, ignore=IGNORE))
 vllm_image = (modal.Image.from_registry("vllm/vllm-openai:latest", add_python=None).entrypoint([])
-              .pip_install("huggingface_hub")
+              .run_commands("python3 -m pip install -q huggingface_hub")
               .add_local_dir(str(HERE), "/root/trimtab", copy=True, ignore=IGNORE))
 
 app = modal.App("trimtab-b200")
