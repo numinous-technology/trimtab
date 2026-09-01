@@ -84,6 +84,15 @@ def _trimtab_apply_hot_knobs(scheduler, args: dict):
     return ok, msgs
 '''
 
+READBACK_ANCHOR = '        ret["effective_max_running_requests_per_dp"] = self.max_running_requests\n'
+READBACK_BODY = READBACK_ANCHOR + '''        ret["trimtab"] = {
+            "max_running_requests": self.max_running_requests,
+            "max_queued_requests": self.max_queued_requests,
+            "chunked_prefill_size": self.chunked_prefill_size,
+            "ceilings": getattr(self, "_trimtab_ceilings", {}),
+        }
+'''
+
 ANCHOR_RE = re.compile(
     r"(    def set_internal_state\(self, recv_req: SetInternalStateReq\):\n"
     r"        server_args_dict = recv_req\.server_args\n)"
@@ -113,6 +122,8 @@ def main():
         sys.exit(0 if n == 1 else 2)
 
     matches = ANCHOR_RE.findall(src)
+    if src.count(READBACK_ANCHOR) != 1:
+        sys.exit(f"read-back anchor matched {src.count(READBACK_ANCHOR)} times, refusing to edit")
     if len(matches) != 1:
         sys.exit(
             f"anchor matched {len(matches)} times in {target}, refusing to edit. "
@@ -121,6 +132,7 @@ def main():
 
     shutil.copyfile(target, target + ".trimtab-orig")
     out = ANCHOR_RE.sub(lambda m: m.group(1) + INJECT_BODY, src, count=1)
+    out = out.replace(READBACK_ANCHOR, READBACK_BODY, 1)
     out = out.rstrip("\n") + "\n" + TAIL
 
     try:

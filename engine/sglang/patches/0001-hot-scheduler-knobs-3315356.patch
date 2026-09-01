@@ -1,8 +1,21 @@
 diff --git a/python/sglang/srt/managers/scheduler.py b/python/sglang/srt/managers/scheduler.py
-index 454f754..522478e 100644
+index 454f754..773be12 100644
 --- a/python/sglang/srt/managers/scheduler.py
 +++ b/python/sglang/srt/managers/scheduler.py
-@@ -4828,6 +4828,20 @@ class Scheduler(
+@@ -4790,6 +4790,12 @@ class Scheduler(
+         )
+         ret["startup_time"] = self.startup_time
+         ret["effective_max_running_requests_per_dp"] = self.max_running_requests
++        ret["trimtab"] = {
++            "max_running_requests": self.max_running_requests,
++            "max_queued_requests": self.max_queued_requests,
++            "chunked_prefill_size": self.chunked_prefill_size,
++            "ceilings": getattr(self, "_trimtab_ceilings", {}),
++        }
+ 
+         if get_exec().moe.elastic_ep_backend is not None:
+             from sglang.srt.elastic_ep.elastic_ep import ElasticEPStateManager
+@@ -4828,6 +4834,20 @@ class Scheduler(
  
      def set_internal_state(self, recv_req: SetInternalStateReq):
          server_args_dict = recv_req.server_args
@@ -23,7 +36,7 @@ index 454f754..522478e 100644
          args_allow_update = set(
              [
                  "pp_max_micro_batch_size",
-@@ -5640,3 +5654,54 @@ def _make_abort_req(
+@@ -5640,3 +5660,54 @@ def _make_abort_req(
              num_output_tokens=len(req.output_ids),
          ),
      )
