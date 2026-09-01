@@ -31,12 +31,13 @@ fi
 trap 'echo "removing pod $POD"; runpodctl remove pod $POD >/dev/null 2>&1' EXIT
 T0=$(date +%s)
 
-ssh_target(){ runpodctl pod list 2>/dev/null | python3 -c "
+RP_KEY=$(grep -oP "apikey\s*=\s*['\"]\K[^'\"]+" ~/.runpod/config.toml)
+ssh_target(){ curl -s --max-time 15 -H "Authorization: Bearer $RP_KEY" https://rest.runpod.io/v1/pods/$POD | python3 -c "
 import json,sys
-for p in json.load(sys.stdin):
-    if p['id']=='$POD':
-        for x in (p.get('runtime') or {}).get('ports') or []:
-            if x.get('privatePort')==22: print(x['ip'], x['publicPort'])"; }
+try: d=json.load(sys.stdin)
+except Exception: sys.exit(0)
+ip=d.get('publicIp'); port=(d.get('portMappings') or {}).get('22')
+if ip and port: print(ip, port)"; }
 until read -r IP PORT < <(ssh_target) && [ -n "${IP:-}" ] && ssh -o StrictHostKeyChecking=no -o ConnectTimeout=8 -p $PORT root@$IP true 2>/dev/null; do
   [ $(( $(date +%s) - T0 )) -gt ${SSH_WAIT:-2400} ] && { echo "ssh never came up"; exit 1; }; sleep 15
 done
