@@ -15,7 +15,9 @@ case $TARGET in
   rtx6000) GPU="NVIDIA RTX PRO 6000 Blackwell Server Edition"; COST=2.5 ;;
   *) echo "unknown target"; exit 2 ;;
 esac
-IMAGE=$([ $ENGINE = vllm ] && echo "vllm/vllm-openai:latest" || echo "lmsysorg/sglang:latest")
+# vllm/vllm-openai has ENTRYPOINT ["vllm","serve"], which swallows the sshd bootstrap, so vllm
+# runs on a plain pytorch image and pod_run.sh installs it. sglang's image has no entrypoint.
+IMAGE=$([ $ENGINE = vllm ] && echo "runpod/pytorch:2.8.0-py3.11-cuda12.8.1-cudnn-devel-ubuntu22.04" || echo "lmsysorg/sglang:latest")
 HERE=$(cd "$(dirname "$0")/.." && pwd)
 NAME=trimtab-$TARGET-$ENGINE
 PUB=$(cat ~/.ssh/id_ed25519.pub)

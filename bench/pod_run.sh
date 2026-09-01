@@ -17,6 +17,10 @@ HERE=$(cd "$(dirname "$0")/.." && pwd)
 MD=/workspace/$(echo $MODEL | tr / _)
 log(){ echo "[$(date +%H:%M:%S)] $*"; }
 
+if [ "${DRY:-0}" != 1 ] && [ $ENGINE = vllm ] && ! python3 -c "import vllm" 2>/dev/null; then
+  t0=$(date +%s); pip install -q vllm huggingface_hub > $OUT/pip_vllm.log 2>&1 || { log "vllm install FAILED"; tail -20 $OUT/pip_vllm.log; exit 1; }
+  log "vllm installed in $(( $(date +%s) - t0 ))s, $(python3 -c 'import vllm;print(vllm.__version__)')"
+fi
 if [ "${DRY:-0}" = 1 ]; then echo 0 > $OUT/download_s; else
 python3 - <<EOF
 import huggingface_hub, time; t=time.time()
