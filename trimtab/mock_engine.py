@@ -18,6 +18,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 class State:
     def __init__(self, engine, mrr=128, mqr=1024, cps=8192, tokens=16384):
         self.engine = engine
+        self.tokens = tokens
         self.lock = threading.Lock()
         self.knobs = (
             {"max_running_requests": mrr, "max_queued_requests": mqr, "chunked_prefill_size": cps}
@@ -67,6 +68,7 @@ def make_handler(state):
                 return self._json(200, {"ok": True})
             if state.engine == "sglang" and self.path == "/get_server_info":
                 return self._json(200, {
+                    "max_total_num_tokens": state.tokens,
                     "internal_states": [{
                         "effective_max_running_requests_per_dp": state.knobs["max_running_requests"],
                         "trimtab": dict(state.knobs, ceilings=state.ceilings),
@@ -92,8 +94,8 @@ def make_handler(state):
     return H
 
 
-def serve(engine, port, host="127.0.0.1"):
-    state = State(engine)
+def serve(engine, port, host="127.0.0.1", tokens=16384):
+    state = State(engine, tokens=tokens)
     ThreadingHTTPServer.request_queue_size = 256
     ThreadingHTTPServer.daemon_threads = True
     srv = ThreadingHTTPServer((host, port), make_handler(state))
@@ -105,8 +107,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--engine", choices=["sglang", "vllm"], required=True)
     ap.add_argument("--port", type=int, required=True)
+    ap.add_argument("--tokens", type=int, default=16384, help="stands in for a cold boot-time allocation")
     a = ap.parse_args()
-    srv = serve(a.engine, a.port)
+    srv = serve(a.engine, a.port, tokens=a.tokens)
     print(f"mock {a.engine} engine on {a.port}", flush=True)
     srv.serve_forever()
 
