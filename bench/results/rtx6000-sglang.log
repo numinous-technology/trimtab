@@ -1,66 +1,78 @@
 Fetching 81 files:   0%|          | 0/81 [00:00<?, ?it/s]Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-Fetching 81 files:   1%|          | 1/81 [00:00<00:11,  6.69it/s]Fetching 81 files:   5%|▍         | 4/81 [00:00<00:04, 17.83it/s]Fetching 81 files:  10%|▉         | 8/81 [00:02<00:22,  3.21it/s]Fetching 81 files:  12%|█▏        | 10/81 [00:05<00:46,  1.54it/s]Fetching 81 files:  14%|█▎        | 11/81 [00:05<00:48,  1.45it/s]Fetching 81 files:  16%|█▌        | 13/81 [00:06<00:42,  1.61it/s]Fetching 81 files:  17%|█▋        | 14/81 [00:07<00:39,  1.69it/s]Fetching 81 files:  19%|█▊        | 15/81 [00:07<00:33,  1.95it/s]Fetching 81 files:  20%|█▉        | 16/81 [00:07<00:28,  2.27it/s]Fetching 81 files:  21%|██        | 17/81 [00:08<00:29,  2.16it/s]Fetching 81 files:  22%|██▏       | 18/81 [00:09<00:43,  1.45it/s]Fetching 81 files:  23%|██▎       | 19/81 [00:10<00:42,  1.46it/s]Fetching 81 files:  25%|██▍       | 20/81 [00:12<01:04,  1.05s/it]Fetching 81 files:  26%|██▌       | 21/81 [00:15<01:48,  1.81s/it]Fetching 81 files:  27%|██▋       | 22/81 [00:22<03:09,  3.21s/it]Fetching 81 files:  28%|██▊       | 23/81 [00:24<02:40,  2.76s/it]Fetching 81 files:  30%|██▉       | 24/81 [00:28<03:08,  3.31s/it]Fetching 81 files:  31%|███       | 25/81 [00:29<02:13,  2.38s/it]Fetching 81 files:  32%|███▏      | 26/81 [00:31<02:04,  2.26s/it]Fetching 81 files:  33%|███▎      | 27/81 [00:32<01:42,  1.89s/it]Fetching 81 files:  35%|███▍      | 28/81 [00:33<01:33,  1.76s/it]Fetching 81 files:  36%|███▌      | 29/81 [00:34<01:19,  1.53s/it]Fetching 81 files:  37%|███▋      | 30/81 [00:36<01:18,  1.53s/it]Fetching 81 files:  38%|███▊      | 31/81 [00:36<00:56,  1.14s/it]Fetching 81 files:  40%|███▉      | 32/81 [00:38<01:18,  1.59s/it]Fetching 81 files:  41%|████      | 33/81 [00:39<01:07,  1.40s/it]Fetching 81 files:  42%|████▏     | 34/81 [00:42<01:24,  1.79s/it]Fetching 81 files:  43%|████▎     | 35/81 [00:43<01:16,  1.65s/it]Fetching 81 files:  44%|████▍     | 36/81 [00:44<01:00,  1.35s/it]Fetching 81 files:  46%|████▌     | 37/81 [00:47<01:24,  1.92s/it]Fetching 81 files:  47%|████▋     | 38/81 [00:49<01:20,  1.88s/it]Fetching 81 files:  48%|████▊     | 39/81 [00:50<01:03,  1.52s/it]Fetching 81 files:  49%|████▉     | 40/81 [00:50<00:46,  1.13s/it]Fetching 81 files:  51%|█████     | 41/81 [00:51<00:48,  1.21s/it]Fetching 81 files:  53%|█████▎    | 43/81 [00:52<00:26,  1.43it/s]Fetching 81 files:  56%|█████▌    | 45/81 [00:52<00:19,  1.89it/s]Fetching 81 files:  59%|█████▉    | 48/81 [00:55<00:23,  1.39it/s]Fetching 81 files:  60%|██████    | 49/81 [00:55<00:20,  1.53it/s]Fetching 81 files:  62%|██████▏   | 50/81 [00:56<00:18,  1.66it/s]Fetching 81 files:  63%|██████▎   | 51/81 [00:56<00:18,  1.59it/s]Fetching 81 files:  64%|██████▍   | 52/81 [00:57<00:16,  1.77it/s]Fetching 81 files:  65%|██████▌   | 53/81 [00:57<00:13,  2.05it/s]Fetching 81 files:  67%|██████▋   | 54/81 [00:58<00:15,  1.70it/s]Fetching 81 files:  68%|██████▊   | 55/81 [00:58<00:14,  1.85it/s]Fetching 81 files:  69%|██████▉   | 56/81 [00:59<00:14,  1.70it/s]Fetching 81 files:  70%|███████   | 57/81 [00:59<00:11,  2.13it/s]Fetching 81 files:  72%|███████▏  | 58/81 [00:59<00:08,  2.66it/s]Fetching 81 files:  73%|███████▎  | 59/81 [01:00<00:06,  3.23it/s]Fetching 81 files:  74%|███████▍  | 60/81 [01:00<00:08,  2.36it/s]Fetching 81 files:  75%|███████▌  | 61/81 [01:01<00:12,  1.59it/s]Fetching 81 files:  79%|███████▉  | 64/81 [01:02<00:05,  3.07it/s]Fetching 81 files:  80%|████████  | 65/81 [01:02<00:04,  3.57it/s]Fetching 81 files:  81%|████████▏ | 66/81 [01:02<00:04,  3.19it/s]Fetching 81 files:  83%|████████▎ | 67/81 [01:02<00:04,  3.38it/s]Fetching 81 files:  84%|████████▍ | 68/81 [01:03<00:04,  3.13it/s]Fetching 81 files:  85%|████████▌ | 69/81 [01:03<00:03,  3.31it/s]Fetching 81 files:  86%|████████▋ | 70/81 [01:03<00:02,  3.97it/s]Fetching 81 files:  89%|████████▉ | 72/81 [01:03<00:01,  5.05it/s]Fetching 81 files:  90%|█████████ | 73/81 [01:04<00:01,  4.72it/s]Fetching 81 files:  91%|█████████▏| 74/81 [01:04<00:02,  3.42it/s]Fetching 81 files:  93%|█████████▎| 75/81 [01:05<00:02,  2.67it/s]Fetching 81 files:  94%|█████████▍| 76/81 [01:06<00:02,  1.76it/s]Fetching 81 files:  95%|█████████▌| 77/81 [01:07<00:03,  1.31it/s]Fetching 81 files:  96%|█████████▋| 78/81 [01:08<00:02,  1.34it/s]Fetching 81 files:  98%|█████████▊| 79/81 [01:09<00:01,  1.27it/s]Fetching 81 files:  99%|█████████▉| 80/81 [01:10<00:01,  1.02s/it]Fetching 81 files: 100%|██████████| 81/81 [01:16<00:00,  2.55s/it]Fetching 81 files: 100%|██████████| 81/81 [01:16<00:00,  1.05it/s]
-[20:42:51] weights at /workspace/Qwen_Qwen3.8-27B-FP8 (78s)
-[20:45:17] boot stock ready in 141s
+Fetching 81 files:   2%|▏         | 2/81 [00:00<00:08,  9.64it/s]Fetching 81 files:  10%|▉         | 8/81 [00:02<00:28,  2.56it/s]Fetching 81 files:  11%|█         | 9/81 [00:03<00:33,  2.12it/s]Fetching 81 files:  12%|█▏        | 10/81 [00:05<00:47,  1.48it/s]Fetching 81 files:  14%|█▎        | 11/81 [00:06<00:53,  1.31it/s]Fetching 81 files:  15%|█▍        | 12/81 [00:12<02:10,  1.90s/it]Fetching 81 files:  16%|█▌        | 13/81 [00:18<03:20,  2.95s/it]Fetching 81 files:  17%|█▋        | 14/81 [00:24<04:16,  3.83s/it]Fetching 81 files:  19%|█▊        | 15/81 [00:25<03:20,  3.04s/it]Fetching 81 files:  20%|█▉        | 16/81 [00:29<03:28,  3.21s/it]Fetching 81 files:  21%|██        | 17/81 [00:34<04:09,  3.89s/it]Fetching 81 files:  22%|██▏       | 18/81 [00:38<03:59,  3.81s/it]Fetching 81 files:  25%|██▍       | 20/81 [00:45<03:51,  3.79s/it]Fetching 81 files:  26%|██▌       | 21/81 [00:47<03:09,  3.16s/it]Fetching 81 files:  27%|██▋       | 22/81 [00:49<02:51,  2.91s/it]Fetching 81 files:  28%|██▊       | 23/81 [00:49<02:11,  2.27s/it]Fetching 81 files:  30%|██▉       | 24/81 [00:53<02:30,  2.64s/it]Fetching 81 files:  31%|███       | 25/81 [00:56<02:35,  2.78s/it]Fetching 81 files:  32%|███▏      | 26/81 [01:02<03:20,  3.65s/it]Fetching 81 files:  33%|███▎      | 27/81 [01:02<02:25,  2.69s/it]Fetching 81 files:  35%|███▍      | 28/81 [01:09<03:33,  4.02s/it]Fetching 81 files:  36%|███▌      | 29/81 [01:12<03:01,  3.49s/it]Fetching 81 files:  37%|███▋      | 30/81 [01:15<02:51,  3.37s/it]Fetching 81 files:  38%|███▊      | 31/81 [01:17<02:28,  2.96s/it]Fetching 81 files:  40%|███▉      | 32/81 [01:17<01:51,  2.28s/it]Fetching 81 files:  41%|████      | 33/81 [01:21<02:03,  2.57s/it]Fetching 81 files:  42%|████▏     | 34/81 [01:25<02:29,  3.18s/it]Fetching 81 files:  44%|████▍     | 36/81 [01:34<02:49,  3.77s/it]Fetching 81 files:  46%|████▌     | 37/81 [01:40<03:09,  4.32s/it]Fetching 81 files:  47%|████▋     | 38/81 [01:41<02:28,  3.46s/it]Fetching 81 files:  48%|████▊     | 39/81 [01:42<01:55,  2.75s/it]Fetching 81 files:  49%|████▉     | 40/81 [01:44<01:42,  2.51s/it]Fetching 81 files:  51%|█████     | 41/81 [01:46<01:40,  2.51s/it]Fetching 81 files:  52%|█████▏    | 42/81 [01:49<01:35,  2.46s/it]Fetching 81 files:  53%|█████▎    | 43/81 [01:49<01:09,  1.84s/it]Fetching 81 files:  54%|█████▍    | 44/81 [01:56<01:58,  3.21s/it]Fetching 81 files:  56%|█████▌    | 45/81 [02:04<02:51,  4.77s/it]Fetching 81 files:  57%|█████▋    | 46/81 [02:05<02:01,  3.48s/it]Fetching 81 files:  58%|█████▊    | 47/81 [02:08<02:00,  3.54s/it]Fetching 81 files:  59%|█████▉    | 48/81 [02:14<02:22,  4.32s/it]Fetching 81 files:  60%|██████    | 49/81 [02:15<01:38,  3.09s/it]Fetching 81 files:  63%|██████▎   | 51/81 [02:15<00:53,  1.78s/it]Fetching 81 files:  64%|██████▍   | 52/81 [02:22<01:31,  3.15s/it]Fetching 81 files:  65%|██████▌   | 53/81 [02:25<01:24,  3.03s/it]Fetching 81 files:  67%|██████▋   | 54/81 [02:25<01:01,  2.26s/it]Fetching 81 files:  68%|██████▊   | 55/81 [02:31<01:26,  3.32s/it]Fetching 81 files:  69%|██████▉   | 56/81 [02:32<01:02,  2.52s/it]Fetching 81 files:  70%|███████   | 57/81 [02:32<00:47,  1.96s/it]Fetching 81 files:  72%|███████▏  | 58/81 [02:33<00:34,  1.49s/it]Fetching 81 files:  73%|███████▎  | 59/81 [02:33<00:26,  1.22s/it]Fetching 81 files:  77%|███████▋  | 62/81 [02:33<00:10,  1.78it/s]Fetching 81 files:  78%|███████▊  | 63/81 [02:51<01:15,  4.20s/it]Fetching 81 files:  79%|███████▉  | 64/81 [02:54<01:06,  3.93s/it]Fetching 81 files:  80%|████████  | 65/81 [02:55<00:48,  3.02s/it]Fetching 81 files:  83%|████████▎ | 67/81 [02:57<00:30,  2.17s/it]Fetching 81 files:  84%|████████▍ | 68/81 [02:58<00:27,  2.09s/it]Fetching 81 files:  86%|████████▋ | 70/81 [02:59<00:14,  1.29s/it]Fetching 81 files:  88%|████████▊ | 71/81 [03:03<00:19,  1.94s/it]Fetching 81 files:  89%|████████▉ | 72/81 [03:03<00:13,  1.50s/it]Fetching 81 files:  91%|█████████▏| 74/81 [03:04<00:07,  1.13s/it]Fetching 81 files:  93%|█████████▎| 75/81 [03:10<00:13,  2.20s/it]Fetching 81 files:  94%|█████████▍| 76/81 [03:12<00:10,  2.09s/it]Fetching 81 files:  95%|█████████▌| 77/81 [03:12<00:06,  1.69s/it]Fetching 81 files:  96%|█████████▋| 78/81 [03:17<00:07,  2.56s/it]Fetching 81 files:  98%|█████████▊| 79/81 [03:23<00:07,  3.51s/it]Fetching 81 files:  99%|█████████▉| 80/81 [03:28<00:03,  3.96s/it]Fetching 81 files: 100%|██████████| 81/81 [03:48<00:00,  8.53s/it]Fetching 81 files: 100%|██████████| 81/81 [03:48<00:00,  2.82s/it]
+[03:27:44] weights at /workspace/Qwen_Qwen3.8-27B-FP8 (229s)
+[03:27:49] gpu memory used before boot stock: 0MiB
+[03:30:50] boot stock ready in 181s
+io_struct patched
 patched /sgl-workspace/sglang/python/sglang/srt/managers/scheduler.py
 backup at /sgl-workspace/sglang/python/sglang/srt/managers/scheduler.py.trimtab-orig
-bench/pod_run.sh: line 29:  1579 Killed                  python3 -m sglang.launch_server --model-path $MD --host 0.0.0.0 --port $PORT --mem-fraction-static 0.85 > $OUT/server_$1.log 2>&1
-[20:46:18] boot patched ready in 56s
+bench/pod_run.sh: line 33:  1229 Killed                  python3 -m sglang.launch_server --model-path $MD --host 0.0.0.0 --port $PORT --mem-fraction-static 0.85 > $OUT/server_$1.log 2>&1
+[03:30:55] gpu memory used before boot patched: 0MiB
+[03:31:52] boot patched ready in 57s
 engine=sglang boot max_running_requests=33
-iter  0 target=8     api=   17.3ms effect=   79.3ms http=200 ok=True
-iter  1 target=33    api=   23.4ms effect=  108.4ms http=200 ok=True
-iter  2 target=8     api=    4.5ms effect=   63.4ms http=200 ok=True
-iter  3 target=33    api=   32.0ms effect=   67.4ms http=200 ok=True
-iter  4 target=8     api=   26.6ms effect=   62.4ms http=200 ok=True
-iter  5 target=33    api=    3.1ms effect=   84.1ms http=200 ok=True
-iter  6 target=8     api=   22.9ms effect=   82.6ms http=200 ok=True
-iter  7 target=33    api=   29.0ms effect=   90.3ms http=200 ok=True
-iter  8 target=8     api=    8.3ms effect=   63.9ms http=200 ok=True
-iter  9 target=33    api=   17.7ms effect=   76.6ms http=200 ok=True
-iter 10 target=8     api=   11.7ms effect=   71.1ms http=200 ok=True
-iter 11 target=33    api=   18.1ms effect=   74.9ms http=200 ok=True
-iter 12 target=8     api=   28.6ms effect=   90.8ms http=200 ok=True
-iter 13 target=33    api=   20.6ms effect=   83.5ms http=200 ok=True
-iter 14 target=8     api=    5.0ms effect=   90.8ms http=200 ok=True
-iter 15 target=33    api=   20.6ms effect=   99.7ms http=200 ok=True
-iter 16 target=8     api=   14.6ms effect=   47.4ms http=200 ok=True
-iter 17 target=33    api=   23.3ms effect=   78.1ms http=200 ok=True
-iter 18 target=8     api=   42.4ms effect=   98.4ms http=200 ok=True
-iter 19 target=33    api=   10.9ms effect=   45.2ms http=200 ok=True
+iter  0 target=8     api=   25.2ms effect=   83.7ms http=200 ok=True
+iter  1 target=33    api=   27.0ms effect=  104.2ms http=200 ok=True
+iter  2 target=8     api=   13.2ms effect=   72.0ms http=200 ok=True
+iter  3 target=33    api=    7.4ms effect=   69.9ms http=200 ok=True
+iter  4 target=8     api=   25.2ms effect=   83.9ms http=200 ok=True
+iter  5 target=33    api=   13.7ms effect=   72.3ms http=200 ok=True
+iter  6 target=8     api=   44.3ms effect=   82.3ms http=200 ok=True
+iter  7 target=33    api=   11.3ms effect=   45.8ms http=200 ok=True
+iter  8 target=8     api=   25.2ms effect=   84.3ms http=200 ok=True
+iter  9 target=33    api=   24.2ms effect=   99.6ms http=200 ok=True
+iter 10 target=8     api=   24.6ms effect=   83.5ms http=200 ok=True
+iter 11 target=33    api=   22.1ms effect=   76.9ms http=200 ok=True
+iter 12 target=8     api=    9.1ms effect=   84.5ms http=200 ok=True
+iter 13 target=33    api=   31.8ms effect=   65.7ms http=200 ok=True
+iter 14 target=8     api=    6.5ms effect=   65.3ms http=200 ok=True
+iter 15 target=33    api=   19.7ms effect=   95.0ms http=200 ok=True
+iter 16 target=8     api=   13.8ms effect=   72.6ms http=200 ok=True
+iter 17 target=33    api=   22.0ms effect=   76.4ms http=200 ok=True
+iter 18 target=8     api=   14.9ms effect=   73.7ms http=200 ok=True
+iter 19 target=33    api=   43.5ms effect=   81.7ms http=200 ok=True
 {
  "engine": "sglang",
  "cap_knob": "max_running_requests",
  "boot_value": 33,
  "iters": 20,
  "all_ok": true,
- "api_ms_median": 19.36,
- "api_ms_p95": 31.97,
- "effect_ms_median": 78.72,
- "effect_ms_p95": 99.72,
- "background_completed": 429,
+ "api_ms_median": 22.02,
+ "api_ms_p95": 43.5,
+ "effect_ms_median": 79.27,
+ "effect_ms_p95": 99.58,
+ "background_completed": 430,
  "background_failed": 0
 }
+chunked_prefill_size         boot=8192     set=2048     read=2048     http=200 ok=True
+log_level                    boot=None     set=WARNING  read=WARNING  http=200 ok=True
+max_prefill_tokens           boot=16384    set=4096     read=4096     http=200 ok=True
+max_queued_requests          boot=None     set=512      read=512      http=200 ok=True
+max_running_requests         boot=33       set=16       read=16       http=200 ok=True
+schedule_conservativeness    boot=None     set=0.5      read=0.5      http=200 ok=True
+schedule_policy              boot=fcfs     set=lpm      read=lpm      http=200 ok=True
 {
  "engine": "sglang",
  "model": "Qwen/Qwen3.8-27B-FP8",
  "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 97887 MiB, 595.91.07",
  "engine_version": "0.5.18",
- "download_s": 78,
- "boot_stock_s": 141,
- "boot_patched_s": 56,
- "bench_exit": 0
+ "download_s": 229,
+ "boot_stock_s": 181,
+ "boot_patched_s": 57,
+ "bench_exit": 0,
+ "sweep_exit": 0
 }
+knob sweep 7 of 7
 {
  "engine": "sglang",
  "cap_knob": "max_running_requests",
  "boot_value": 33,
  "iters": 20,
  "all_ok": true,
- "api_ms_median": 19.36,
- "api_ms_p95": 31.97,
- "effect_ms_median": 78.72,
- "effect_ms_p95": 99.72,
- "background_completed": 429,
+ "api_ms_median": 22.02,
+ "api_ms_p95": 43.5,
+ "effect_ms_median": 79.27,
+ "effect_ms_p95": 99.58,
+ "background_completed": 430,
  "background_failed": 0
 }
-[20:47:21] done, results in /root/trimtab_results/sglang.json
+[03:32:54] done, results in /root/trimtab_results/sglang.json

@@ -3,160 +3,238 @@
  "model": "Qwen/Qwen3.8-27B-FP8",
  "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 97887 MiB, 595.91.07",
  "engine_version": "0.5.18",
- "download_s": 78,
- "boot_stock_s": 141,
- "boot_patched_s": 56,
+ "download_s": 229,
+ "boot_stock_s": 181,
+ "boot_patched_s": 57,
  "bench_exit": 0,
+ "sweep_exit": 0,
+ "knob_sweep": {
+  "engine": "sglang",
+  "knobs_ok": 7,
+  "knobs_total": 7,
+  "rows": [
+   {
+    "knob": "chunked_prefill_size",
+    "boot": 8192,
+    "target": 2048,
+    "read_back": 2048,
+    "http": 200,
+    "api_ms": 0.89,
+    "ok": true,
+    "restored": true
+   },
+   {
+    "knob": "log_level",
+    "boot": null,
+    "target": "WARNING",
+    "read_back": "WARNING",
+    "http": 200,
+    "api_ms": 2.46,
+    "ok": true,
+    "restored": false
+   },
+   {
+    "knob": "max_prefill_tokens",
+    "boot": 16384,
+    "target": 4096,
+    "read_back": 4096,
+    "http": 200,
+    "api_ms": 0.64,
+    "ok": true,
+    "restored": true
+   },
+   {
+    "knob": "max_queued_requests",
+    "boot": null,
+    "target": 512,
+    "read_back": 512,
+    "http": 200,
+    "api_ms": 0.6,
+    "ok": true,
+    "restored": false
+   },
+   {
+    "knob": "max_running_requests",
+    "boot": 33,
+    "target": 16,
+    "read_back": 16,
+    "http": 200,
+    "api_ms": 0.6,
+    "ok": true,
+    "restored": true
+   },
+   {
+    "knob": "schedule_conservativeness",
+    "boot": null,
+    "target": 0.5,
+    "read_back": 0.5,
+    "http": 200,
+    "api_ms": 0.64,
+    "ok": true,
+    "restored": false
+   },
+   {
+    "knob": "schedule_policy",
+    "boot": "fcfs",
+    "target": "lpm",
+    "read_back": "lpm",
+    "http": 200,
+    "api_ms": 0.61,
+    "ok": true,
+    "restored": true
+   }
+  ]
+ },
  "hot_swap": {
   "engine": "sglang",
   "cap_knob": "max_running_requests",
   "boot_value": 33,
   "iters": 20,
   "all_ok": true,
-  "api_ms_median": 19.36,
-  "api_ms_p95": 31.97,
-  "effect_ms_median": 78.72,
-  "effect_ms_p95": 99.72,
-  "background_completed": 429,
+  "api_ms_median": 22.02,
+  "api_ms_p95": 43.5,
+  "effect_ms_median": 79.27,
+  "effect_ms_p95": 99.58,
+  "background_completed": 430,
   "background_failed": 0,
   "rows": [
    {
     "target": 8,
-    "api_ms": 17.29816198348999,
-    "effect_ms": 79.30614205542952,
+    "api_ms": 25.1987820956856,
+    "effect_ms": 83.68296397384256,
     "http": 200,
     "ok": true
    },
    {
     "target": 33,
-    "api_ms": 23.381107952445745,
-    "effect_ms": 108.42823702841997,
+    "api_ms": 26.996920933015645,
+    "effect_ms": 104.21818506438285,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 4.519143956713378,
-    "effect_ms": 63.429621048271656,
+    "api_ms": 13.17877706605941,
+    "effect_ms": 71.99878804385662,
     "http": 200,
     "ok": true
    },
    {
     "target": 33,
-    "api_ms": 31.96801897138357,
-    "effect_ms": 67.39575904794037,
+    "api_ms": 7.3693940648809075,
+    "effect_ms": 69.86089097335935,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 26.627639075741172,
-    "effect_ms": 62.39047693088651,
+    "api_ms": 25.24414099752903,
+    "effect_ms": 83.92118301708251,
     "http": 200,
     "ok": true
    },
    {
     "target": 33,
-    "api_ms": 3.0583019834011793,
-    "effect_ms": 84.07867408823222,
+    "api_ms": 13.678124989382923,
+    "effect_ms": 72.2566059557721,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 22.940209950320423,
-    "effect_ms": 82.59864302817732,
+    "api_ms": 44.31566200219095,
+    "effect_ms": 82.31862192042172,
     "http": 200,
     "ok": true
    },
    {
     "target": 33,
-    "api_ms": 28.95961608737707,
-    "effect_ms": 90.34089010674506,
+    "api_ms": 11.316848918795586,
+    "effect_ms": 45.789243071340024,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 8.27626301907003,
-    "effect_ms": 63.8525189133361,
+    "api_ms": 25.210801046341658,
+    "effect_ms": 84.33215995319188,
     "http": 200,
     "ok": true
    },
    {
     "target": 33,
-    "api_ms": 17.668709973804653,
-    "effect_ms": 76.64335693698376,
+    "api_ms": 24.238956975750625,
+    "effect_ms": 99.57588405814022,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 11.72819291241467,
-    "effect_ms": 71.09764800406992,
+    "api_ms": 24.61186598520726,
+    "effect_ms": 83.47937604412436,
     "http": 200,
     "ok": true
    },
    {
     "target": 33,
-    "api_ms": 18.11953797005117,
-    "effect_ms": 74.93750692810863,
+    "api_ms": 22.074440959841013,
+    "effect_ms": 76.8643879564479,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 28.559828992001712,
-    "effect_ms": 90.84052697289735,
+    "api_ms": 9.068613988347352,
+    "effect_ms": 84.52494896482676,
     "http": 200,
     "ok": true
    },
    {
     "target": 33,
-    "api_ms": 20.622793002985418,
-    "effect_ms": 83.51580798625946,
+    "api_ms": 31.777160009369254,
+    "effect_ms": 65.73877693153918,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 5.025352002121508,
-    "effect_ms": 90.7937369775027,
+    "api_ms": 6.467859027907252,
+    "effect_ms": 65.32331893686205,
     "http": 200,
     "ok": true
    },
    {
     "target": 33,
-    "api_ms": 20.5992340343073,
-    "effect_ms": 99.72413594368845,
+    "api_ms": 19.67813598457724,
+    "effect_ms": 95.01601301599294,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 14.602686977013946,
-    "effect_ms": 47.398931928910315,
+    "api_ms": 13.822112930938601,
+    "effect_ms": 72.6246340200305,
     "http": 200,
     "ok": true
    },
    {
     "target": 33,
-    "api_ms": 23.29335908871144,
-    "effect_ms": 78.12389906030148,
+    "api_ms": 21.95564203429967,
+    "effect_ms": 76.39227993786335,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 42.429010034538805,
-    "effect_ms": 98.41102396603674,
+    "api_ms": 14.919765992090106,
+    "effect_ms": 73.69295705575496,
     "http": 200,
     "ok": true
    },
    {
     "target": 33,
-    "api_ms": 10.86879801005125,
-    "effect_ms": 45.205594040453434,
+    "api_ms": 43.50164602510631,
+    "effect_ms": 81.67508605401963,
     "http": 200,
     "ok": true
    }
