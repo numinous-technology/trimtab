@@ -37,9 +37,13 @@ values to the live scheduler. vLLM dispatches utility RPCs to EngineCore by
 method name, so the patch adds one method and one dev router (the server runs
 with VLLM_SERVER_DEV_MODE=1, the same gate vLLM puts on its own dev routes).
 
-The last column is the proof a knob is hot. It is the line where the scheduler
-reads the variable on every step. A variable read only at boot would be listed
-as cold.
+trimtab supports the knobs listed in the manifests and nothing else. Today
+that is three hot knobs on SGLang plus five niche ones upstream already
+allowed, two hot knobs on vLLM, and 11 (SGLang) and 7 (vLLM) cold knobs the
+supervisor can change by relaunching with new flags. Every other flag is set
+at launch as before. A knob becomes hot only after its per-step read is
+verified at a source line, which is the last column below. A knob read only at
+boot is cold.
 
 | engine | knob | validation | per-step read verified at |
 |---|---|---|---|
@@ -143,6 +147,22 @@ modal run bench/launch_modal_b200_vllm.py
 
 docs/environment-notes.md lists the environment problems these runs hit and
 how the scripts handle each.
+
+### Cold knobs
+
+These are baked into GPU memory or graph capture at boot, so changing one
+means a relaunch. The supervisor does that relaunch with weights already on
+local disk, and maps each knob to its launch flag through a table in
+trimtab/supervisor.py. A cold knob not in the table is refused, not guessed.
+
+| engine | cold knobs the supervisor handles |
+|---|---|
+| sglang | tp_size, ep_size, quantization, kv_cache_dtype, mem_fraction_static, max_total_num_tokens, cuda_graph_max_bs, attention_backend, page_size, speculative_algorithm, speculative_draft_model_path |
+| vllm | tensor_parallel_size, quantization, kv_cache_dtype, gpu_memory_utilization, max_model_len, cuda_graph_sizes, speculative_config |
+
+Likely next hot knobs, none done. Schedule policy, speculative draft depth,
+per-request deadlines, watermark thresholds, log level. Each needs a few
+lines of patch and a verified per-step read.
 
 ## Quickstart
 
