@@ -39,8 +39,8 @@ with VLLM_SERVER_DEV_MODE=1, the same gate vLLM puts on its own dev routes).
 
 trimtab supports the knobs listed in the manifests and nothing else. Today
 that is three hot knobs on SGLang plus five niche ones upstream already
-allowed, two hot knobs on vLLM, and 11 (SGLang) and 7 (vLLM) cold knobs the
-supervisor can change by relaunching with new flags. Every other flag is set
+allowed, two hot knobs on vLLM, and 11 (SGLang) and 7 (vLLM) existing cold flags the
+supervisor knows how to relaunch with. Every other flag is set
 at launch as before. A knob becomes hot only after its per-step read is
 verified at a source line, which is the last column below. A knob read only at
 boot is cold.
@@ -150,10 +150,23 @@ how the scripts handle each.
 
 ### Cold knobs
 
-These are baked into GPU memory or graph capture at boot, so changing one
-means a relaunch. The supervisor does that relaunch with weights already on
-local disk, and maps each knob to its launch flag through a table in
-trimtab/supervisor.py. A cold knob not in the table is refused, not guessed.
+These are existing engine flags, not something trimtab adds. They are baked
+into GPU memory or graph capture at boot, so changing one means a relaunch.
+What the supervisor adds is the relaunch itself. When a desired version
+changes a cold knob, it drains, stops the engine, relaunches with the new
+flag, waits for health, and re-applies the hot knobs on top. The mapping from
+knob to flag is a table in trimtab/supervisor.py. A cold knob not in the
+table is refused, not guessed.
+
+What that relaunch costs. A redeploy is image pull, weight download, pod
+scheduling, and engine boot. The supervisor removes the first three and pays
+only the boot, against weights already on local disk and in the page cache.
+Measured on the six runs, that boot took 55 to 281 seconds, against 60 to
+428 seconds for the first boot after download (the second table under
+Benchmarks). The engine's own startup, loading weights to GPU, capturing CUDA
+graphs, compiling, is the floor. Keeping weights resident in GPU memory across
+a relaunch would remove most of that floor, and neither engine exposes a way
+to do it today, so trimtab does not claim it.
 
 | engine | cold knobs the supervisor handles |
 |---|---|
