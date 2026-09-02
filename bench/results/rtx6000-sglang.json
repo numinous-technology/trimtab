@@ -3,9 +3,9 @@
  "model": "Qwen/Qwen3.8-27B-FP8",
  "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 97887 MiB, 595.91.07",
  "engine_version": "0.5.18",
- "download_s": 229,
- "boot_stock_s": 181,
- "boot_patched_s": 57,
+ "download_s": 0,
+ "boot_stock_s": 56,
+ "boot_patched_s": 56,
  "bench_exit": 0,
  "sweep_exit": 0,
  "knob_sweep": {
@@ -19,7 +19,7 @@
     "target": 2048,
     "read_back": 2048,
     "http": 200,
-    "api_ms": 0.89,
+    "api_ms": 0.96,
     "ok": true,
     "restored": true
    },
@@ -29,7 +29,7 @@
     "target": "WARNING",
     "read_back": "WARNING",
     "http": 200,
-    "api_ms": 2.46,
+    "api_ms": 1.42,
     "ok": true,
     "restored": false
    },
@@ -39,7 +39,7 @@
     "target": 4096,
     "read_back": 4096,
     "http": 200,
-    "api_ms": 0.64,
+    "api_ms": 0.63,
     "ok": true,
     "restored": true
    },
@@ -49,7 +49,7 @@
     "target": 512,
     "read_back": 512,
     "http": 200,
-    "api_ms": 0.6,
+    "api_ms": 0.63,
     "ok": true,
     "restored": false
    },
@@ -59,7 +59,7 @@
     "target": 16,
     "read_back": 16,
     "http": 200,
-    "api_ms": 0.6,
+    "api_ms": 0.59,
     "ok": true,
     "restored": true
    },
@@ -69,7 +69,7 @@
     "target": 0.5,
     "read_back": 0.5,
     "http": 200,
-    "api_ms": 0.64,
+    "api_ms": 0.62,
     "ok": true,
     "restored": false
    },
@@ -79,9 +79,157 @@
     "target": "lpm",
     "read_back": "lpm",
     "http": 200,
-    "api_ms": 0.61,
+    "api_ms": 0.65,
     "ok": true,
     "restored": true
+   }
+  ]
+ },
+ "warm_exit": 0,
+ "warm_reinit": {
+  "boot_max_total_num_tokens": 445546,
+  "boot_max_running_requests": 33,
+  "all_ok": true,
+  "rows": [
+   {
+    "fields": {
+     "mem_fraction_static": 0.75
+    },
+    "ok": true,
+    "http": 200,
+    "engine": {
+     "ok": true,
+     "fields": {
+      "mem_fraction_static": 0.75
+     },
+     "released": [],
+     "freed_gib": 51.55,
+     "memory_saver": true,
+     "rewired": [
+      "SchedulePolicy.tree_cache",
+      "SchedulerBatchResultProcessor.req_to_token_pool",
+      "SchedulerBatchResultProcessor.token_to_kv_pool_allocator",
+      "SchedulerBatchResultProcessor.tree_cache",
+      "SchedulerDPAttnAdapter.req_to_token_pool",
+      "SchedulerDPAttnAdapter.token_to_kv_pool_allocator",
+      "SchedulerDPAttnAdapter.tree_cache",
+      "SchedulerInvariantChecker.req_to_token_pool",
+      "SchedulerInvariantChecker.token_to_kv_pool_allocator",
+      "SchedulerInvariantChecker.tree_cache",
+      "SchedulerKvEventsPublisher.tree_cache",
+      "SchedulerLoadInquirer.token_to_kv_pool_allocator",
+      "SchedulerOutputStreamer.tree_cache",
+      "SchedulerPoolStatsObserver.req_to_token_pool",
+      "SchedulerPoolStatsObserver.token_to_kv_pool_allocator",
+      "SchedulerPoolStatsObserver.tree_cache",
+      "SessionController.tree_cache"
+     ],
+     "max_total_num_tokens": 220234,
+     "max_running_requests": 33,
+     "free_s": 0.089,
+     "rebuild_s": 30.683,
+     "total_s": 30.772
+    },
+    "call_s": 30.78,
+    "call_to_first_token_s": 31.13,
+    "max_total_num_tokens_after": 220234,
+    "max_running_requests_after": 33,
+    "generate_ok": true,
+    "sample": " the wind turned, and the wind turned when the ship turned.\n"
+   },
+   {
+    "fields": {
+     "max_total_tokens": 111386,
+     "max_running_requests": 16
+    },
+    "ok": true,
+    "http": 200,
+    "engine": {
+     "ok": true,
+     "fields": {
+      "max_total_tokens": 111386,
+      "max_running_requests": 16
+     },
+     "released": [],
+     "freed_gib": 37.79,
+     "memory_saver": true,
+     "rewired": [
+      "SchedulePolicy.tree_cache",
+      "SchedulerBatchResultProcessor.req_to_token_pool",
+      "SchedulerBatchResultProcessor.token_to_kv_pool_allocator",
+      "SchedulerBatchResultProcessor.tree_cache",
+      "SchedulerDPAttnAdapter.req_to_token_pool",
+      "SchedulerDPAttnAdapter.token_to_kv_pool_allocator",
+      "SchedulerDPAttnAdapter.tree_cache",
+      "SchedulerInvariantChecker.req_to_token_pool",
+      "SchedulerInvariantChecker.token_to_kv_pool_allocator",
+      "SchedulerInvariantChecker.tree_cache",
+      "SchedulerKvEventsPublisher.tree_cache",
+      "SchedulerLoadInquirer.token_to_kv_pool_allocator",
+      "SchedulerOutputStreamer.tree_cache",
+      "SchedulerPoolStatsObserver.req_to_token_pool",
+      "SchedulerPoolStatsObserver.token_to_kv_pool_allocator",
+      "SchedulerPoolStatsObserver.tree_cache",
+      "SessionController.tree_cache"
+     ],
+     "max_total_num_tokens": 111386,
+     "max_running_requests": 16,
+     "free_s": 0.532,
+     "rebuild_s": 31.236,
+     "total_s": 31.768
+    },
+    "call_s": 31.77,
+    "call_to_first_token_s": 32.12,
+    "max_total_num_tokens_after": 111386,
+    "max_running_requests_after": 16,
+    "generate_ok": true,
+    "sample": " the wind turned, and the wind turned when the ship turned.\n"
+   },
+   {
+    "fields": {
+     "mem_fraction_static": 0.85
+    },
+    "ok": true,
+    "http": 200,
+    "engine": {
+     "ok": true,
+     "fields": {
+      "mem_fraction_static": 0.85
+     },
+     "released": [],
+     "freed_gib": 31.08,
+     "memory_saver": true,
+     "rewired": [
+      "SchedulePolicy.tree_cache",
+      "SchedulerBatchResultProcessor.req_to_token_pool",
+      "SchedulerBatchResultProcessor.token_to_kv_pool_allocator",
+      "SchedulerBatchResultProcessor.tree_cache",
+      "SchedulerDPAttnAdapter.req_to_token_pool",
+      "SchedulerDPAttnAdapter.token_to_kv_pool_allocator",
+      "SchedulerDPAttnAdapter.tree_cache",
+      "SchedulerInvariantChecker.req_to_token_pool",
+      "SchedulerInvariantChecker.token_to_kv_pool_allocator",
+      "SchedulerInvariantChecker.tree_cache",
+      "SchedulerKvEventsPublisher.tree_cache",
+      "SchedulerLoadInquirer.token_to_kv_pool_allocator",
+      "SchedulerOutputStreamer.tree_cache",
+      "SchedulerPoolStatsObserver.req_to_token_pool",
+      "SchedulerPoolStatsObserver.token_to_kv_pool_allocator",
+      "SchedulerPoolStatsObserver.tree_cache",
+      "SessionController.tree_cache"
+     ],
+     "max_total_num_tokens": 111386,
+     "max_running_requests": 16,
+     "free_s": 0.561,
+     "rebuild_s": 31.234,
+     "total_s": 31.795
+    },
+    "call_s": 31.8,
+    "call_to_first_token_s": 32.15,
+    "max_total_num_tokens_after": 111386,
+    "max_running_requests_after": 16,
+    "generate_ok": true,
+    "sample": " the wind turned, and the wind turned when the ship turned.\n"
    }
   ]
  },
@@ -91,150 +239,150 @@
   "boot_value": 33,
   "iters": 20,
   "all_ok": true,
-  "api_ms_median": 22.02,
-  "api_ms_p95": 43.5,
-  "effect_ms_median": 79.27,
-  "effect_ms_p95": 99.58,
-  "background_completed": 430,
+  "api_ms_median": 16.78,
+  "api_ms_p95": 29.73,
+  "effect_ms_median": 66.99,
+  "effect_ms_p95": 100.01,
+  "background_completed": 424,
   "background_failed": 0,
   "rows": [
    {
     "target": 8,
-    "api_ms": 25.1987820956856,
-    "effect_ms": 83.68296397384256,
+    "api_ms": 23.94414891023189,
+    "effect_ms": 100.00750795006752,
     "http": 200,
     "ok": true
    },
    {
     "target": 33,
-    "api_ms": 26.996920933015645,
-    "effect_ms": 104.21818506438285,
+    "api_ms": 4.177273949608207,
+    "effect_ms": 62.97928199637681,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 13.17877706605941,
-    "effect_ms": 71.99878804385662,
+    "api_ms": 43.71498397085816,
+    "effect_ms": 81.3528549624607,
     "http": 200,
     "ok": true
    },
    {
     "target": 33,
-    "api_ms": 7.3693940648809075,
-    "effect_ms": 69.86089097335935,
+    "api_ms": 17.622399027459323,
+    "effect_ms": 72.1060240175575,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 25.24414099752903,
-    "effect_ms": 83.92118301708251,
+    "api_ms": 24.857352022081614,
+    "effect_ms": 83.66431994363666,
     "http": 200,
     "ok": true
    },
    {
     "target": 33,
-    "api_ms": 13.678124989382923,
-    "effect_ms": 72.2566059557721,
+    "api_ms": 29.727902030572295,
+    "effect_ms": 105.32624390907586,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 44.31566200219095,
-    "effect_ms": 82.31862192042172,
+    "api_ms": 15.929159941151738,
+    "effect_ms": 53.895947989076376,
     "http": 200,
     "ok": true
    },
    {
     "target": 33,
-    "api_ms": 11.316848918795586,
-    "effect_ms": 45.789243071340024,
+    "api_ms": 1.440401072613895,
+    "effect_ms": 60.202429071068764,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 25.210801046341658,
-    "effect_ms": 84.33215995319188,
+    "api_ms": 15.098584932275116,
+    "effect_ms": 74.34037001803517,
     "http": 200,
     "ok": true
    },
    {
     "target": 33,
-    "api_ms": 24.238956975750625,
-    "effect_ms": 99.57588405814022,
+    "api_ms": 25.804147007875144,
+    "effect_ms": 84.73087404854596,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 24.61186598520726,
-    "effect_ms": 83.47937604412436,
+    "api_ms": 15.736790955998003,
+    "effect_ms": 74.70356696285307,
     "http": 200,
     "ok": true
    },
    {
     "target": 33,
-    "api_ms": 22.074440959841013,
-    "effect_ms": 76.8643879564479,
+    "api_ms": 13.799493084661663,
+    "effect_ms": 51.63144401740283,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 9.068613988347352,
-    "effect_ms": 84.52494896482676,
+    "api_ms": 20.112133002839983,
+    "effect_ms": 95.70584492757916,
     "http": 200,
     "ok": true
    },
    {
     "target": 33,
-    "api_ms": 31.777160009369254,
-    "effect_ms": 65.73877693153918,
+    "api_ms": 23.970349109731615,
+    "effect_ms": 57.44070699438453,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 6.467859027907252,
-    "effect_ms": 65.32331893686205,
+    "api_ms": 12.109962990507483,
+    "effect_ms": 71.00531994365156,
     "http": 200,
     "ok": true
    },
    {
     "target": 33,
-    "api_ms": 19.67813598457724,
-    "effect_ms": 95.01601301599294,
+    "api_ms": 22.543548024259508,
+    "effect_ms": 60.374067979864776,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 13.822112930938601,
-    "effect_ms": 72.6246340200305,
+    "api_ms": 3.984605078585446,
+    "effect_ms": 62.85136193037033,
     "http": 200,
     "ok": true
    },
    {
     "target": 33,
-    "api_ms": 21.95564203429967,
-    "effect_ms": 76.39227993786335,
+    "api_ms": 20.7096190424636,
+    "effect_ms": 58.2760110264644,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 14.919765992090106,
-    "effect_ms": 73.69295705575496,
+    "api_ms": 15.372153022326529,
+    "effect_ms": 53.242382942698896,
     "http": 200,
     "ok": true
    },
    {
     "target": 33,
-    "api_ms": 43.50164602510631,
-    "effect_ms": 81.67508605401963,
+    "api_ms": 2.310925046913326,
+    "effect_ms": 61.12887302879244,
     "http": 200,
     "ok": true
    }

@@ -19,14 +19,15 @@ for f in sorted(glob.glob(str(HERE / "results" / "*.json"))):
         bg=h["background_completed"], drops=h["background_failed"],
         stock=r["boot_stock_s"], patched=r["boot_patched_s"],
         sweep=(f'{r["knob_sweep"]["knobs_ok"]}/{r["knob_sweep"]["knobs_total"]}' if "knob_sweep" in r else "cap only"),
+        warm=(("%.1f s" % max(x["call_to_first_token_s"] for x in r["warm_reinit"]["rows"])) if r.get("warm_reinit", {}).get("rows") else "n/a"),
     ))
 
 hdr = ("| run | GPU | engine | boot cap | swaps ok | API p50 ms | API p95 ms | effect p50 ms | effect p95 ms "
-       "| requests under load | dropped | hot knobs proven | boot cold disk s | boot warm cache s |")
-sep = "|" + "---|" * 14
+       "| requests under load | dropped | hot knobs proven | warm reinit | boot cold disk s | boot warm cache s |")
+sep = "|" + "---|" * 15
 lines = [hdr, sep] + [
     f'| {x["target"]} | {x["gpu"]} | {x["engine"]} | {x["boot_value"]} | {x["ok"]} | {x["api50"]} | {x["api95"]} '
-    f'| {x["eff50"]} | {x["eff95"]} | {x["bg"]} | {x["drops"]} | {x["sweep"]} | {x["stock"]} | {x["patched"]} |' for x in ROWS]
+    f'| {x["eff50"]} | {x["eff95"]} | {x["bg"]} | {x["drops"]} | {x["sweep"]} | {x["warm"]} | {x["stock"]} | {x["patched"]} |' for x in ROWS]
 
 doc = f"""# Measured results
 
@@ -38,6 +39,10 @@ Hot knobs proven is the knob sweep, which sets every hot knob in the
 manifest on the live engine, reads it back, and restores it. Cells run before
 the sweep existed say "cap only", meaning only the concurrency cap was
 exercised there.
+
+Warm reinit is the slowest of three in-place KV pool rebuilds on the live
+server (weights stay on the GPU), from the control call to the first token
+served afterwards. n/a where the engine has no warm path yet.
 
 What the columns mean. The bench runs 32 concurrent generation threads, then
 flips the running-request cap between 8 and its boot value twenty times.
@@ -59,7 +64,15 @@ value, so vLLM's effect number includes that drain and is dominated by output
 length, not by the control path (its API latency is the same ~20 ms). Raising
 the cap is immediate on both engines.
 
-Not claimed. GPU-resident reinit. Anything on models or GPUs not in this table.
+GPU-resident reinit, measured separately on RTX PRO 6000 with SGLang 0.5.18,
+in bench/results/rtx6000-sglang-warm*.json. Three consecutive KV pool resizes
+(mem_fraction 0.85 to 0.75, then an explicit 111k-token pool with cap 16,
+then back) with weights resident, each followed by a served generation.
+With prefill CUDA graphs on, 31.4 to 32.0 s call to first token, 29 s of it
+prefill graph capture. With prefill CUDA graphs off, 2.0 to 2.4 s. Freeing
+the old pool took 0.08 to 0.57 s in every case.
+
+Not claimed. Warm reinit on vLLM. Anything on models or GPUs not in this table.
 """
 (HERE.parent / "docs" / "results.md").write_text(doc)
 print(doc)

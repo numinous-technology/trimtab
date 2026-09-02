@@ -1,46 +1,45 @@
-Fetching 81 files:   0%|          | 0/81 [00:00<?, ?it/s]Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-Fetching 81 files:   2%|▏         | 2/81 [00:00<00:08,  9.64it/s]Fetching 81 files:  10%|▉         | 8/81 [00:02<00:28,  2.56it/s]Fetching 81 files:  11%|█         | 9/81 [00:03<00:33,  2.12it/s]Fetching 81 files:  12%|█▏        | 10/81 [00:05<00:47,  1.48it/s]Fetching 81 files:  14%|█▎        | 11/81 [00:06<00:53,  1.31it/s]Fetching 81 files:  15%|█▍        | 12/81 [00:12<02:10,  1.90s/it]Fetching 81 files:  16%|█▌        | 13/81 [00:18<03:20,  2.95s/it]Fetching 81 files:  17%|█▋        | 14/81 [00:24<04:16,  3.83s/it]Fetching 81 files:  19%|█▊        | 15/81 [00:25<03:20,  3.04s/it]Fetching 81 files:  20%|█▉        | 16/81 [00:29<03:28,  3.21s/it]Fetching 81 files:  21%|██        | 17/81 [00:34<04:09,  3.89s/it]Fetching 81 files:  22%|██▏       | 18/81 [00:38<03:59,  3.81s/it]Fetching 81 files:  25%|██▍       | 20/81 [00:45<03:51,  3.79s/it]Fetching 81 files:  26%|██▌       | 21/81 [00:47<03:09,  3.16s/it]Fetching 81 files:  27%|██▋       | 22/81 [00:49<02:51,  2.91s/it]Fetching 81 files:  28%|██▊       | 23/81 [00:49<02:11,  2.27s/it]Fetching 81 files:  30%|██▉       | 24/81 [00:53<02:30,  2.64s/it]Fetching 81 files:  31%|███       | 25/81 [00:56<02:35,  2.78s/it]Fetching 81 files:  32%|███▏      | 26/81 [01:02<03:20,  3.65s/it]Fetching 81 files:  33%|███▎      | 27/81 [01:02<02:25,  2.69s/it]Fetching 81 files:  35%|███▍      | 28/81 [01:09<03:33,  4.02s/it]Fetching 81 files:  36%|███▌      | 29/81 [01:12<03:01,  3.49s/it]Fetching 81 files:  37%|███▋      | 30/81 [01:15<02:51,  3.37s/it]Fetching 81 files:  38%|███▊      | 31/81 [01:17<02:28,  2.96s/it]Fetching 81 files:  40%|███▉      | 32/81 [01:17<01:51,  2.28s/it]Fetching 81 files:  41%|████      | 33/81 [01:21<02:03,  2.57s/it]Fetching 81 files:  42%|████▏     | 34/81 [01:25<02:29,  3.18s/it]Fetching 81 files:  44%|████▍     | 36/81 [01:34<02:49,  3.77s/it]Fetching 81 files:  46%|████▌     | 37/81 [01:40<03:09,  4.32s/it]Fetching 81 files:  47%|████▋     | 38/81 [01:41<02:28,  3.46s/it]Fetching 81 files:  48%|████▊     | 39/81 [01:42<01:55,  2.75s/it]Fetching 81 files:  49%|████▉     | 40/81 [01:44<01:42,  2.51s/it]Fetching 81 files:  51%|█████     | 41/81 [01:46<01:40,  2.51s/it]Fetching 81 files:  52%|█████▏    | 42/81 [01:49<01:35,  2.46s/it]Fetching 81 files:  53%|█████▎    | 43/81 [01:49<01:09,  1.84s/it]Fetching 81 files:  54%|█████▍    | 44/81 [01:56<01:58,  3.21s/it]Fetching 81 files:  56%|█████▌    | 45/81 [02:04<02:51,  4.77s/it]Fetching 81 files:  57%|█████▋    | 46/81 [02:05<02:01,  3.48s/it]Fetching 81 files:  58%|█████▊    | 47/81 [02:08<02:00,  3.54s/it]Fetching 81 files:  59%|█████▉    | 48/81 [02:14<02:22,  4.32s/it]Fetching 81 files:  60%|██████    | 49/81 [02:15<01:38,  3.09s/it]Fetching 81 files:  63%|██████▎   | 51/81 [02:15<00:53,  1.78s/it]Fetching 81 files:  64%|██████▍   | 52/81 [02:22<01:31,  3.15s/it]Fetching 81 files:  65%|██████▌   | 53/81 [02:25<01:24,  3.03s/it]Fetching 81 files:  67%|██████▋   | 54/81 [02:25<01:01,  2.26s/it]Fetching 81 files:  68%|██████▊   | 55/81 [02:31<01:26,  3.32s/it]Fetching 81 files:  69%|██████▉   | 56/81 [02:32<01:02,  2.52s/it]Fetching 81 files:  70%|███████   | 57/81 [02:32<00:47,  1.96s/it]Fetching 81 files:  72%|███████▏  | 58/81 [02:33<00:34,  1.49s/it]Fetching 81 files:  73%|███████▎  | 59/81 [02:33<00:26,  1.22s/it]Fetching 81 files:  77%|███████▋  | 62/81 [02:33<00:10,  1.78it/s]Fetching 81 files:  78%|███████▊  | 63/81 [02:51<01:15,  4.20s/it]Fetching 81 files:  79%|███████▉  | 64/81 [02:54<01:06,  3.93s/it]Fetching 81 files:  80%|████████  | 65/81 [02:55<00:48,  3.02s/it]Fetching 81 files:  83%|████████▎ | 67/81 [02:57<00:30,  2.17s/it]Fetching 81 files:  84%|████████▍ | 68/81 [02:58<00:27,  2.09s/it]Fetching 81 files:  86%|████████▋ | 70/81 [02:59<00:14,  1.29s/it]Fetching 81 files:  88%|████████▊ | 71/81 [03:03<00:19,  1.94s/it]Fetching 81 files:  89%|████████▉ | 72/81 [03:03<00:13,  1.50s/it]Fetching 81 files:  91%|█████████▏| 74/81 [03:04<00:07,  1.13s/it]Fetching 81 files:  93%|█████████▎| 75/81 [03:10<00:13,  2.20s/it]Fetching 81 files:  94%|█████████▍| 76/81 [03:12<00:10,  2.09s/it]Fetching 81 files:  95%|█████████▌| 77/81 [03:12<00:06,  1.69s/it]Fetching 81 files:  96%|█████████▋| 78/81 [03:17<00:07,  2.56s/it]Fetching 81 files:  98%|█████████▊| 79/81 [03:23<00:07,  3.51s/it]Fetching 81 files:  99%|█████████▉| 80/81 [03:28<00:03,  3.96s/it]Fetching 81 files: 100%|██████████| 81/81 [03:48<00:00,  8.53s/it]Fetching 81 files: 100%|██████████| 81/81 [03:48<00:00,  2.82s/it]
-[03:27:44] weights at /workspace/Qwen_Qwen3.8-27B-FP8 (229s)
-[03:27:49] gpu memory used before boot stock: 0MiB
-[03:30:50] boot stock ready in 181s
+Fetching 81 files:   0%|          | 0/81 [00:00<?, ?it/s]Fetching 81 files:  86%|████████▋ | 70/81 [00:00<00:00, 694.04it/s]Fetching 81 files: 100%|██████████| 81/81 [00:00<00:00, 731.24it/s]
+[04:56:22] weights at /workspace/Qwen_Qwen3.8-27B-FP8 (0s)
+[04:56:27] gpu memory used before boot stock: 0MiB
+[04:57:23] boot stock ready in 56s
 io_struct patched
 patched /sgl-workspace/sglang/python/sglang/srt/managers/scheduler.py
 backup at /sgl-workspace/sglang/python/sglang/srt/managers/scheduler.py.trimtab-orig
-bench/pod_run.sh: line 33:  1229 Killed                  python3 -m sglang.launch_server --model-path $MD --host 0.0.0.0 --port $PORT --mem-fraction-static 0.85 > $OUT/server_$1.log 2>&1
-[03:30:55] gpu memory used before boot patched: 0MiB
-[03:31:52] boot patched ready in 57s
+bench/pod_run.sh: line 33: 16866 Killed                  python3 -m sglang.launch_server --model-path $MD --host 0.0.0.0 --port $PORT --mem-fraction-static 0.85 --enable-memory-saver ${SGLANG_EXTRA:-} > $OUT/server_$1.log 2>&1
+[04:57:28] gpu memory used before boot patched: 0MiB
+[04:58:24] boot patched ready in 56s
 engine=sglang boot max_running_requests=33
-iter  0 target=8     api=   25.2ms effect=   83.7ms http=200 ok=True
-iter  1 target=33    api=   27.0ms effect=  104.2ms http=200 ok=True
-iter  2 target=8     api=   13.2ms effect=   72.0ms http=200 ok=True
-iter  3 target=33    api=    7.4ms effect=   69.9ms http=200 ok=True
-iter  4 target=8     api=   25.2ms effect=   83.9ms http=200 ok=True
-iter  5 target=33    api=   13.7ms effect=   72.3ms http=200 ok=True
-iter  6 target=8     api=   44.3ms effect=   82.3ms http=200 ok=True
-iter  7 target=33    api=   11.3ms effect=   45.8ms http=200 ok=True
-iter  8 target=8     api=   25.2ms effect=   84.3ms http=200 ok=True
-iter  9 target=33    api=   24.2ms effect=   99.6ms http=200 ok=True
-iter 10 target=8     api=   24.6ms effect=   83.5ms http=200 ok=True
-iter 11 target=33    api=   22.1ms effect=   76.9ms http=200 ok=True
-iter 12 target=8     api=    9.1ms effect=   84.5ms http=200 ok=True
-iter 13 target=33    api=   31.8ms effect=   65.7ms http=200 ok=True
-iter 14 target=8     api=    6.5ms effect=   65.3ms http=200 ok=True
-iter 15 target=33    api=   19.7ms effect=   95.0ms http=200 ok=True
-iter 16 target=8     api=   13.8ms effect=   72.6ms http=200 ok=True
-iter 17 target=33    api=   22.0ms effect=   76.4ms http=200 ok=True
-iter 18 target=8     api=   14.9ms effect=   73.7ms http=200 ok=True
-iter 19 target=33    api=   43.5ms effect=   81.7ms http=200 ok=True
+iter  0 target=8     api=   23.9ms effect=  100.0ms http=200 ok=True
+iter  1 target=33    api=    4.2ms effect=   63.0ms http=200 ok=True
+iter  2 target=8     api=   43.7ms effect=   81.4ms http=200 ok=True
+iter  3 target=33    api=   17.6ms effect=   72.1ms http=200 ok=True
+iter  4 target=8     api=   24.9ms effect=   83.7ms http=200 ok=True
+iter  5 target=33    api=   29.7ms effect=  105.3ms http=200 ok=True
+iter  6 target=8     api=   15.9ms effect=   53.9ms http=200 ok=True
+iter  7 target=33    api=    1.4ms effect=   60.2ms http=200 ok=True
+iter  8 target=8     api=   15.1ms effect=   74.3ms http=200 ok=True
+iter  9 target=33    api=   25.8ms effect=   84.7ms http=200 ok=True
+iter 10 target=8     api=   15.7ms effect=   74.7ms http=200 ok=True
+iter 11 target=33    api=   13.8ms effect=   51.6ms http=200 ok=True
+iter 12 target=8     api=   20.1ms effect=   95.7ms http=200 ok=True
+iter 13 target=33    api=   24.0ms effect=   57.4ms http=200 ok=True
+iter 14 target=8     api=   12.1ms effect=   71.0ms http=200 ok=True
+iter 15 target=33    api=   22.5ms effect=   60.4ms http=200 ok=True
+iter 16 target=8     api=    4.0ms effect=   62.9ms http=200 ok=True
+iter 17 target=33    api=   20.7ms effect=   58.3ms http=200 ok=True
+iter 18 target=8     api=   15.4ms effect=   53.2ms http=200 ok=True
+iter 19 target=33    api=    2.3ms effect=   61.1ms http=200 ok=True
 {
  "engine": "sglang",
  "cap_knob": "max_running_requests",
  "boot_value": 33,
  "iters": 20,
  "all_ok": true,
- "api_ms_median": 22.02,
- "api_ms_p95": 43.5,
- "effect_ms_median": 79.27,
- "effect_ms_p95": 99.58,
- "background_completed": 430,
+ "api_ms_median": 16.78,
+ "api_ms_p95": 29.73,
+ "effect_ms_median": 66.99,
+ "effect_ms_p95": 100.01,
+ "background_completed": 424,
  "background_failed": 0
 }
 chunked_prefill_size         boot=8192     set=2048     read=2048     http=200 ok=True
@@ -50,17 +49,24 @@ max_queued_requests          boot=None     set=512      read=512      http=200 o
 max_running_requests         boot=33       set=16       read=16       http=200 ok=True
 schedule_conservativeness    boot=None     set=0.5      read=0.5      http=200 ok=True
 schedule_policy              boot=fcfs     set=lpm      read=lpm      http=200 ok=True
+boot max_total_num_tokens=445546 max_running_requests=33
+{"fields": {"mem_fraction_static": 0.75}, "ok": true, "http": 200, "engine": {"ok": true, "fields": {"mem_fraction_static": 0.75}, "released": [], "freed_gib": 51.55, "memory_saver": true, "rewired": ["SchedulePolicy.tree_cache", "SchedulerBatchResultProcessor.req_to_token_pool", "SchedulerBatchResultProcessor.token_to_kv_pool_allocator", "SchedulerBatchResultProcessor.tree_cache", "SchedulerDPAttnAdapter.req_to_token_pool", "SchedulerDPAttnAdapter.token_to_kv_pool_allocator", "SchedulerDPAttnAdapter.tree_cache", "SchedulerInvariantChecker.req_to_token_pool", "SchedulerInvariantChecker.token_to_kv_pool_allocator", "SchedulerInvariantChecker.tree_cache", "SchedulerKvEventsPublisher.tree_cache", "SchedulerLoadInquirer.token_to_kv_pool_allocator", "SchedulerOutputStreamer.tree_cache", "SchedulerPoolStatsObserver.req_to_token_pool", "SchedulerPoolStatsObserver.token_to_kv_pool_allocator", "SchedulerPoolStatsObserver.tree_cache", "SessionController.tree_cache"], "max_total_num_tokens": 220234, "max_running_requests": 33, "free_s": 0.089, "rebuild_s": 30.683, "total_s": 30.772}, "call_s": 30.78, "call_to_first_token_s": 31.13, "max_total_num_tokens_after": 220234, "max_running_requests_after": 33, "generate_ok": true}
+{"fields": {"max_total_tokens": 111386, "max_running_requests": 16}, "ok": true, "http": 200, "engine": {"ok": true, "fields": {"max_total_tokens": 111386, "max_running_requests": 16}, "released": [], "freed_gib": 37.79, "memory_saver": true, "rewired": ["SchedulePolicy.tree_cache", "SchedulerBatchResultProcessor.req_to_token_pool", "SchedulerBatchResultProcessor.token_to_kv_pool_allocator", "SchedulerBatchResultProcessor.tree_cache", "SchedulerDPAttnAdapter.req_to_token_pool", "SchedulerDPAttnAdapter.token_to_kv_pool_allocator", "SchedulerDPAttnAdapter.tree_cache", "SchedulerInvariantChecker.req_to_token_pool", "SchedulerInvariantChecker.token_to_kv_pool_allocator", "SchedulerInvariantChecker.tree_cache", "SchedulerKvEventsPublisher.tree_cache", "SchedulerLoadInquirer.token_to_kv_pool_allocator", "SchedulerOutputStreamer.tree_cache", "SchedulerPoolStatsObserver.req_to_token_pool", "SchedulerPoolStatsObserver.token_to_kv_pool_allocator", "SchedulerPoolStatsObserver.tree_cache", "SessionController.tree_cache"], "max_total_num_tokens": 111386, "max_running_requests": 16, "free_s": 0.532, "rebuild_s": 31.236, "total_s": 31.768}, "call_s": 31.77, "call_to_first_token_s": 32.12, "max_total_num_tokens_after": 111386, "max_running_requests_after": 16, "generate_ok": true}
+{"fields": {"mem_fraction_static": 0.85}, "ok": true, "http": 200, "engine": {"ok": true, "fields": {"mem_fraction_static": 0.85}, "released": [], "freed_gib": 31.08, "memory_saver": true, "rewired": ["SchedulePolicy.tree_cache", "SchedulerBatchResultProcessor.req_to_token_pool", "SchedulerBatchResultProcessor.token_to_kv_pool_allocator", "SchedulerBatchResultProcessor.tree_cache", "SchedulerDPAttnAdapter.req_to_token_pool", "SchedulerDPAttnAdapter.token_to_kv_pool_allocator", "SchedulerDPAttnAdapter.tree_cache", "SchedulerInvariantChecker.req_to_token_pool", "SchedulerInvariantChecker.token_to_kv_pool_allocator", "SchedulerInvariantChecker.tree_cache", "SchedulerKvEventsPublisher.tree_cache", "SchedulerLoadInquirer.token_to_kv_pool_allocator", "SchedulerOutputStreamer.tree_cache", "SchedulerPoolStatsObserver.req_to_token_pool", "SchedulerPoolStatsObserver.token_to_kv_pool_allocator", "SchedulerPoolStatsObserver.tree_cache", "SessionController.tree_cache"], "max_total_num_tokens": 111386, "max_running_requests": 16, "free_s": 0.561, "rebuild_s": 31.234, "total_s": 31.795}, "call_s": 31.8, "call_to_first_token_s": 32.15, "max_total_num_tokens_after": 111386, "max_running_requests_after": 16, "generate_ok": true}
+{"boot_max_total_num_tokens": 445546, "boot_max_running_requests": 33, "all_ok": true}
 {
  "engine": "sglang",
  "model": "Qwen/Qwen3.8-27B-FP8",
  "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 97887 MiB, 595.91.07",
  "engine_version": "0.5.18",
- "download_s": 229,
- "boot_stock_s": 181,
- "boot_patched_s": 57,
+ "download_s": 0,
+ "boot_stock_s": 56,
+ "boot_patched_s": 56,
  "bench_exit": 0,
- "sweep_exit": 0
+ "sweep_exit": 0,
+ "warm_exit": 0
 }
+warm reinit True [31.13, 32.12, 32.15]
 knob sweep 7 of 7
 {
  "engine": "sglang",
@@ -68,11 +74,11 @@ knob sweep 7 of 7
  "boot_value": 33,
  "iters": 20,
  "all_ok": true,
- "api_ms_median": 22.02,
- "api_ms_p95": 43.5,
- "effect_ms_median": 79.27,
- "effect_ms_p95": 99.58,
- "background_completed": 430,
+ "api_ms_median": 16.78,
+ "api_ms_p95": 29.73,
+ "effect_ms_median": 66.99,
+ "effect_ms_p95": 100.01,
+ "background_completed": 424,
  "background_failed": 0
 }
-[03:32:54] done, results in /root/trimtab_results/sglang.json
+[05:01:02] done, results in /root/trimtab_results/sglang.json
