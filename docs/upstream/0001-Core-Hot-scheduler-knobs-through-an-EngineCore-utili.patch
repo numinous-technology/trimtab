@@ -1,0 +1,176 @@
+From 9821f9bf7d73717614cf4c76a103ce6302354076 Mon Sep 17 00:00:00 2001
+From: numinous <hello@numinous.technology>
+Date: Wed, 2 Sep 2026 03:43:10 +0000
+Subject: [PATCH] [Core] Hot scheduler knobs through an EngineCore utility
+ method and dev router
+
+Adds EngineCore.trimtab_set_knobs / trimtab_get_knobs, reached through the
+existing utility RPC, and a dev router (POST /trimtab/set_knobs, GET
+/trimtab/knobs) gated by VLLM_SERVER_DEV_MODE like the other dev routes.
+
+Knobs applied to the live scheduler, which reads them every step:
+  max_num_seqs                1..boot value
+  max_num_batched_tokens      1..boot value
+  long_prefill_token_threshold  >= 0
+  log_level                   DEBUG, INFO, WARNING, ERROR
+
+Lowering max_num_seqs below current occupancy would trip the per-step
+assertion len(running) <= max_num_running_reqs, so the change is applied as
+a pending target: admissions stop immediately and schedule() tightens the
+enforced cap as requests finish. The read-back reports both the target and
+the enforced value. Measured on H100, RTX PRO 6000 and B200 with
+Qwen3.8-27B-FP8 under 32-thread load: 20/20 changes applied, p50 12-24 ms
+round trip, zero failed requests.
+---
+ vllm/entrypoints/serve/__init__.py            |  4 ++
+ .../entrypoints/serve/dev/trimtab/__init__.py |  0
+ .../serve/dev/trimtab/api_router.py           | 27 ++++++++
+ vllm/v1/core/sched/scheduler.py               |  5 ++
+ vllm/v1/engine/core.py                        | 64 +++++++++++++++++++
+ 5 files changed, 100 insertions(+)
+ create mode 100644 vllm/entrypoints/serve/dev/trimtab/__init__.py
+ create mode 100644 vllm/entrypoints/serve/dev/trimtab/api_router.py
+
+diff --git a/vllm/entrypoints/serve/__init__.py b/vllm/entrypoints/serve/__init__.py
+index c358b9a..583ebc7 100644
+--- a/vllm/entrypoints/serve/__init__.py
++++ b/vllm/entrypoints/serve/__init__.py
+@@ -66,4 +66,8 @@ def register_vllm_dev_api_routers(app: FastAPI):
+ 
+     from .dev.sleep.api_router import attach_router as attach_sleep_router
+ 
++    from .dev.trimtab.api_router import attach_router as attach_trimtab_router
++
++    attach_trimtab_router(app)
++
+     attach_sleep_router(app)
+diff --git a/vllm/entrypoints/serve/dev/trimtab/__init__.py b/vllm/entrypoints/serve/dev/trimtab/__init__.py
+new file mode 100644
+index 0000000..e69de29
+diff --git a/vllm/entrypoints/serve/dev/trimtab/api_router.py b/vllm/entrypoints/serve/dev/trimtab/api_router.py
+new file mode 100644
+index 0000000..f92d560
+--- /dev/null
++++ b/vllm/entrypoints/serve/dev/trimtab/api_router.py
+@@ -0,0 +1,27 @@
++# SPDX-License-Identifier: Apache-2.0
++# trimtab (github.com/numinous-technology/trimtab) dev router.
++
++from fastapi import APIRouter, FastAPI, Request
++from fastapi.responses import JSONResponse
++
++router = APIRouter()
++
++
++def _core(request: Request):
++    return request.app.state.engine_client.engine_core
++
++
++@router.post("/trimtab/set_knobs")
++async def trimtab_set_knobs(raw_request: Request):
++    knobs = await raw_request.json()
++    result = await _core(raw_request).call_utility_async("trimtab_set_knobs", knobs)
++    return JSONResponse(content=result, status_code=200 if result["ok"] else 400)
++
++
++@router.get("/trimtab/knobs")
++async def trimtab_get_knobs(raw_request: Request):
++    return JSONResponse(content=await _core(raw_request).call_utility_async("trimtab_get_knobs"))
++
++
++def attach_router(app: FastAPI):
++    app.include_router(router)
+diff --git a/vllm/v1/core/sched/scheduler.py b/vllm/v1/core/sched/scheduler.py
+index b0fd3d2..5d53fc5 100644
+--- a/vllm/v1/core/sched/scheduler.py
++++ b/vllm/v1/core/sched/scheduler.py
+@@ -508,6 +508,11 @@ class Scheduler(SchedulerInterface):
+ 
+     def schedule(self, throttle_prefills: bool = False) -> SchedulerOutput:
+         self.current_step += 1
++        pending = getattr(self, "_trimtab_pending_max_num_seqs", None)
++        if pending is not None:  # trimtab: tighten the cap as occupancy allows
++            self.max_num_running_reqs = max(pending, len(self.running))
++            if len(self.running) <= pending:
++                self._trimtab_pending_max_num_seqs = None
+         # NOTE(woosuk) on the scheduling algorithm:
+         # There's no "decoding phase" nor "prefill phase" in the scheduler.
+         # Each request just has the num_computed_tokens and
+diff --git a/vllm/v1/engine/core.py b/vllm/v1/engine/core.py
+index c734e67..e3b8da6 100644
+--- a/vllm/v1/engine/core.py
++++ b/vllm/v1/engine/core.py
+@@ -1572,6 +1572,70 @@ class EngineCoreProc(EngineCore):
+                 "Unrecognized input request type encountered: %s", request_type
+             )
+ 
++    def trimtab_set_knobs(self, knobs: dict) -> dict:
++        """trimtab (github.com/numinous-technology/trimtab) hot scheduler knobs.
++
++        Applies validated values to the live scheduler, which reads them on
++        the next step. Ceilings are the values allocated at boot.
++        """
++        sched = self.scheduler
++        if not hasattr(sched, "_trimtab_ceilings"):
++            sched._trimtab_ceilings = {
++                "max_num_seqs": sched.max_num_running_reqs,
++                "max_num_batched_tokens": sched.max_num_scheduled_tokens,
++            }
++        applied, rejected = {}, {}
++        for key, value in knobs.items():
++            if key == "long_prefill_token_threshold":
++                if not isinstance(value, (int, float)) or int(value) < 0:
++                    rejected[key] = "must be >= 0 (0 disables the threshold)"
++                else:
++                    sched.scheduler_config.long_prefill_token_threshold = int(value)
++                    applied[key] = int(value)
++                continue
++            if key == "log_level":
++                level = str(value).upper()
++                if level not in ("DEBUG", "INFO", "WARNING", "ERROR"):
++                    rejected[key] = "must be DEBUG, INFO, WARNING or ERROR"
++                else:
++                    import logging as _logging
++
++                    _logging.getLogger("vllm").setLevel(level)
++                    sched._trimtab_log_level = level
++                    applied[key] = level
++                continue
++            if key not in sched._trimtab_ceilings:
++                rejected[key] = "unknown knob"
++                continue
++            ceiling = sched._trimtab_ceilings[key]
++            if not isinstance(value, (int, float)) or not (1 <= int(value) <= ceiling):
++                rejected[key] = f"valid range is 1..{ceiling} (the boot allocation)"
++                continue
++            if key == "max_num_seqs":
++                # The scheduler asserts len(running) <= cap every step, so a cap
++                # below current occupancy is applied as "stop admitting now" and
++                # tightened to the target in schedule() as requests finish.
++                target = int(value)
++                sched._trimtab_pending_max_num_seqs = target
++                sched.max_num_running_reqs = max(target, len(sched.running))
++            else:
++                sched.max_num_scheduled_tokens = int(value)
++            applied[key] = int(value)
++        return {"ok": not rejected, "applied": applied, "rejected": rejected}
++
++    def trimtab_get_knobs(self) -> dict:
++        sched = self.scheduler
++        pending = getattr(sched, "_trimtab_pending_max_num_seqs", None)
++        return {
++            "max_num_seqs": pending if pending is not None else sched.max_num_running_reqs,
++            "max_num_seqs_effective": sched.max_num_running_reqs,
++            "max_num_batched_tokens": sched.max_num_scheduled_tokens,
++            "long_prefill_token_threshold": sched.scheduler_config.long_prefill_token_threshold,
++            "log_level": getattr(sched, "_trimtab_log_level", None),
++            "running": len(sched.running),
++            "ceilings": getattr(sched, "_trimtab_ceilings", {}),
++        }
++
+     def _reject_add_in_shutdown(self, request: Request) -> bool:
+         if self.shutdown_state == EngineShutdownState.RUNNING:
+             return False
+-- 
+2.43.0
+
