@@ -77,9 +77,12 @@ deadlines are per-request parameters.
 
 ### Warm knobs, rebuilt in place with weights resident
 
-SGLang today, with a working measured path. vLLM's equivalent is built but
-blocked on an allocator limitation (see the end of this README).
-`mem_fraction_static` and `max_total_num_tokens` (the
+Both engines, measured. The engine drains, frees the KV pool and CUDA graphs,
+rebuilds pools, backends and graphs at the new size, and rewires the
+scheduler. The weights never move. SGLang needs `--enable-memory-saver`, vLLM
+needs `--enable-sleep-mode`, both of which the supervisor and bench add.
+
+On SGLang, `mem_fraction_static` and `max_total_num_tokens` (the
 KV pool size), and raising the `max_running_requests` ceiling. The engine
 drains, unmaps the old KV pool and CUDA graphs through its own memory saver,
 rebuilds pools, attention backends and graphs at the new size, and rewires
@@ -87,12 +90,15 @@ every scheduler component to the new objects. The 29 GB of weights never move.
 Needs the server launched with `--enable-memory-saver`, which the supervisor
 and bench add for SGLang. The supervisor tries this path before a relaunch.
 
-Measured on RTX PRO 6000, three consecutive resizes each followed by a served
-generation. 31 to 32 s from the control call to the first token with prefill
-CUDA graphs on (29 s of that is capturing them). 2.0 to 2.4 s with prefill
-CUDA graphs off (`--disable-prefill-cuda-graph`). Freeing the old pool took
-under 0.6 s in every case. A relaunch on the same GPU is 56 s warm, 141 to
-181 s cold.
+On vLLM, `gpu_memory_utilization` (the KV pool size), co-changing
+`max_num_seqs` in the same rebuild.
+
+Measured, three consecutive resizes each followed by a served generation.
+SGLang on RTX PRO 6000: 31 to 32 s call to first token with prefill CUDA
+graphs on (29 s of that is capturing them), 2.0 to 2.4 s with them off
+(`--disable-prefill-cuda-graph`), freeing under 0.6 s. vLLM on H100: 8.3 to
+10.1 s call to first token, freeing 35.7 GiB in ~0.2 s. A relaunch on the same
+GPU is 56 to 86 s warm, 141 to 391 s cold.
 
 ### Cold knobs, changed by relaunch
 
@@ -105,7 +111,7 @@ missing from its table is refused, not guessed.
 | engine | cold knobs the supervisor relaunches with |
 |---|---|
 | sglang | tp_size, ep_size, quantization, kv_cache_dtype, cuda_graph_max_bs, attention_backend, page_size, speculative_algorithm, speculative_draft_model_path |
-| vllm | tensor_parallel_size, quantization, kv_cache_dtype, gpu_memory_utilization, max_model_len, cuda_graph_sizes, speculative_config |
+| vllm | tensor_parallel_size, quantization, kv_cache_dtype, max_model_len, cuda_graph_sizes, speculative_config |
 
 A redeploy is image pull, weight download, pod scheduling, and engine boot.
 The supervisor's relaunch skips the first three and pays the boot against
@@ -286,25 +292,197 @@ operator against a real kind cluster, and the CLI end to end. The mock was corre
 one bool per rank, and vLLM reports a target and an enforced cap separately.
 The mock now does both.
 
-## Warm reinit on vLLM, built and blocked upstream
+## Cold knobs, changed by relaunch
 
-The warm path is built for vLLM as well. `EngineCore.trimtab_reinit`
-(POST /trimtab/reinit) drains, drops the KV tensors, clears the CUDA graphs,
-`CuMemAllocator.discard`s the KV pool, refreshes the memory snapshot, and
-rebuilds the KV cache and scheduler. Measured on H100 with vLLM 0.28.0, the
-discard frees the pool (49 GiB reported free) and the profiler sizes the new
-pool correctly.
+These are existing engine flags baked into GPU memory or graph capture at
+boot. trimtab does not make them hot. The supervisor knows which they are and,
+when a desired version changes one, drains, stops the engine, relaunches with
+the new flag, waits for health, and re-applies the hot knobs. A cold knob
+missing from its table is refused, not guessed.
 
-It stops one step short. After discard unmaps the pages, PyTorch's caching
-allocator still hands those segments to the next small allocation, which
-faults despite 49 GiB free. The documented fix,
-`PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`, is incompatible with the
-pluggable allocator vLLM installs for sleep mode. A clean vLLM warm reinit
-needs the allocator to release the PyTorch-side segment on discard, an
-upstream change. Until then vLLM pool sizing is marked cold and the supervisor
-relaunches rather than risk a crash. The code, the route, and the mock test
-stay. docs/environment-notes.md has the full trace. SGLang has no such
-constraint, which is why its warm path lands.
+| engine | cold knobs the supervisor relaunches with |
+|---|---|
+| sglang | tp_size, ep_size, quantization, kv_cache_dtype, cuda_graph_max_bs, attention_backend, page_size, speculative_algorithm, speculative_draft_model_path |
+| vllm | tensor_parallel_size, quantization, kv_cache_dtype, max_model_len, cuda_graph_sizes, speculative_config |
+
+A redeploy is image pull, weight download, pod scheduling, and engine boot.
+The supervisor's relaunch skips the first three and pays the boot against
+weights already on local disk. Measured below, that boot took 55 to 281
+seconds. These knobs change the weights' own layout (parallelism,
+quantization) or the model itself, so the pool-only warm path cannot cover
+them.
+
+## Measured
+
+We started a real SGLang or vLLM server on one GPU, kept it busy with 32
+concurrent generation requests, and changed its concurrency cap twenty times
+while it ran. The server acknowledged each change in about 15 ms. On SGLang
+the new cap was in force in under a tenth of a second. Not one request failed.
+A restart on the same machines takes one to seven minutes.
+
+The bench. One GPU, Qwen/Qwen3.8-27B-FP8. 32 threads keep about 32
+generation requests in flight. The bench sets the cap to 8, then back to its
+boot value, twenty times, two seconds apart. For each change it records the
+time until the server acknowledges the command (API) and the time until the
+scheduler reports the new cap as in force (effect). Generation requests that
+fail during the run count as dropped. p50 and p95 are over the twenty
+changes.
+
+| GPU | engine | boot cap | changes ok | API p50 ms | API p95 ms | effect p50 ms | effect p95 ms | requests completed | dropped |
+|---|---|---|---|---|---|---|---|---|---|
+| H100 80GB | sglang 0.5.18 | 24 | 20/20 | 16 | 50 | 87 | 126 | 489 | 0 |
+| RTX PRO 6000 Blackwell | sglang 0.5.18 | 33 | 20/20 | 19 | 32 | 79 | 100 | 429 | 0 |
+| B200 | sglang 0.5.18 | 80 | 20/20 | 17 | 48 | 78 | 124 | 806 | 0 |
+| H100 80GB | vllm 0.28.0 | 256 | 20/20 | 17 | 80 | 347 | 1296 | 531 | 0 |
+| RTX PRO 6000 Blackwell | vllm 0.28.0 | 256 | 20/20 | 20 | 40 | 1304 | 2664 | 444 | 0 |
+| B200 | vllm 0.28.0 | 256 | 20/20 | 12 | 18 | 649 | 1529 | 947 | 0 |
+
+vLLM's effect number is larger because vLLM asserts on every step that no
+more requests are running than the cap allows. A lower cap cannot fully apply
+until enough in-flight requests finish. trimtab stops new admissions at once
+and tightens the enforced cap as requests complete. The bench measures the
+enforced value, so the drain is in the number. Raising the cap is immediate on
+both engines. SGLang applies a lower cap immediately and lets in-flight
+requests finish above it.
+
+What a restart costs on the same machines. Cold disk is the first boot after
+downloading weights. Warm cache is the second boot of the same weights, which
+is what the supervisor pays for a cold knob.
+
+| GPU | engine | boot, cold disk | boot, warm cache |
+|---|---|---|---|
+| H100 80GB | sglang | 147 s | 146 s |
+| RTX PRO 6000 Blackwell | sglang | 141 s | 56 s |
+| B200 | sglang | 428 s | 281 s |
+| H100 80GB | vllm | 321 s | 75 s |
+| RTX PRO 6000 Blackwell | vllm | 60 s | 55 s |
+| B200 | vllm | 166 s | 86 s |
+
+Per-change rows and the HTTP status of every control call are in
+`bench/results`. `docs/results.md` is generated from those files.
+`docs/environment-notes.md` records the environment problems the runs hit
+(image entrypoints, driver floors, SM120 attention, hybrid model caps) and how
+the scripts handle each.
+
+## Quickstart
+
+Patch the engine inside its container and restart once. No change after that
+needs a restart.
+
+```
+python3 engine/sglang/apply_patch.py
+python3 engine/vllm/apply_patch.py
+```
+
+Change a knob on a live server.
+
+```
+python3 -m trimtab.cli set --engine sglang --url http://localhost:30000 max_running_requests=64
+python3 -m trimtab.cli set --engine vllm   --url http://localhost:8000  max_num_seqs=64
+```
+
+Or version the change and let a daemon apply it. Every version is kept, and
+rollback points the group at an older one. `--db` takes a SQLite path, a
+`postgresql://` dsn, or the `http://` address of a trimtab.server.
+
+```
+python3 -m trimtab.cli propose  --db t.db --group prod --reason "lower cap" max_running_requests=64
+python3 -m trimtab.cli promote  --db t.db --group prod 1
+python3 -m trimtab.cli daemon   --db t.db --group prod --engine sglang --url http://localhost:30000 --replica r0
+python3 -m trimtab.cli rollback --db t.db --group prod 1
+```
+
+Canary a candidate on one replica. Gates are data. Pass promotes to the group,
+fail reverts the canary replica.
+
+```
+python3 -m trimtab.cli canary start --db t.db --group prod --engine sglang --replicas r0,r1,r2 \
+    --metrics r0=http://a:30000/metrics r1=http://b:30000/metrics r2=http://c:30000/metrics \
+    2 --scope r0 --window 300 \
+    --gates '[{"metric":"p99_ttft_ms","max_ratio":1.25},{"metric":"throughput","min_ratio":0.9}]'
+python3 -m trimtab.cli canary observe --db t.db --group prod --engine sglang --replicas r0,r1,r2 --metrics ... 1
+```
+
+Run the engine under the supervisor. Hot knobs apply live, cold knobs
+relaunch.
+
+```
+python3 -m trimtab.cli supervise --db t.db --group prod --engine sglang \
+    --model Qwen/Qwen3.8-27B-FP8 --port 30000 --replica r0
+```
+
+Run the store as a service so daemons on other machines can reach it.
+
+```
+python3 -m trimtab.server --db postgresql://user:pw@host/trimtab --port 7070 --token secret
+python3 -m trimtab.cli daemon --db http://plane:7070 --token secret --group prod --engine sglang --url http://localhost:30000 --replica r0
+```
+
+On Kubernetes, an InferenceConfig object is the front door. The operator turns
+it into a version (or a canary) in the store and writes the store's view back
+into its status.
+
+```
+kubectl apply -f deploy/k8s/crd.yaml
+kubectl apply -f deploy/k8s/controlplane.yaml
+kubectl apply -f deploy/k8s/example-inferenceconfig.yaml
+kubectl get inferenceconfigs
+```
+
+Measure a live server under load.
+
+```
+python3 bench/hot_swap_bench.py --engine sglang --base http://localhost:30000 --iters 20
+```
+
+Try all of it without a GPU. The mock engine speaks both control surfaces.
+
+```
+python3 -m trimtab.mock_engine --engine sglang --port 30000 &
+python3 -m pytest tests/
+DRY=1 ENGINE=sglang OUT=/tmp/r bash bench/pod_run.sh
+```
+
+Reproduce a measured cell. Results land in `bench/results`.
+
+```
+bench/launch_runpod.sh h100 sglang
+bench/launch_runpod.sh rtx6000 vllm
+modal run bench/launch_modal_b200.py
+modal run bench/launch_modal_b200_vllm.py
+```
+
+## What is in the repo
+
+```
+engine/<engine>/apply_patch.py   patcher for installed trees, refuses when anchors do not match
+engine/<engine>/patches/         patch files derived from the patcher against pinned upstream commits
+engine/<engine>/manifests/       hot, cold, deferred classification per engine version
+trimtab/adapters.py              one call shape for both engines
+trimtab/manifest.py              loads manifests, validates values at the boundary
+trimtab/store.py                 append-only SQLite versions, the table is the history
+trimtab/reconciler.py            converges one replica on its desired version, no-op when there
+trimtab/canary.py                candidate on a subset, gates as data, promote or revert
+trimtab/metrics.py               Prometheus text to counter rates and histogram quantiles
+trimtab/supervisor.py            owns the engine process, hot live, cold by relaunch
+trimtab/server.py                the store over HTTP, and RemoteStore with the Store interface
+trimtab/operator.py              Kubernetes operator, InferenceConfig to store, stdlib api client
+trimtab/cli.py                   set, get, propose, promote, rollback, canary, daemon, supervise
+trimtab/mock_engine.py           both control surfaces without a GPU
+tests/                           41 tests on CPU, plus Postgres and kind-cluster tests that run when those exist
+bench/                           bench, knob sweep, on-pod runner, RunPod and Modal launchers, results
+deploy/k8s/                      CRD, control plane and operator manifests, example object
+docs/upstream/                   ready-to-push patches for SGLang and vLLM with measured numbers in the messages
+docs/                            spec, results, environment notes
+```
+
+Tests cover the adapters, manifest validation, the store on SQLite and on a
+real Postgres, the network API and RemoteStore over the wire, the reconciler,
+canary over a three-replica mock fleet, metrics parsing, the supervisor
+against a real subprocess including cold relaunch and crash recovery, the
+operator against a real kind cluster, and the CLI end to end. The mock was corrected twice from the GPU runs. SGLang returns
+one bool per rank, and vLLM reports a target and an enforced cap separately.
+The mock now does both.
 
 ## License
 

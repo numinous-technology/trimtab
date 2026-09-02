@@ -60,31 +60,35 @@ A pattern like `pkill -f "vllm serve"` matches the command line of the shell
 that contains the pkill, and kills it. Every pattern in these scripts uses the
 bracket idiom (`vllm [s]erve`) so it cannot match its own invocation.
 
-## vLLM warm reinit, implemented and blocked upstream
+## vLLM warm reinit, and the four things that made it work
 
-The warm path is built for vLLM too. `EngineCore.trimtab_reinit` (POST
-/trimtab/reinit) drains, has each worker drop the KV tensors, clear the CUDA
-graphs, `CuMemAllocator.discard("kv_cache")` to unmap the pool, refresh the
-memory snapshot, then rebuilds the KV cache and scheduler at the new size.
-Measured on H100 with vLLM 0.28.0 and Qwen3.8-27B-FP8, `discard` frees the
-pool (35.7 GiB, then 49 GiB reported free), and the profiler sizes the new
-pool correctly once `init_snapshot` is refreshed.
+The warm path works on vLLM too, measured on H100 with vLLM 0.28.0. Four
+findings, each a real dead end before the fix.
 
-It stops one step short on real vLLM. After `discard` unmaps the pages,
-PyTorch's caching allocator still holds those segments and hands them to the
-next small allocation, which faults with `CUDA error: an illegal memory
-access` or `out of memory` despite 49 GiB free. The error text names the fix,
-`PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`, but expandable segments
-are incompatible with the pluggable allocator vLLM installs for sleep mode, so
-setting it is silently ignored. Freeing the tensors instead of `discard` does
-not release them either, because the hybrid GDN model holds mamba-state
-references that plain dereference does not reach.
+Dropping references does not free the KV pool. torch.cuda.empty_cache()
+errors on a pluggable allocator (pytorch/pytorch#145168), so the pages stay
+mapped. The release that works is the one vLLM's own use_memory_pool exit
+uses: tear down the kv_cache MemPool object.
 
-A clean vLLM warm reinit needs the allocator to release the PyTorch-side
-segment when it discards a tag (discard-and-forget), which is an upstream
-change. Until then the manifest marks vLLM pool sizing cold, so the supervisor
-relaunches rather than crash the engine. The code and the route stay, and the
-mock exercises the control path end to end. SGLang has no pluggable-allocator
-constraint (its memory saver reserves virtual address space per generation and
-keeps the tensors mapped-out but referenced), which is why the SGLang warm
-path lands and vLLM's does not, yet.
+discard() is the wrong primitive. CuMemAllocator.discard unmaps a tag's pages
+but leaves the blocks is_asleep in the pool, and the later MemPool destructor
+or an allocator eviction unmaps them again, an MMU fault. The fix is to drop
+the KV references, then destruct the kv_cache MemPool two-phase the way
+release_pools does (drop the MemPool while the allocator is still held, gc,
+then drop the allocator), which releases each block once through the free
+callback. That frees 35.7 GiB cleanly.
+
+Do not refresh the memory snapshot. The profiler measures non_kv_cache_memory
+as consumption relative to init_snapshot, which is captured at boot before the
+weights load. Refreshing it after the weights are resident drops the 30 GiB of
+weights from that accounting, so the profiler oversizes the new pool (825k
+tokens at util 0.7 versus 452k at boot 0.85) and OOMs. Keep the boot snapshot.
+
+Lift the per-process memory fraction. vLLM caps the process at
+gpu_memory_utilization through set_per_process_memory_fraction. Lift it to 1.0
+before the rebuild, the profiler sizes the new pool against device free
+memory, not that guard.
+
+With those, three consecutive resizes on H100 each freed the pool in ~0.2 s
+and rebuilt in 8 to 10 s, serving a generation after each. A warm relaunch on
+the same GPU is 86 s, a cold one 391 s.

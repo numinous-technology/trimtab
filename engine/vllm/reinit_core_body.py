@@ -21,6 +21,7 @@
         previous = {"gpu_memory_utilization": cc.gpu_memory_utilization,
                     "max_num_seqs": sc.max_num_seqs, "max_num_batched_tokens": sc.max_num_batched_tokens}
         released = self.collective_rpc("trimtab_release_kv")
+        logger.info("trimtab release result %s", released)
         freed_at = _time.perf_counter()
 
         def _rebuild(values):
@@ -61,7 +62,7 @@
             "ok": "error" not in fields, "fields": fields,
             "num_gpu_blocks": kv_cache_config.num_blocks,
             "max_num_seqs": sched.max_num_running_reqs,
-            "freed_gib": [r.get("freed_gib") for r in released],
+            "freed_gib": [r.get("released_gib") for r in released],
             "free_s": round(freed_at - t0, 3), "rebuild_s": round(done - freed_at, 3), "total_s": round(done - t0, 3),
         }
         self._trimtab_last_reinit = info

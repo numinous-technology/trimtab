@@ -51,14 +51,12 @@ knobs:
   - field: kv_cache_dtype
     klass: cold
   - field: gpu_memory_utilization
-    klass: cold
+    klass: warm
     note: >
-      warm reinit is implemented (EngineCore.trimtab_reinit, POST /trimtab/reinit)
-      and works through the mock, but on real vLLM the rebuild cannot allocate
-      after CuMemAllocator.discard frees the KV pool. PyTorch's pluggable-cumem
-      allocator reuses the unmapped segments and faults, and expandable_segments
-      is incompatible with a pluggable allocator. Classified cold until vLLM
-      supports discard-and-forget. See docs/environment-notes.md.
+      in-place reinit, KV cache, CUDA graphs and scheduler rebuilt at the new
+      size with weights resident, needs --enable-sleep-mode. The kv_cache
+      MemPool is torn down two-phase (the way vLLM release_pools does) after
+      dropping KV refs, then EngineCore rebuilds. Measured on H100.
   - field: max_model_len
     klass: cold
   - field: cuda_graph_sizes

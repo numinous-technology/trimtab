@@ -1,0 +1,92 @@
+{
+ "boot_max_total_num_tokens": 746,
+ "boot_max_running_requests": 256,
+ "all_ok": true,
+ "rows": [
+  {
+   "fields": {
+    "gpu_memory_utilization": 0.7
+   },
+   "ok": true,
+   "http": 200,
+   "engine": {
+    "ok": true,
+    "fields": {
+     "gpu_memory_utilization": 0.7
+    },
+    "num_gpu_blocks": 742,
+    "max_num_seqs": 256,
+    "freed_gib": [
+     null
+    ],
+    "free_s": 0.204,
+    "rebuild_s": 9.864,
+    "total_s": 10.068
+   },
+   "call_s": 10.07,
+   "call_to_first_token_s": 10.4,
+   "max_total_num_tokens_after": 742,
+   "max_running_requests_after": 256,
+   "generate_ok": true,
+   "sample": " the wind shifted, and the crew had to adjust the sails.\nA."
+  },
+  {
+   "fields": {
+    "gpu_memory_utilization": 0.6,
+    "max_num_seqs": 128
+   },
+   "ok": true,
+   "http": 200,
+   "engine": {
+    "ok": true,
+    "fields": {
+     "gpu_memory_utilization": 0.6,
+     "max_num_seqs": 128
+    },
+    "num_gpu_blocks": 743,
+    "max_num_seqs": 128,
+    "freed_gib": [
+     null
+    ],
+    "free_s": 0.234,
+    "rebuild_s": 8.07,
+    "total_s": 8.304
+   },
+   "call_s": 8.31,
+   "call_to_first_token_s": 8.57,
+   "max_total_num_tokens_after": 743,
+   "max_running_requests_after": 128,
+   "generate_ok": true,
+   "sample": " the wind shifted, and the crew had to adjust the sails.\nA."
+  },
+  {
+   "fields": {
+    "gpu_memory_utilization": 0.85,
+    "max_num_seqs": 256
+   },
+   "ok": true,
+   "http": 200,
+   "engine": {
+    "ok": true,
+    "fields": {
+     "gpu_memory_utilization": 0.85,
+     "max_num_seqs": 256
+    },
+    "num_gpu_blocks": 742,
+    "max_num_seqs": 256,
+    "freed_gib": [
+     null
+    ],
+    "free_s": 0.219,
+    "rebuild_s": 9.368,
+    "total_s": 9.587
+   },
+   "call_s": 9.59,
+   "call_to_first_token_s": 9.85,
+   "max_total_num_tokens_after": 742,
+   "max_running_requests_after": 256,
+   "generate_ok": true,
+   "sample": " the wind shifted, and the crew had to adjust the sails.\nA."
+  }
+ ]
+}

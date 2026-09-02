@@ -31,9 +31,8 @@ COLD_FLAGS = {
     },
     "vllm": {
         "tensor_parallel_size": "--tensor-parallel-size", "quantization": "--quantization",
-        "kv_cache_dtype": "--kv-cache-dtype", "gpu_memory_utilization": "--gpu-memory-utilization",
-        "max_model_len": "--max-model-len", "cuda_graph_sizes": "--cuda-graph-sizes",
-        "speculative_config": "--speculative-config",
+        "kv_cache_dtype": "--kv-cache-dtype", "max_model_len": "--max-model-len",
+        "cuda_graph_sizes": "--cuda-graph-sizes", "speculative_config": "--speculative-config",
     },
     "mock": {"max_total_num_tokens": "--tokens", "tp_size": "--tp"},
 }

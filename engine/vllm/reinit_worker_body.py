@@ -15,7 +15,7 @@
         import gc
 
         from vllm.compilation.cuda_graph import CUDAGraphWrapper
-        from vllm.device_allocator.cumem import CuMemAllocator, unmap_and_release
+        from vllm.device_allocator.cumem import CuMemAllocator
 
         mr = self.model_runner
         torch.cuda.synchronize()
@@ -37,16 +37,25 @@
         mr._cleanup_profiling_kv_cache()
         gc.collect()
 
-        # Return the freed blocks to the OS, the way use_memory_pool exit does.
+        # Tear down the kv_cache MemPool itself, two-phase, the way vLLM's own
+        # release_pools does. The MemPool destructor releases its blocks through
+        # the pluggable free callback (single clean unmap each). Dropping the
+        # MemPool while the allocator is still strongly held avoids the
+        # finalize-order crash (pytorch/pytorch#145168). Manual per-block frees
+        # instead race the destructor and double-free (MMU fault).
         allocator = CuMemAllocator.get_instance()
+        data = allocator.allocator_and_pools.pop("kv_cache", None)
         released = 0
-        data = allocator.allocator_and_pools.get("kv_cache")
         if data is not None:
-            for allocation in data[0].snapshot():
+            mem_pool, pool_alloc = data
+            for allocation in mem_pool.snapshot():
                 if allocation["allocated_size"] == 0:
-                    handle = allocator._python_free_callback(allocation["address"])
-                    unmap_and_release(handle)
-                    released += handle[1]
+                    released += allocation.get("total_size", 0)
+            del data
+            del mem_pool          # phase 1: ~MemPool runs, allocator still alive
+            gc.collect()
+            del pool_alloc        # phase 2: drop the pluggable allocator
+            gc.collect()
         torch.cuda.synchronize()
 
         # vLLM caps the process at gpu_memory_utilization through
@@ -54,11 +63,10 @@
         # pool against device free memory, not this guard.
         torch.cuda.set_per_process_memory_fraction(1.0)
 
-        # Refresh the profiler baseline, captured at boot, to the current state:
-        # weights resident, KV freed. MemorySnapshot measures on construction.
-        from vllm.utils.mem_utils import MemorySnapshot
-
-        self.init_snapshot = MemorySnapshot(device=self.device)
+        # init_snapshot stays as captured at boot (before weights loaded). The
+        # profiler measures non_kv_cache_memory as consumption relative to it,
+        # which must include the weights. Refreshing it post-weights would drop
+        # the weights from that accounting and oversize the new pool.
         return {"released_gib": round(released / 2**30, 2),
                 "free_gib": round((torch.cuda.mem_get_info()[0] - free0) / 2**30, 2)}
 
