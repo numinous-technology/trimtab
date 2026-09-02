@@ -45,18 +45,34 @@ is set at launch as before.
 ### Hot knobs, changed live
 
 A knob is hot only after the line where the scheduler reads it on every step
-has been checked in the engine source. That line is the last column.
+has been checked in the engine source. That line is the last column. Every
+knob below was set, read back, and restored on a live engine on real hardware
+(the knob sweep in the results).
 
 | engine | knob | allowed values | per-step read |
 |---|---|---|---|
 | sglang 0.5.18 | max_running_requests | 1 to boot value | scheduler.py 2274, 2302, 3626 |
 | sglang 0.5.18 | max_queued_requests | 0 or more | scheduler.py 3077 |
 | sglang 0.5.18 | chunked_prefill_size | 1 or more | scheduler.py 3600 |
+| sglang 0.5.18 | max_prefill_tokens | 1 to KV pool size | scheduler.py 3621 |
+| sglang 0.5.18 | schedule_policy | fcfs, lpm, dfs-weight, lof, random, priority | schedule_policy.py 257, 294, 297 |
+| sglang 0.5.18 | schedule_conservativeness | above 0, rebuilds the new-token-ratio watermarks | scheduler.py 3620, 3890 to 3948 |
+| sglang 0.5.18 | log_level | DEBUG, INFO, WARNING, ERROR | every log call |
 | vllm 0.28.0 | max_num_seqs | 1 to boot value | v1/core/sched/scheduler.py 792 |
 | vllm 0.28.0 | max_num_batched_tokens | 1 to boot value | v1/core/sched/scheduler.py 440, 529 |
+| vllm 0.28.0 | long_prefill_token_threshold | 0 or more | v1/core/sched/scheduler.py 441, 598, 992 |
+| vllm 0.28.0 | log_level | DEBUG, INFO, WARNING, ERROR | every log call |
 
 SGLang's five upstream keys (pp_max_micro_batch_size, two speculative accept
 thresholds, two dspark controls) still work through the same route.
+
+Knobs that look hot and are not, with the reason recorded in the manifest so
+nobody re-investigates. Speculative depth on both engines, the draft CUDA
+graphs are captured for a fixed depth at boot. SGLang's watchdog timeout, it
+is passed by value into a thread at boot. vLLM's scheduling policy, the
+waiting queue object is built for one policy at init and switching needs a
+queue rebuild. Neither engine has a scheduler-level request deadline knob,
+deadlines are per-request parameters.
 
 ### Cold knobs, changed by relaunch
 
@@ -76,12 +92,6 @@ The supervisor's relaunch skips the first three and pays the boot against
 weights already on local disk. Measured below, that boot took 55 to 281
 seconds. Keeping weights in GPU memory across a relaunch would cut most of
 that, and neither engine exposes a way to do it, so trimtab does not claim it.
-
-### Likely next hot knobs
-
-Schedule policy, speculative draft depth, per-request deadlines, watermark
-thresholds, log level. None done. Each needs a few lines of patch and a
-checked per-step read.
 
 ## Measured
 
@@ -153,7 +163,8 @@ python3 -m trimtab.cli set --engine vllm   --url http://localhost:8000  max_num_
 ```
 
 Or version the change and let a daemon apply it. Every version is kept, and
-rollback points the group at an older one.
+rollback points the group at an older one. `--db` takes a SQLite path, a
+`postgresql://` dsn, or the `http://` address of a trimtab.server.
 
 ```
 python3 -m trimtab.cli propose  --db t.db --group prod --reason "lower cap" max_running_requests=64
@@ -179,6 +190,24 @@ relaunch.
 ```
 python3 -m trimtab.cli supervise --db t.db --group prod --engine sglang \
     --model Qwen/Qwen3.8-27B-FP8 --port 30000 --replica r0
+```
+
+Run the store as a service so daemons on other machines can reach it.
+
+```
+python3 -m trimtab.server --db postgresql://user:pw@host/trimtab --port 7070 --token secret
+python3 -m trimtab.cli daemon --db http://plane:7070 --token secret --group prod --engine sglang --url http://localhost:30000 --replica r0
+```
+
+On Kubernetes, an InferenceConfig object is the front door. The operator turns
+it into a version (or a canary) in the store and writes the store's view back
+into its status.
+
+```
+kubectl apply -f deploy/k8s/crd.yaml
+kubectl apply -f deploy/k8s/controlplane.yaml
+kubectl apply -f deploy/k8s/example-inferenceconfig.yaml
+kubectl get inferenceconfigs
 ```
 
 Measure a live server under load.
@@ -217,26 +246,32 @@ trimtab/reconciler.py            converges one replica on its desired version, n
 trimtab/canary.py                candidate on a subset, gates as data, promote or revert
 trimtab/metrics.py               Prometheus text to counter rates and histogram quantiles
 trimtab/supervisor.py            owns the engine process, hot live, cold by relaunch
+trimtab/server.py                the store over HTTP, and RemoteStore with the Store interface
+trimtab/operator.py              Kubernetes operator, InferenceConfig to store, stdlib api client
 trimtab/cli.py                   set, get, propose, promote, rollback, canary, daemon, supervise
 trimtab/mock_engine.py           both control surfaces without a GPU
-tests/                           32 tests, run on CPU against the mock
-bench/                           bench, on-pod runner, RunPod and Modal launchers, results
+tests/                           43 tests on CPU, plus Postgres and kind-cluster tests that run when those exist
+bench/                           bench, knob sweep, on-pod runner, RunPod and Modal launchers, results
+deploy/k8s/                      CRD, control plane and operator manifests, example object
+docs/upstream/                   ready-to-push patches for SGLang and vLLM with measured numbers in the messages
 docs/                            spec, results, environment notes
 ```
 
-Tests cover the adapters, manifest validation, the store, the reconciler,
+Tests cover the adapters, manifest validation, the store on SQLite and on a
+real Postgres, the network API and RemoteStore over the wire, the reconciler,
 canary over a three-replica mock fleet, metrics parsing, the supervisor
-against a real subprocess including cold relaunch and crash recovery, and the
-CLI end to end. The mock was corrected twice from the GPU runs. SGLang returns
+against a real subprocess including cold relaunch and crash recovery, the
+operator against a real kind cluster, and the CLI end to end. The mock was corrected twice from the GPU runs. SGLang returns
 one bool per rank, and vLLM reports a target and an enforced cap separately.
 The mock now does both.
 
 ## Not built
 
-GPU-resident reinit, for the reason above. A network API for the store, which
-comes when a second machine needs to talk to it. A Postgres backend, the
-SQLite schema is already the Postgres schema. A Kubernetes operator. Upstream
-pull requests to SGLang and vLLM, which the patches are shaped for.
+GPU-resident reinit. Keeping weights in GPU memory while the KV pool and
+CUDA graphs are rebuilt would cut the cold-knob relaunch from minutes to
+seconds. Neither engine exposes a way to rebuild those without tearing down
+the process. The upstream patches in docs/upstream are the first step in that
+conversation.
 
 ## License
 
