@@ -19,10 +19,16 @@ a setter.
 
 ## What works today
 
-Two engines, one control surface. Both SGLang and vLLM snapshot their
-scheduler caps into instance attributes at boot and read them on every step.
-The patches make those attributes writable through each engine's existing
-control RPC, validated against ceilings recorded at boot.
+Two engines, one control surface.
+
+How it works, in plain terms. When SGLang or vLLM starts, it reads its flags
+once and copies a few of them into variables on the scheduler object. From
+then on the flag is dead and the variable is what the scheduler reads, many
+times a second, to decide what to run next. trimtab lets you change that
+variable on the running server. Each engine already has a way to send a
+command into the scheduler, so the patch adds a handler that takes the new
+value, checks it against the ceiling the engine sized memory for at boot, and
+writes it. The scheduler picks it up on its next step.
 
 SGLang ships a POST /set_internal_state route wired end to end, from HTTP
 through a fan-out communicator to every scheduler rank, guarded by an
@@ -30,6 +36,10 @@ allowlist of five niche keys. The patch widens the allowlist and applies the
 values to the live scheduler. vLLM dispatches utility RPCs to EngineCore by
 method name, so the patch adds one method and one dev router (the server runs
 with VLLM_SERVER_DEV_MODE=1, the same gate vLLM puts on its own dev routes).
+
+The last column is the proof a knob is hot. It is the line where the scheduler
+reads the variable on every step. A variable read only at boot would be listed
+as cold.
 
 | engine | knob | validation | per-step read verified at |
 |---|---|---|---|
@@ -68,6 +78,48 @@ under load in every cell, control call p50 12 to 20 ms. The table with every
 column explained is in docs/results.md and the per-swap JSON is in
 bench/results. docs/environment-notes.md records the environment problems the
 vLLM lane hit and how the scripts handle them.
+
+## Benchmarks
+
+Model Qwen/Qwen3.8-27B-FP8, one GPU per run, 32 concurrent generation threads
+as background load, the running-request cap flipped between 8 and its boot
+value twenty times. API is the control call round trip including every rank
+confirming. Effect is from the call until the value read back from the
+scheduler equals the target. Dropped is background requests that failed during
+the run. Boot cold disk is the first boot after weight download, boot warm
+cache is the second boot of the same weights, which is what the supervisor's
+cold-knob relaunch costs. Per-swap rows and the HTTP status of every control
+call are in bench/results.
+
+| run | GPU | engine | boot cap | swaps ok | API p50 ms | API p95 ms | effect p50 ms | effect p95 ms | requests under load | dropped | boot cold disk s | boot warm cache s |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| b200-sglang | NVIDIA B200 | sglang 0.5.18 | 80 | 20/20 | 16.64 | 47.96 | 78.39 | 123.82 | 806 | 0 | 428 | 281 |
+| b200-vllm | NVIDIA B200 | vllm 0.28.0 | 256 | 20/20 | 11.54 | 17.61 | 649.49 | 1529.43 | 947 | 0 | 166 | 86 |
+| h100-sglang | NVIDIA H100 80GB HBM3 | sglang 0.5.18 | 24 | 20/20 | 15.95 | 49.99 | 87.28 | 126.38 | 489 | 0 | 147 | 146 |
+| h100-vllm | NVIDIA H100 80GB HBM3 | vllm 0.28.0 | 256 | 20/20 | 16.97 | 80.15 | 346.89 | 1296.47 | 531 | 0 | 321 | 75 |
+| rtx6000-sglang | NVIDIA RTX PRO 6000 Blackwell Server Edition | sglang 0.5.18 | 33 | 20/20 | 19.36 | 31.97 | 78.72 | 99.72 | 429 | 0 | 141 | 56 |
+| rtx6000-vllm | NVIDIA RTX PRO 6000 Blackwell Server Edition | vllm 0.28.0 | 256 | 20/20 | 20.21 | 40.47 | 1304.39 | 2663.86 | 444 | 0 | 60 | 55 |
+
+vLLM's effect number is larger for a reason. vLLM asserts running <= cap on
+every scheduler step, so a lowered cap cannot land while more requests are
+running than the new cap allows. trimtab stops admissions at once and
+tightens the enforced cap as requests finish, and the bench measures the
+enforced value, so those numbers include the drain. Raising the cap is
+immediate on both engines, and the control path itself is 12 to 20 ms on
+every cell. SGLang has no such assertion and applies a lowering immediately.
+
+Reproduce a cell with one command, results land in bench/results.
+
+```
+bench/launch_runpod.sh h100 sglang
+bench/launch_runpod.sh rtx6000 vllm
+modal run bench/launch_modal_b200.py
+modal run bench/launch_modal_b200_vllm.py
+```
+
+docs/environment-notes.md lists the environment problems these runs hit
+(image entrypoints, driver floors, SM120 attention, hybrid model caps) and how
+the scripts handle each.
 
 ## Quickstart
 
@@ -154,6 +206,31 @@ seconds instead of redeploying in minutes. A control plane where every change
 is versioned, canaried against preregistered gates, and rollbackable. An
 upstream PR to SGLang so the hook lives in the engine itself.
 
-## License
+## License and what is not in this repo
 
-Apache 2.0
+Everything in this repository is Apache 2.0. Engine patches, adapters,
+manifests, the store, reconciler, canary, supervisor, CLI, mock engine, bench,
+and the published results. Use it, fork it, ship it.
+
+Some things we build on top of trimtab are not open source and are not in
+this repository.
+
+Fleet management. Many clusters and replica groups under one desired-state
+view, with tenancy, RBAC, SSO, and audit export.
+
+Hosted control plane. The store and reconciler run as a service with a
+Postgres backend, an agent on each pod talks to it, you never run the plane.
+
+Configuration recipes. A corpus of measured serving configurations per model
+and per GPU, with the evidence attached, from our inference pricing work.
+Starting points that already have the knobs where they should be.
+
+Canary policy library. Preregistered gate sets per traffic shape that the
+open canary consumes as data.
+
+Support and engineering on the open code, including new engine versions and
+engines, on a contract basis.
+
+If you run inference at a scale where any of that matters, or you want the
+hot path in an engine or engine version we do not cover yet, reach out.
+Numinous Technology, hello@numinous.technology.
