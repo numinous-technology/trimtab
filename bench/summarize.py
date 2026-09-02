@@ -9,7 +9,7 @@ import pathlib
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROWS = []
-for f in sorted(glob.glob(str(HERE / "results" / "*.json"))):
+for f in sorted(f for f in glob.glob(str(HERE / "results" / "*.json")) if "-warm" not in f):
     r = json.load(open(f))
     h = r["hot_swap"]
     ROWS.append(dict(
