@@ -100,7 +100,7 @@ class VLLMAdapter:
 
     def read_knobs(self) -> dict:
         body = _get(f"{self.base}/trimtab/knobs", self.timeout)
-        return {k: v for k, v in body.items() if k != "ceilings"}
+        return {k: v for k, v in body.items() if k not in ("ceilings", "running")}
 
     def healthy(self) -> bool:
         try:

@@ -26,6 +26,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from trimtab.adapters import make_adapter  # noqa: E402
 
 CAP = {"sglang": "max_running_requests", "vllm": "max_num_seqs"}
+# what the scheduler is enforcing right now. vLLM tightens a lowered cap as requests finish,
+# so effect is measured on the enforced value, not on the accepted target.
+EFFECT = {"sglang": "max_running_requests", "vllm": "max_num_seqs_effective"}
 GEN = {
     "sglang": ("/generate", lambda n: {"text": "Write a paragraph about ships. ",
                                        "sampling_params": {"max_new_tokens": n, "temperature": 0.7}}),
@@ -95,8 +98,8 @@ def main():
         t0 = time.perf_counter()
         r = adapter.set_hot({cap: target})
         eff = None
-        while eff != target and time.perf_counter() - t0 < 10:
-            eff = adapter.read_knobs()[cap]
+        while eff != target and time.perf_counter() - t0 < 30:
+            eff = adapter.read_knobs()[EFFECT[a.engine]]
         effect_ms = (time.perf_counter() - t0) * 1000
         ok = r.ok and eff == target
         rows.append(dict(target=target, api_ms=r.latency_ms, effect_ms=effect_ms, http=r.http_status, ok=ok))

@@ -45,7 +45,12 @@ CORE_BODY = '''    def trimtab_set_knobs(self, knobs: dict) -> dict:
                 rejected[key] = f"valid range is 1..{ceiling} (the boot allocation)"
                 continue
             if key == "max_num_seqs":
-                sched.max_num_running_reqs = int(value)
+                # The scheduler asserts len(running) <= cap every step, so a cap
+                # below current occupancy is applied as "stop admitting now" and
+                # tightened to the target in schedule() as requests finish.
+                target = int(value)
+                sched._trimtab_pending_max_num_seqs = target
+                sched.max_num_running_reqs = max(target, len(sched.running))
             else:
                 sched.max_num_scheduled_tokens = int(value)
             applied[key] = int(value)
@@ -53,9 +58,12 @@ CORE_BODY = '''    def trimtab_set_knobs(self, knobs: dict) -> dict:
 
     def trimtab_get_knobs(self) -> dict:
         sched = self.scheduler
+        pending = getattr(sched, "_trimtab_pending_max_num_seqs", None)
         return {
-            "max_num_seqs": sched.max_num_running_reqs,
+            "max_num_seqs": pending if pending is not None else sched.max_num_running_reqs,
+            "max_num_seqs_effective": sched.max_num_running_reqs,
             "max_num_batched_tokens": sched.max_num_scheduled_tokens,
+            "running": len(sched.running),
             "ceilings": getattr(sched, "_trimtab_ceilings", {}),
         }
 
@@ -90,6 +98,14 @@ def attach_router(app: FastAPI):
     app.include_router(router)
 '''
 
+SCHED_ANCHOR = "    def schedule(self, throttle_prefills: bool = False) -> SchedulerOutput:\n        self.current_step += 1\n"
+SCHED_BODY = SCHED_ANCHOR + '''        pending = getattr(self, "_trimtab_pending_max_num_seqs", None)
+        if pending is not None:  # trimtab: tighten the cap as occupancy allows
+            self.max_num_running_reqs = max(pending, len(self.running))
+            if len(self.running) <= pending:
+                self._trimtab_pending_max_num_seqs = None
+'''
+
 INIT_ANCHOR = "    from .dev.sleep.api_router import attach_router as attach_sleep_router\n"
 INIT_BODY = INIT_ANCHOR + '''
     from .dev.trimtab.api_router import attach_router as attach_trimtab_router
@@ -107,7 +123,7 @@ def root():
 
 def edit(path, anchor, body, check_only):
     src = open(path).read()
-    if MARKER in src or "attach_trimtab_router" in src:
+    if MARKER in src or "attach_trimtab_router" in src or "_trimtab_pending_max_num_seqs" in src:
         return "already patched"
     n = src.count(anchor)
     if n != 1:
@@ -126,6 +142,7 @@ def main():
     r = root()
     print("core   ", edit(f"{r}/v1/engine/core.py", CORE_ANCHOR, CORE_BODY + CORE_ANCHOR, check_only))
     print("serve  ", edit(f"{r}/entrypoints/serve/__init__.py", INIT_ANCHOR, INIT_BODY, check_only))
+    print("sched  ", edit(f"{r}/v1/core/sched/scheduler.py", SCHED_ANCHOR, SCHED_BODY, check_only))
     if not check_only:
         import os
         d = f"{r}/entrypoints/serve/dev/trimtab"

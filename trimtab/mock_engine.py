@@ -75,7 +75,8 @@ def make_handler(state):
                     }],
                 })
             if state.engine == "vllm" and self.path == "/trimtab/knobs":
-                return self._json(200, dict(state.knobs, ceilings=state.ceilings))
+                return self._json(200, dict(state.knobs, max_num_seqs_effective=state.knobs["max_num_seqs"],
+                                            running=0, ceilings=state.ceilings))
             self._json(404, {"error": "no route"})
 
         def do_POST(self):

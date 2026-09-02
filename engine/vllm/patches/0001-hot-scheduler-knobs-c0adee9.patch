@@ -47,11 +47,27 @@ index 0000000..f92d560
 +
 +def attach_router(app: FastAPI):
 +    app.include_router(router)
+diff --git a/vllm/v1/core/sched/scheduler.py b/vllm/v1/core/sched/scheduler.py
+index b0fd3d2..5d53fc5 100644
+--- a/vllm/v1/core/sched/scheduler.py
++++ b/vllm/v1/core/sched/scheduler.py
+@@ -508,6 +508,11 @@ class Scheduler(SchedulerInterface):
+ 
+     def schedule(self, throttle_prefills: bool = False) -> SchedulerOutput:
+         self.current_step += 1
++        pending = getattr(self, "_trimtab_pending_max_num_seqs", None)
++        if pending is not None:  # trimtab: tighten the cap as occupancy allows
++            self.max_num_running_reqs = max(pending, len(self.running))
++            if len(self.running) <= pending:
++                self._trimtab_pending_max_num_seqs = None
+         # NOTE(woosuk) on the scheduling algorithm:
+         # There's no "decoding phase" nor "prefill phase" in the scheduler.
+         # Each request just has the num_computed_tokens and
 diff --git a/vllm/v1/engine/core.py b/vllm/v1/engine/core.py
-index c734e67..9986697 100644
+index c734e67..8ac646d 100644
 --- a/vllm/v1/engine/core.py
 +++ b/vllm/v1/engine/core.py
-@@ -1572,6 +1572,42 @@ class EngineCoreProc(EngineCore):
+@@ -1572,6 +1572,50 @@ class EngineCoreProc(EngineCore):
                  "Unrecognized input request type encountered: %s", request_type
              )
  
@@ -77,7 +93,12 @@ index c734e67..9986697 100644
 +                rejected[key] = f"valid range is 1..{ceiling} (the boot allocation)"
 +                continue
 +            if key == "max_num_seqs":
-+                sched.max_num_running_reqs = int(value)
++                # The scheduler asserts len(running) <= cap every step, so a cap
++                # below current occupancy is applied as "stop admitting now" and
++                # tightened to the target in schedule() as requests finish.
++                target = int(value)
++                sched._trimtab_pending_max_num_seqs = target
++                sched.max_num_running_reqs = max(target, len(sched.running))
 +            else:
 +                sched.max_num_scheduled_tokens = int(value)
 +            applied[key] = int(value)
@@ -85,9 +106,12 @@ index c734e67..9986697 100644
 +
 +    def trimtab_get_knobs(self) -> dict:
 +        sched = self.scheduler
++        pending = getattr(sched, "_trimtab_pending_max_num_seqs", None)
 +        return {
-+            "max_num_seqs": sched.max_num_running_reqs,
++            "max_num_seqs": pending if pending is not None else sched.max_num_running_reqs,
++            "max_num_seqs_effective": sched.max_num_running_reqs,
 +            "max_num_batched_tokens": sched.max_num_scheduled_tokens,
++            "running": len(sched.running),
 +            "ceilings": getattr(sched, "_trimtab_ceilings", {}),
 +        }
 +
