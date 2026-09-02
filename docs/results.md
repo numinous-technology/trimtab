@@ -17,7 +17,9 @@ supervisor's cold-knob relaunch path.
 | run | GPU | engine | boot cap | swaps ok | API p50 ms | API p95 ms | effect p50 ms | effect p95 ms | requests under load | dropped | boot cold disk s | boot warm cache s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | b200-sglang | NVIDIA B200 | sglang 0.5.18 | 80 | 20/20 | 16.64 | 47.96 | 78.39 | 123.82 | 806 | 0 | 428 | 281 |
+| b200-vllm | NVIDIA B200 | vllm 0.28.0 | 256 | 20/20 | 11.54 | 17.61 | 649.49 | 1529.43 | 947 | 0 | 166 | 86 |
 | h100-sglang | NVIDIA H100 80GB HBM3 | sglang 0.5.18 | 24 | 20/20 | 15.95 | 49.99 | 87.28 | 126.38 | 489 | 0 | 147 | 146 |
+| h100-vllm | NVIDIA H100 80GB HBM3 | vllm 0.28.0 | 256 | 20/20 | 16.97 | 80.15 | 346.89 | 1296.47 | 531 | 0 | 321 | 75 |
 | rtx6000-sglang | NVIDIA RTX PRO 6000 Blackwell Server Edition | sglang 0.5.18 | 33 | 20/20 | 19.36 | 31.97 | 78.72 | 99.72 | 429 | 0 | 141 | 56 |
 | rtx6000-vllm | NVIDIA RTX PRO 6000 Blackwell Server Edition | vllm 0.28.0 | 256 | 20/20 | 20.21 | 40.47 | 1304.39 | 2663.86 | 444 | 0 | 60 | 55 |
 
