@@ -174,12 +174,16 @@ the scripts handle each.
 
 ## Quickstart
 
-Patch the engine inside its container and restart once. No change after that
-needs a restart.
+The patches are not upstream yet, so you apply them to the engine installed in
+your container. The patcher edits the installed tree in place, verifies every
+anchor, writes a `.trimtab-orig` backup, and refuses if the version differs.
+**docs/running.md has the full per-engine steps, including the launch flags
+each feature needs** (`--enable-memory-saver` for SGLang warm reinit,
+`VLLM_SERVER_DEV_MODE=1` and `--enable-sleep-mode` for vLLM), version-drift
+handling, reverting, and the SM120 and hybrid-model notes. The short version:
 
 ```
-python3 engine/sglang/apply_patch.py
-python3 engine/vllm/apply_patch.py
+python3 engine/sglang/apply_patch.py    # or engine/vllm/apply_patch.py, --check first
 ```
 
 Change a knob on a live server.
@@ -366,12 +370,16 @@ the scripts handle each.
 
 ## Quickstart
 
-Patch the engine inside its container and restart once. No change after that
-needs a restart.
+The patches are not upstream yet, so you apply them to the engine installed in
+your container. The patcher edits the installed tree in place, verifies every
+anchor, writes a `.trimtab-orig` backup, and refuses if the version differs.
+**docs/running.md has the full per-engine steps, including the launch flags
+each feature needs** (`--enable-memory-saver` for SGLang warm reinit,
+`VLLM_SERVER_DEV_MODE=1` and `--enable-sleep-mode` for vLLM), version-drift
+handling, reverting, and the SM120 and hybrid-model notes. The short version:
 
 ```
-python3 engine/sglang/apply_patch.py
-python3 engine/vllm/apply_patch.py
+python3 engine/sglang/apply_patch.py    # or engine/vllm/apply_patch.py, --check first
 ```
 
 Change a knob on a live server.
