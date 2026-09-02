@@ -22,12 +22,25 @@
         self.last_batch = None
         self.chunked_req = None
 
+        mr = self.tp_worker.model_runner
+        previous = {
+            "mem_fraction_static": mr.mem_fraction_static,
+            "max_total_tokens": self.max_total_num_tokens,
+            "max_running_requests": self.max_running_requests,
+        }
+        kinds = ("token_to_kv_pool", "token_to_kv_pool_allocator", "req_to_token_pool", "_unified_memory_pool",
+                 "decode_cuda_graph_runner", "prefill_cuda_graph_runner", "tree_cache")
+        old = {k: (self.tree_cache if k == "tree_cache" else getattr(mr, k, None)) for k in kinds}
+        old = {k: v for k, v in old.items() if v is not None}
+        free_before = torch.cuda.mem_get_info()[0]
+
         workers = [w for w in (self.tp_worker, getattr(self, "draft_worker", None)) if w is not None]
         for w in workers:
             r = w.model_runner
             for attr in ("decode_cuda_graph_runner", "prefill_cuda_graph_runner", "eager_runner",
                          "token_to_kv_pool", "token_to_kv_pool_allocator", "req_to_token_pool",
-                         "_unified_memory_pool", "attn_backend", "decode_attn_backend", "prefill_attn_backend"):
+                         "_unified_memory_pool", "attn_backend", "decode_attn_backend", "prefill_attn_backend",
+                         "graph_shared_output"):
                 if hasattr(r, attr):
                     setattr(r, attr, None)
             if "mem_fraction_static" in fields:
@@ -35,15 +48,47 @@
         self.tree_cache = None
         self.req_to_token_pool = None
         self.token_to_kv_pool_allocator = None
+        # Anything else still pointing at the old pools keeps their GPU memory
+        # alive. Release it generically and log the owner, so the explicit list
+        # above can grow from evidence rather than guesswork.
+        released, slots = [], []
+        for kind, obj in old.items():
+            for ref in gc.get_referrers(obj):
+                if isinstance(ref, dict):
+                    for k, v in list(ref.items()):
+                        if v is obj:
+                            ref[k] = None
+                            released.append(f"{kind}<-{k}")
+                            slots.append((ref, k, kind))
+                elif isinstance(ref, list):
+                    for i, v in enumerate(ref):
+                        if v is obj:
+                            ref[i] = None
+                            released.append(f"{kind}<-list")
+                            slots.append((ref, i, kind))
+        del old, obj
         gc.collect()
         torch.cuda.empty_cache()
         torch.cuda.synchronize()
+        free_after = torch.cuda.mem_get_info()[0]
         freed_at = _time.perf_counter()
+        logger.info(f"trimtab reinit released {sorted(set(released))}, freed {(free_after - free_before) / 2**30:.2f} GiB")
 
-        get_context().override(source="trimtab_reinit", **fields)
-        self.init_memory_pools()
-        self.init_all_attention_backends()
-        self.init_all_cuda_graphs()
+        def _rebuild(values):
+            get_context().override(source="trimtab_reinit", **values)
+            for w in workers:
+                if "mem_fraction_static" in values:
+                    w.model_runner.mem_fraction_static = float(values["mem_fraction_static"])
+            self.init_memory_pools()
+            self.init_all_attention_backends()
+            self.init_all_cuda_graphs()
+
+        try:
+            _rebuild(fields)
+        except Exception as e:  # rebuild with the previous sizing so the server survives
+            logger.warning(f"trimtab reinit with {fields} failed ({e}), restoring previous sizing")
+            _rebuild({k: previous[k] for k in previous if k in fields or k == "mem_fraction_static"})
+            fields = {"error": str(e), "restored": previous}
 
         (
             self.max_total_num_tokens,
@@ -74,11 +119,19 @@
         self.req_to_token_pool = result.req_to_token_pool
         self.token_to_kv_pool_allocator = result.token_to_kv_pool_allocator
         self.tree_cache = result.tree_cache
+        new = {k: (self.tree_cache if k == "tree_cache" else getattr(mr, k, None)) for k in kinds}
+        for ref, key, kind in slots:  # rewire every released slot to the rebuilt object of the same kind
+            try:
+                if ref[key] is None:
+                    ref[key] = new[kind]
+            except (KeyError, IndexError, TypeError):
+                pass
         self.new_token_ratio_tracker.reset()
         self._trimtab_ceilings = {"max_running_requests": self.max_running_requests}
         done = _time.perf_counter()
         info = {
-            "ok": True, "fields": fields,
+            "ok": "error" not in fields, "fields": fields,
+            "released": sorted(set(released)), "freed_gib": round((free_after - free_before) / 2**30, 2),
             "max_total_num_tokens": self.max_total_num_tokens,
             "max_running_requests": self.max_running_requests,
             "free_s": round(freed_at - t0, 3), "rebuild_s": round(done - freed_at, 3), "total_s": round(done - t0, 3),
