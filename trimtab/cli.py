@@ -16,6 +16,7 @@ hot path, a reconciler loop against one engine.
 import argparse
 import getpass
 import json
+import os
 import sys
 
 from . import manifest
@@ -23,6 +24,7 @@ from .adapters import make_adapter
 from .canary import Canary
 from .metrics import SGLANG_MAP, VLLM_MAP, PrometheusMetrics
 from .reconciler import Reconciler
+from .server import open_store
 from .store import Store
 from .supervisor import Supervisor
 
@@ -58,22 +60,22 @@ def cmd_get(a):
 
 
 def cmd_propose(a):
-    v = Store(a.db).propose(a.group, parse_kv(a.kv), getpass.getuser(), a.reason)
+    v = open_store(a.db, a.token).propose(a.group, parse_kv(a.kv), getpass.getuser(), a.reason)
     print(json.dumps({"version_id": v.id, "parent_id": v.parent_id, "fields": v.fields}))
 
 
 def cmd_promote(a):
-    Store(a.db).promote(a.group, a.version)
+    open_store(a.db, a.token).promote(a.group, a.version)
     print(json.dumps({"group": a.group, "desired_version_id": a.version}))
 
 
 def cmd_rollback(a):
-    Store(a.db).rollback(a.group, a.version)
+    open_store(a.db, a.token).rollback(a.group, a.version)
     print(json.dumps({"group": a.group, "desired_version_id": a.version, "rollback": True}))
 
 
 def cmd_versions(a):
-    s = Store(a.db)
+    s = open_store(a.db, a.token)
     d = s.desired(a.group)
     for v in s.versions(a.group):
         mark = "*" if d and v.id == d.id else " "
@@ -81,14 +83,14 @@ def cmd_versions(a):
 
 
 def cmd_status(a):
-    print(json.dumps(Store(a.db).status(a.group), indent=1))
+    print(json.dumps(open_store(a.db, a.token).status(a.group), indent=1))
 
 
 def _canary(a):
     urls = parse_kv(a.metrics or [])
     metrics = PrometheusMetrics(urls, SGLANG_MAP if a.engine == "sglang" else VLLM_MAP)
     replicas = a.replicas.split(",")
-    return Canary(Store(a.db), metrics, a.group, replicas)
+    return Canary(open_store(a.db, a.token), metrics, a.group, replicas)
 
 
 def cmd_canary_start(a):
@@ -109,11 +111,11 @@ def cmd_canary_abort(a):
 
 
 def cmd_canary_show(a):
-    print(json.dumps(Store(a.db).canary(a.canary_id), indent=1))
+    print(json.dumps(open_store(a.db, a.token).canary(a.canary_id), indent=1))
 
 
 def cmd_daemon(a):
-    rec = Reconciler(Store(a.db), manifest.find(a.engine), make_adapter(a.engine, a.url), a.replica, a.group)
+    rec = Reconciler(open_store(a.db, a.token), manifest.find(a.engine), make_adapter(a.engine, a.url), a.replica, a.group)
     if a.once:
         print(rec.tick())
         return
@@ -121,7 +123,7 @@ def cmd_daemon(a):
 
 
 def cmd_supervise(a):
-    sup = Supervisor(Store(a.db), manifest.find(a.engine), launcher=a.launcher or a.engine, adapter_engine=a.engine,
+    sup = Supervisor(open_store(a.db, a.token), manifest.find(a.engine), launcher=a.launcher or a.engine, adapter_engine=a.engine,
                      model=a.model, port=a.port, replica_id=a.replica, group=a.group,
                      extra_flags=a.extra_flag or [], drain_s=a.drain, log_path=a.engine_log)
     if a.once:
@@ -138,7 +140,8 @@ def main(argv=None):
         sp.add_argument("--url", required=True)
 
     def db(sp):
-        sp.add_argument("--db", required=True)
+        sp.add_argument("--db", required=True, help="sqlite path, postgresql:// dsn, or http:// url of trimtab.server")
+        sp.add_argument("--token", default=os.environ.get("TRIMTAB_TOKEN"), help="bearer token for an http store")
         sp.add_argument("--group", required=True)
 
     s = sub.add_parser("set"); eng(s); s.add_argument("kv", nargs="+"); s.set_defaults(f=cmd_set)
