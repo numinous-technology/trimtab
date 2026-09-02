@@ -1,0 +1,69 @@
+Fetching 81 files:   0%|          | 0/81 [00:00<?, ?it/s]Fetching 81 files:  75%|███████▌  | 61/81 [00:00<00:00, 607.18it/s]Fetching 81 files: 100%|██████████| 81/81 [00:00<00:00, 671.17it/s]
+[02:31:59] weights at /workspace/Qwen_Qwen3.8-27B-FP8 (0s)
+[02:32:04] gpu memory used before boot stock: 0MiB
+[02:33:04] boot stock ready in 60s
+core    patched
+serve   patched
+sched   patched
+router  written /usr/local/lib/python3.11/dist-packages/vllm/entrypoints/serve/dev/trimtab/api_router.py
+bench/pod_run.sh: line 33:  6800 Killed                  VLLM_SERVER_DEV_MODE=1 vllm serve $MD --served-model-name default --host 0.0.0.0 --port $PORT --gpu-memory-utilization 0.85 --max-model-len 16384 $VFLAGS > $OUT/server_$1.log 2>&1
+[02:33:09] gpu memory used before boot patched: 0MiB
+[02:34:04] boot patched ready in 55s
+engine=vllm boot max_num_seqs=256
+iter  0 target=8     api=   30.8ms effect= 3871.8ms http=200 ok=True
+iter  1 target=256   api=   11.4ms effect=   60.2ms http=200 ok=True
+iter  2 target=8     api=   49.2ms effect= 2663.9ms http=200 ok=True
+iter  3 target=256   api=   11.7ms effect=   59.9ms http=200 ok=True
+iter  4 target=8     api=   24.6ms effect= 2549.4ms http=200 ok=True
+iter  5 target=256   api=   20.0ms effect=   69.0ms http=200 ok=True
+iter  6 target=8     api=   20.4ms effect= 2534.9ms http=200 ok=True
+iter  7 target=256   api=   18.8ms effect=   67.0ms http=200 ok=True
+iter  8 target=8     api=   40.5ms effect= 2607.0ms http=200 ok=True
+iter  9 target=256   api=   25.9ms effect=   73.8ms http=200 ok=True
+iter 10 target=8     api=   24.9ms effect= 2560.0ms http=200 ok=True
+iter 11 target=256   api=   14.8ms effect=   62.8ms http=200 ok=True
+iter 12 target=8     api=   25.9ms effect= 2565.8ms http=200 ok=True
+iter 13 target=256   api=   19.4ms effect=   68.3ms http=200 ok=True
+iter 14 target=8     api=   16.0ms effect= 2611.7ms http=200 ok=True
+iter 15 target=256   api=   15.1ms effect=   64.7ms http=200 ok=True
+iter 16 target=8     api=    3.4ms effect= 2637.3ms http=200 ok=True
+iter 17 target=256   api=   11.0ms effect=   59.4ms http=200 ok=True
+iter 18 target=8     api=   26.8ms effect= 2541.5ms http=200 ok=True
+iter 19 target=256   api=   21.0ms effect=   69.1ms http=200 ok=True
+{
+ "engine": "vllm",
+ "cap_knob": "max_num_seqs",
+ "boot_value": 256,
+ "iters": 20,
+ "all_ok": true,
+ "api_ms_median": 20.21,
+ "api_ms_p95": 40.47,
+ "effect_ms_median": 1304.39,
+ "effect_ms_p95": 2663.86,
+ "background_completed": 444,
+ "background_failed": 0
+}
+{
+ "engine": "vllm",
+ "model": "Qwen/Qwen3.8-27B-FP8",
+ "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 97887 MiB, 595.91.07",
+ "engine_version": "0.28.0",
+ "download_s": 0,
+ "boot_stock_s": 60,
+ "boot_patched_s": 55,
+ "bench_exit": 0
+}
+{
+ "engine": "vllm",
+ "cap_knob": "max_num_seqs",
+ "boot_value": 256,
+ "iters": 20,
+ "all_ok": true,
+ "api_ms_median": 20.21,
+ "api_ms_p95": 40.47,
+ "effect_ms_median": 1304.39,
+ "effect_ms_p95": 2663.86,
+ "background_completed": 444,
+ "background_failed": 0
+}
+[02:35:32] done, results in /root/trimtab_results/vllm.json
