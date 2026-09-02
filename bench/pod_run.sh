@@ -75,6 +75,9 @@ python3 $HERE/bench/hot_swap_bench.py --engine $ENGINE --base http://127.0.0.1:$
 BENCH_EXIT=$?
 python3 $HERE/bench/knob_sweep.py --engine $ENGINE --base http://127.0.0.1:$PORT --out $OUT/knob_sweep.json
 SWEEP_EXIT=$?
+if [ $ENGINE = sglang ]; then
+  python3 $HERE/bench/warm_reinit_bench.py --base http://127.0.0.1:$PORT --out $OUT/warm_reinit.json; WARM_EXIT=$?
+else echo '{"all_ok": null, "rows": []}' > $OUT/warm_reinit.json; WARM_EXIT=0; fi
 
 python3 - <<EOF
 import json, subprocess
@@ -89,10 +92,13 @@ r = {
   "bench_exit": $BENCH_EXIT,
   "sweep_exit": $SWEEP_EXIT,
   "knob_sweep": json.load(open("$OUT/knob_sweep.json")),
+  "warm_exit": $WARM_EXIT,
+  "warm_reinit": json.load(open("$OUT/warm_reinit.json")),
   "hot_swap": json.load(open("$OUT/hot_swap.json")),
 }
 json.dump(r, open("$R", "w"), indent=1)
-print(json.dumps({k: v for k, v in r.items() if k not in ("hot_swap", "knob_sweep")}, indent=1))
+print(json.dumps({k: v for k, v in r.items() if k not in ("hot_swap", "knob_sweep", "warm_reinit")}, indent=1))
+print("warm reinit", r["warm_reinit"].get("all_ok"), [x.get("call_to_first_token_s") for x in r["warm_reinit"]["rows"]])
 print("knob sweep", r["knob_sweep"]["knobs_ok"], "of", r["knob_sweep"]["knobs_total"])
 print(json.dumps({k: v for k, v in r["hot_swap"].items() if k != "rows"}, indent=1))
 EOF
