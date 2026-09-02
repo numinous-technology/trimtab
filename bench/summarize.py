@@ -45,6 +45,14 @@ supervisor's cold-knob relaunch path.
 
 {chr(10).join(lines)}
 
+Effect latency differs by engine for a reason. SGLang applies a lowered cap
+immediately and lets in-flight requests finish above it. vLLM asserts
+running <= cap on every step, so trimtab stops admissions at once and
+tightens the enforced cap as requests finish. The bench measures the enforced
+value, so vLLM's effect number includes that drain and is dominated by output
+length, not by the control path (its API latency is the same ~20 ms). Raising
+the cap is immediate on both engines.
+
 Not claimed. GPU-resident reinit. Anything on models or GPUs not in this table.
 """
 (HERE.parent / "docs" / "results.md").write_text(doc)
