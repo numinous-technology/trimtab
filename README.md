@@ -40,7 +40,8 @@ architecture-specific code, so trimtab runs on any GPU the engine runs on.
 ## What you can change
 
 trimtab supports the knobs in the manifests and nothing else. Every other flag
-is set at launch as before.
+is set at launch as before. Knobs come in three classes. Hot changes live.
+Warm rebuilds the KV pool in place with weights resident. Cold relaunches.
 
 ### Hot knobs, changed live
 
@@ -74,6 +75,23 @@ waiting queue object is built for one policy at init and switching needs a
 queue rebuild. Neither engine has a scheduler-level request deadline knob,
 deadlines are per-request parameters.
 
+### Warm knobs, rebuilt in place with weights resident
+
+SGLang only, today. `mem_fraction_static` and `max_total_num_tokens` (the
+KV pool size), and raising the `max_running_requests` ceiling. The engine
+drains, unmaps the old KV pool and CUDA graphs through its own memory saver,
+rebuilds pools, attention backends and graphs at the new size, and rewires
+every scheduler component to the new objects. The 29 GB of weights never move.
+Needs the server launched with `--enable-memory-saver`, which the supervisor
+and bench add for SGLang. The supervisor tries this path before a relaunch.
+
+Measured on RTX PRO 6000, three consecutive resizes each followed by a served
+generation. 31 to 32 s from the control call to the first token with prefill
+CUDA graphs on (29 s of that is capturing them). 2.0 to 2.4 s with prefill
+CUDA graphs off (`--disable-prefill-cuda-graph`). Freeing the old pool took
+under 0.6 s in every case. A relaunch on the same GPU is 56 s warm, 141 to
+181 s cold.
+
 ### Cold knobs, changed by relaunch
 
 These are existing engine flags baked into GPU memory or graph capture at
@@ -84,14 +102,15 @@ missing from its table is refused, not guessed.
 
 | engine | cold knobs the supervisor relaunches with |
 |---|---|
-| sglang | tp_size, ep_size, quantization, kv_cache_dtype, mem_fraction_static, max_total_num_tokens, cuda_graph_max_bs, attention_backend, page_size, speculative_algorithm, speculative_draft_model_path |
+| sglang | tp_size, ep_size, quantization, kv_cache_dtype, cuda_graph_max_bs, attention_backend, page_size, speculative_algorithm, speculative_draft_model_path |
 | vllm | tensor_parallel_size, quantization, kv_cache_dtype, gpu_memory_utilization, max_model_len, cuda_graph_sizes, speculative_config |
 
 A redeploy is image pull, weight download, pod scheduling, and engine boot.
 The supervisor's relaunch skips the first three and pays the boot against
 weights already on local disk. Measured below, that boot took 55 to 281
-seconds. Keeping weights in GPU memory across a relaunch would cut most of
-that, and neither engine exposes a way to do it, so trimtab does not claim it.
+seconds. These knobs change the weights' own layout (parallelism,
+quantization) or the model itself, so the pool-only warm path cannot cover
+them.
 
 ## Measured
 
@@ -267,11 +286,11 @@ The mock now does both.
 
 ## Not built
 
-GPU-resident reinit. Keeping weights in GPU memory while the KV pool and
-CUDA graphs are rebuilt would cut the cold-knob relaunch from minutes to
-seconds. Neither engine exposes a way to rebuild those without tearing down
-the process. The upstream patches in docs/upstream are the first step in that
-conversation.
+Warm reinit on vLLM. The mechanism exists there too, `CuMemAllocator` under
+`--enable-sleep-mode` can discard the KV pool while keeping weights, but its
+bookkeeping has to be cleared and `bind_kv_cache` asserts an empty cache list
+before a new allocation, so it is a deeper change than SGLang's and is not
+done. vLLM cold knobs relaunch.
 
 ## License
 
