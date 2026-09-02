@@ -32,6 +32,38 @@ knobs:
       type: int
       min: 1
 
+  - field: max_prefill_tokens
+    klass: hot
+    verified_at: "scheduler.py 3621 (PrefillAdder built per batch)"
+    validator:
+      type: int
+      min: 1
+      max_source: kv_pool
+    note: engine caps it at max_total_num_tokens
+
+  - field: schedule_policy
+    klass: hot
+    verified_at: "schedule_policy.py 257, 294, 297 (SchedulePolicy.policy read in calc_priority every batch)"
+    validator:
+      type: str
+      choices: fcfs,lpm,dfs-weight,lof,random,priority
+    note: applied through SchedulePolicy._validate_and_adjust_policy, so a cache-aware policy falls back to fcfs when the radix cache is off
+
+  - field: schedule_conservativeness
+    klass: hot
+    verified_at: "scheduler.py 3620, 3890-3948 (new_token_ratio_tracker read on every retract/decay step)"
+    validator:
+      type: float
+      min: 0.01
+    note: rebuilds the tracker's init, min and decay the same way from_config does
+
+  - field: log_level
+    klass: hot
+    verified_at: "python logging, read on every log call"
+    validator:
+      type: str
+      choices: DEBUG,INFO,WARNING,ERROR
+
   # stock set_internal_state allowlist, present upstream before trimtab
   - field: pp_max_micro_batch_size
     klass: hot
@@ -55,11 +87,16 @@ knobs:
     klass: hot
     origin: upstream
 
-  # candidates for later trimtab versions, snapshotted at init today so a
-  # live change needs more than an attribute write
-  - field: schedule_policy
-    klass: deferred
-    note: snapshotted into a SchedulePolicy object at init, scheduler.py 1299
+  # cold with a reason, so nobody re-investigates
+  - field: speculative_num_steps
+    klass: cold
+    note: draft CUDA graphs are captured for a fixed depth at boot
+  - field: speculative_num_draft_tokens
+    klass: cold
+    note: same, sized into the draft pipeline at boot
+  - field: watchdog_timeout
+    klass: cold
+    note: passed by value into the watchdog thread at boot
 
   - field: tp_size
     klass: cold

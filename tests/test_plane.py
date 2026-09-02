@@ -102,3 +102,37 @@ def test_store_promote_wrong_group_refused():
     v = s.propose("a", {"x": 1}, "t", "r")
     with pytest.raises(ValueError):
         s.promote("b", v.id)
+
+
+NEW_KNOBS = {
+    "sglang": [("max_prefill_tokens", 4096), ("schedule_policy", "lpm"), ("schedule_conservativeness", 0.5), ("log_level", "WARNING")],
+    "vllm": [("long_prefill_token_threshold", 2048), ("log_level", "DEBUG")],
+}
+BAD_KNOBS = {
+    "sglang": [("schedule_policy", "bogus"), ("schedule_conservativeness", 0), ("log_level", "LOUD")],
+    "vllm": [("long_prefill_token_threshold", -5), ("log_level", "LOUD")],
+}
+
+
+def test_new_hot_knobs_apply_and_read_back(engine):
+    name, url, state = engine
+    a = make_adapter(name, url)
+    m = manifest.find(name)
+    for k, v in NEW_KNOBS[name]:
+        accepted, rejected = m.validate({k: v})
+        assert accepted == {k: v}, rejected
+        r = a.set_hot({k: v})
+        assert r.ok, (k, r.rejected)
+        assert str(a.read_knobs()[k]).lower() == str(v).lower()
+
+
+def test_new_hot_knobs_bad_values_rejected_at_manifest_and_engine(engine):
+    name, url, state = engine
+    a = make_adapter(name, url)
+    m = manifest.find(name)
+    before = dict(state.knobs)
+    for k, v in BAD_KNOBS[name]:
+        accepted, rejected = m.validate({k: v})
+        assert not accepted and k in rejected
+        assert not a.set_hot({k: v}).ok  # engine agrees even when the manifest is bypassed
+    assert state.knobs == before

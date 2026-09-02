@@ -46,6 +46,10 @@ def _trimtab_apply_hot_knobs(scheduler, args: dict):
                            valid range 1..the value allocated at boot
     max_queued_requests    admission cap on the waiting queue, >= 0
     chunked_prefill_size   prefill chunk size for the next batch, > 0
+    max_prefill_tokens     prefill token budget per batch, 1..KV pool size
+    schedule_policy        fcfs, lpm, dfs-weight, lof, random, priority
+    schedule_conservativeness  > 0, rebuilds the new-token-ratio watermarks
+    log_level              DEBUG, INFO, WARNING, ERROR
     """
     if not hasattr(scheduler, "_trimtab_ceilings"):
         scheduler._trimtab_ceilings = {
@@ -81,6 +85,53 @@ def _trimtab_apply_hot_knobs(scheduler, args: dict):
         else:
             scheduler.chunked_prefill_size = int(v)
             msgs.append(f"trimtab applied chunked_prefill_size={int(v)}")
+    if "max_prefill_tokens" in args:
+        v = args.pop("max_prefill_tokens")
+        hi = scheduler.max_total_num_tokens
+        if not isinstance(v, (int, float)) or not (1 <= int(v) <= hi):
+            ok = False
+            msgs.append(f"trimtab rejected max_prefill_tokens={v}, valid range is 1..{hi} (the KV pool)")
+        else:
+            scheduler.max_prefill_tokens = int(v)
+            msgs.append(f"trimtab applied max_prefill_tokens={int(v)}")
+    if "schedule_policy" in args:
+        v = args.pop("schedule_policy")
+        try:
+            new = scheduler.policy._validate_and_adjust_policy(str(v), scheduler.policy.tree_cache)
+        except ValueError as e:
+            ok = False
+            msgs.append(f"trimtab rejected schedule_policy={v}, {e}")
+        else:
+            scheduler.policy.policy = new
+            scheduler.schedule_policy = str(v)
+            msgs.append(f"trimtab applied schedule_policy={v} (effective {new.value})")
+    if "schedule_conservativeness" in args:
+        v = args.pop("schedule_conservativeness")
+        if not isinstance(v, (int, float)) or v <= 0:
+            ok = False
+            msgs.append(f"trimtab rejected schedule_conservativeness={v}, must be > 0")
+        else:
+            from sglang.srt.environ import envs
+
+            t = scheduler.new_token_ratio_tracker
+            t.init = min(envs.SGLANG_INIT_NEW_TOKEN_RATIO.get() * float(v), 1.0)
+            t.min = min(t.init * envs.SGLANG_MIN_NEW_TOKEN_RATIO_FACTOR.get(), 1.0)
+            t.decay = (t.init - t.min) / envs.SGLANG_NEW_TOKEN_RATIO_DECAY_STEPS.get()
+            t.current = t.init
+            scheduler._trimtab_conservativeness = float(v)
+            msgs.append(f"trimtab applied schedule_conservativeness={v} (new_token_ratio init {t.init:.3f} min {t.min:.3f})")
+    if "log_level" in args:
+        v = str(args.pop("log_level")).upper()
+        if v not in ("DEBUG", "INFO", "WARNING", "ERROR"):
+            ok = False
+            msgs.append(f"trimtab rejected log_level={v}, must be DEBUG, INFO, WARNING or ERROR")
+        else:
+            import logging as _logging
+
+            _logging.getLogger("sglang").setLevel(v)
+            _logging.getLogger().setLevel(v)
+            scheduler._trimtab_log_level = v
+            msgs.append(f"trimtab applied log_level={v}")
     return ok, msgs
 '''
 
@@ -89,9 +140,16 @@ READBACK_BODY = READBACK_ANCHOR + '''        ret["trimtab"] = {
             "max_running_requests": self.max_running_requests,
             "max_queued_requests": self.max_queued_requests,
             "chunked_prefill_size": self.chunked_prefill_size,
-            "ceilings": getattr(self, "_trimtab_ceilings", {}),
+            "max_prefill_tokens": self.max_prefill_tokens,
+            "schedule_policy": self.schedule_policy,
+            "schedule_conservativeness": getattr(self, "_trimtab_conservativeness", None),
+            "log_level": getattr(self, "_trimtab_log_level", None),
+            "ceilings": dict(getattr(self, "_trimtab_ceilings", {}), max_prefill_tokens=self.max_total_num_tokens),
         }
 '''
+
+IO_ANCHOR = "    server_args: Dict[str, Union[int, float]]\n"
+IO_BODY = "    server_args: Dict[str, Union[int, float, str]]  # trimtab: str for schedule_policy, log_level\n"
 
 ANCHOR_RE = re.compile(
     r"(    def set_internal_state\(self, recv_req: SetInternalStateReq\):\n"
@@ -107,11 +165,26 @@ def find_target():
     return f"{root}/srt/managers/scheduler.py"
 
 
+def patch_io_struct(scheduler_path, check_only):
+    path = scheduler_path.replace("scheduler.py", "io_struct.py")
+    src = open(path).read()
+    if IO_BODY in src:
+        return "already patched"
+    if src.count(IO_ANCHOR) != 1:
+        sys.exit(f"io_struct anchor matched {src.count(IO_ANCHOR)} times, refusing to edit")
+    if check_only:
+        return "anchor ok"
+    shutil.copyfile(path, path + ".trimtab-orig")
+    open(path, "w").write(src.replace(IO_ANCHOR, IO_BODY, 1))
+    return "patched"
+
+
 def main():
     check_only = "--check" in sys.argv
     target = find_target()
     src = open(target).read()
 
+    print("io_struct", patch_io_struct(target, check_only))
     if MARKER in src:
         print(f"already patched, nothing to do ({target})")
         return

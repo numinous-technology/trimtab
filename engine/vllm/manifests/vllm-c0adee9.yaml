@@ -23,6 +23,27 @@ knobs:
       max_source: boot_value
     note: applied to scheduler.max_num_scheduled_tokens
 
+  - field: long_prefill_token_threshold
+    klass: hot
+    verified_at: "vllm/v1/core/sched/scheduler.py 441, 598, 992 (scheduler_config read per step)"
+    validator:
+      type: int
+      min: 0
+
+  - field: log_level
+    klass: hot
+    verified_at: "python logging, read on every log call"
+    validator:
+      type: str
+      choices: DEBUG,INFO,WARNING,ERROR
+
+  - field: policy
+    klass: deferred
+    note: fcfs or priority, the waiting queue object is built for one policy at init (scheduler.py 198), switching needs a queue rebuild
+  - field: num_speculative_tokens
+    klass: cold
+    note: sized into the draft pipeline and CUDA graphs at boot
+
   - field: tensor_parallel_size
     klass: cold
   - field: quantization

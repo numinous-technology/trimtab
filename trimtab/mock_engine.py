@@ -21,11 +21,14 @@ class State:
         self.tokens = tokens
         self.lock = threading.Lock()
         self.knobs = (
-            {"max_running_requests": mrr, "max_queued_requests": mqr, "chunked_prefill_size": cps}
+            {"max_running_requests": mrr, "max_queued_requests": mqr, "chunked_prefill_size": cps,
+             "max_prefill_tokens": tokens, "schedule_policy": "fcfs", "schedule_conservativeness": 1.0, "log_level": "INFO"}
             if engine == "sglang"
-            else {"max_num_seqs": mrr, "max_num_batched_tokens": tokens}
+            else {"max_num_seqs": mrr, "max_num_batched_tokens": tokens, "long_prefill_token_threshold": 0, "log_level": "INFO"}
         )
-        self.ceilings = {k: v for k, v in self.knobs.items() if k != "max_queued_requests"}
+        self.ceilings = {k: v for k, v in self.knobs.items() if k in ("max_running_requests", "max_num_seqs", "max_num_batched_tokens", "max_prefill_tokens")}
+        self.str_choices = {"schedule_policy": ("fcfs", "lpm", "dfs-weight", "lof", "random", "priority"),
+                            "log_level": ("DEBUG", "INFO", "WARNING", "ERROR")}
         self.applied_calls = 0
 
     def apply(self, changes):
@@ -35,7 +38,20 @@ class State:
                 if k not in self.knobs:
                     rejected[k] = "unknown knob"
                     continue
-                lo = 0 if k == "max_queued_requests" else 1
+                if k in self.str_choices:
+                    if str(v).lower() not in [c.lower() for c in self.str_choices[k]]:
+                        rejected[k] = f"must be one of {self.str_choices[k]}"
+                        continue
+                    self.knobs[k] = str(v).upper() if k == "log_level" else str(v)
+                    applied[k] = self.knobs[k]
+                    continue
+                if k == "schedule_conservativeness":
+                    if not isinstance(v, (int, float)) or v <= 0:
+                        rejected[k] = "must be > 0"
+                        continue
+                    self.knobs[k] = float(v); applied[k] = float(v)
+                    continue
+                lo = 0 if k in ("max_queued_requests", "long_prefill_token_threshold") else 1
                 hi = self.ceilings.get(k)
                 if not isinstance(v, (int, float)) or int(v) < lo or (hi is not None and int(v) > hi):
                     rejected[k] = f"valid range is {lo}..{hi}"

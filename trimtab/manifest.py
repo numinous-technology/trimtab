@@ -21,6 +21,7 @@ class Knob:
     vmax: int | None = None
     max_source: str | None = None
     vtype: str = "int"
+    choices: tuple = ()
 
 
 class Manifest:
@@ -39,6 +40,13 @@ class Manifest:
                 rejected[k] = "cold knob, needs a reinit"
             elif knob.klass == DEFERRED:
                 rejected[k] = "not hot in this engine version"
+            elif knob.vtype == "str":
+                if not isinstance(v, str):
+                    rejected[k] = "must be a string"
+                elif knob.choices and v.lower() not in [c.lower() for c in knob.choices]:
+                    rejected[k] = f"must be one of {', '.join(knob.choices)}"
+                else:
+                    accepted[k] = v
             elif isinstance(v, bool) or not isinstance(v, int if knob.vtype == "int" else (int, float)):
                 rejected[k] = f"must be {'an integer' if knob.vtype == 'int' else 'a number'}"
             elif knob.vmin is not None and v < knob.vmin:
@@ -96,10 +104,11 @@ def load(path) -> Manifest:
         knobs.append(Knob(
             field=r["field"],
             klass=r["klass"],
-            vmin=int(v["min"]) if "min" in v else None,
-            vmax=int(v["max"]) if "max" in v else None,
+            vmin=float(v["min"]) if "min" in v else None,
+            vmax=float(v["max"]) if "max" in v else None,
             max_source=v.get("max_source"),
             vtype=v.get("type", "int"),
+            choices=tuple(c.strip() for c in v.get("choices", "").split(",") if c.strip()),
         ))
     return Manifest(top["engine"], top["engine_commit"], knobs)
 

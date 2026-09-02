@@ -64,10 +64,10 @@ index b0fd3d2..5d53fc5 100644
          # There's no "decoding phase" nor "prefill phase" in the scheduler.
          # Each request just has the num_computed_tokens and
 diff --git a/vllm/v1/engine/core.py b/vllm/v1/engine/core.py
-index c734e67..8ac646d 100644
+index c734e67..e3b8da6 100644
 --- a/vllm/v1/engine/core.py
 +++ b/vllm/v1/engine/core.py
-@@ -1572,6 +1572,50 @@ class EngineCoreProc(EngineCore):
+@@ -1572,6 +1572,70 @@ class EngineCoreProc(EngineCore):
                  "Unrecognized input request type encountered: %s", request_type
              )
  
@@ -85,6 +85,24 @@ index c734e67..8ac646d 100644
 +            }
 +        applied, rejected = {}, {}
 +        for key, value in knobs.items():
++            if key == "long_prefill_token_threshold":
++                if not isinstance(value, (int, float)) or int(value) < 0:
++                    rejected[key] = "must be >= 0 (0 disables the threshold)"
++                else:
++                    sched.scheduler_config.long_prefill_token_threshold = int(value)
++                    applied[key] = int(value)
++                continue
++            if key == "log_level":
++                level = str(value).upper()
++                if level not in ("DEBUG", "INFO", "WARNING", "ERROR"):
++                    rejected[key] = "must be DEBUG, INFO, WARNING or ERROR"
++                else:
++                    import logging as _logging
++
++                    _logging.getLogger("vllm").setLevel(level)
++                    sched._trimtab_log_level = level
++                    applied[key] = level
++                continue
 +            if key not in sched._trimtab_ceilings:
 +                rejected[key] = "unknown knob"
 +                continue
@@ -111,6 +129,8 @@ index c734e67..8ac646d 100644
 +            "max_num_seqs": pending if pending is not None else sched.max_num_running_reqs,
 +            "max_num_seqs_effective": sched.max_num_running_reqs,
 +            "max_num_batched_tokens": sched.max_num_scheduled_tokens,
++            "long_prefill_token_threshold": sched.scheduler_config.long_prefill_token_threshold,
++            "log_level": getattr(sched, "_trimtab_log_level", None),
 +            "running": len(sched.running),
 +            "ceilings": getattr(sched, "_trimtab_ceilings", {}),
 +        }

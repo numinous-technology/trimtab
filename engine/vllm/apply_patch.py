@@ -37,6 +37,24 @@ CORE_BODY = '''    def trimtab_set_knobs(self, knobs: dict) -> dict:
             }
         applied, rejected = {}, {}
         for key, value in knobs.items():
+            if key == "long_prefill_token_threshold":
+                if not isinstance(value, (int, float)) or int(value) < 0:
+                    rejected[key] = "must be >= 0 (0 disables the threshold)"
+                else:
+                    sched.scheduler_config.long_prefill_token_threshold = int(value)
+                    applied[key] = int(value)
+                continue
+            if key == "log_level":
+                level = str(value).upper()
+                if level not in ("DEBUG", "INFO", "WARNING", "ERROR"):
+                    rejected[key] = "must be DEBUG, INFO, WARNING or ERROR"
+                else:
+                    import logging as _logging
+
+                    _logging.getLogger("vllm").setLevel(level)
+                    sched._trimtab_log_level = level
+                    applied[key] = level
+                continue
             if key not in sched._trimtab_ceilings:
                 rejected[key] = "unknown knob"
                 continue
@@ -63,6 +81,8 @@ CORE_BODY = '''    def trimtab_set_knobs(self, knobs: dict) -> dict:
             "max_num_seqs": pending if pending is not None else sched.max_num_running_reqs,
             "max_num_seqs_effective": sched.max_num_running_reqs,
             "max_num_batched_tokens": sched.max_num_scheduled_tokens,
+            "long_prefill_token_threshold": sched.scheduler_config.long_prefill_token_threshold,
+            "log_level": getattr(sched, "_trimtab_log_level", None),
             "running": len(sched.running),
             "ceilings": getattr(sched, "_trimtab_ceilings", {}),
         }
