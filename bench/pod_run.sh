@@ -73,6 +73,8 @@ boot patched || exit 1
 fi
 python3 $HERE/bench/hot_swap_bench.py --engine $ENGINE --base http://127.0.0.1:$PORT --iters ${ITERS:-20} --settle-s ${SETTLE:-10} --gap-s ${GAP:-2} --out $OUT/hot_swap.json
 BENCH_EXIT=$?
+python3 $HERE/bench/knob_sweep.py --engine $ENGINE --base http://127.0.0.1:$PORT --out $OUT/knob_sweep.json
+SWEEP_EXIT=$?
 
 python3 - <<EOF
 import json, subprocess
@@ -85,10 +87,13 @@ r = {
   "boot_stock_s": int(open("$OUT/boot_stock_s").read()),
   "boot_patched_s": int(open("$OUT/boot_patched_s").read()),
   "bench_exit": $BENCH_EXIT,
+  "sweep_exit": $SWEEP_EXIT,
+  "knob_sweep": json.load(open("$OUT/knob_sweep.json")),
   "hot_swap": json.load(open("$OUT/hot_swap.json")),
 }
 json.dump(r, open("$R", "w"), indent=1)
-print(json.dumps({k: v for k, v in r.items() if k != "hot_swap"}, indent=1))
+print(json.dumps({k: v for k, v in r.items() if k not in ("hot_swap", "knob_sweep")}, indent=1))
+print("knob sweep", r["knob_sweep"]["knobs_ok"], "of", r["knob_sweep"]["knobs_total"])
 print(json.dumps({k: v for k, v in r["hot_swap"].items() if k != "rows"}, indent=1))
 EOF
 [ "${KEEP_SERVER:-0}" = 1 ] || pkill -9 -f "launch_[s]erver|vllm [s]erve|vllm.[e]ntrypoints|[V]LLM|[E]ngineCore|trimtab.[m]ock_engine" 2>/dev/null
