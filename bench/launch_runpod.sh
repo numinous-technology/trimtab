@@ -46,7 +46,11 @@ until read -r IP PORT < <(ssh_target) && [ -n "${IP:-}" ] && ssh -o StrictHostKe
 done
 S="ssh -o StrictHostKeyChecking=no -p $PORT root@$IP"
 echo "ssh up at $IP:$PORT after $(( $(date +%s) - T0 ))s"
-$S "nvidia-smi --query-gpu=name,memory.total --format=csv,noheader"
+$S "nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader"
+if [ $ENGINE = vllm ]; then  # pip vllm wheels need CUDA 12.9+, so the host driver must be 575+
+  DRV=$($S "nvidia-smi --query-gpu=driver_version --format=csv,noheader" | cut -d. -f1)
+  [ "${DRV:-0}" -ge 575 ] || { echo "host driver $DRV too old for vllm wheels, remove and retry on another host"; KEEP=0; exit 3; }
+fi
 
 tar -C $HERE -czf /tmp/trimtab.tgz --exclude .git --exclude bench/results . && scp -o StrictHostKeyChecking=no -P $PORT /tmp/trimtab.tgz root@$IP:/root/ >/dev/null
 $S "mkdir -p /root/trimtab && tar -C /root/trimtab -xzf /root/trimtab.tgz && cd /root/trimtab && \

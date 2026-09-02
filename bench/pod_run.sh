@@ -46,8 +46,12 @@ boot(){ # $1 label -> writes $OUT/boot_$1_s, returns 1 on failure
     python3 -m sglang.launch_server --model-path $MD --host 0.0.0.0 --port $PORT \
       --mem-fraction-static 0.85 > $OUT/server_$1.log 2>&1 &
   else
+    # --max-num-seqs 256: vllm's default 1024 exceeds this hybrid model's Mamba cache blocks.
+    # SM120 (RTX PRO 6000): the wheel's FlashInfer does not know the arch, Triton attention does.
+    VFLAGS="--max-num-seqs 256"
+    case "$(nvidia-smi --query-gpu=compute_cap --format=csv,noheader | head -1)" in 12.*) VFLAGS="$VFLAGS --attention-backend TRITON_ATTN"; export VLLM_USE_FLASHINFER_SAMPLER=0;; esac
     VLLM_SERVER_DEV_MODE=1 vllm serve $MD --served-model-name default --host 0.0.0.0 --port $PORT \
-      --gpu-memory-utilization 0.85 --max-model-len 16384 > $OUT/server_$1.log 2>&1 &
+      --gpu-memory-utilization 0.85 --max-model-len 16384 $VFLAGS > $OUT/server_$1.log 2>&1 &
   fi
   while true; do
     c=$(curl -s -m 3 -o /dev/null -w '%{http_code}' http://127.0.0.1:$PORT/health)
