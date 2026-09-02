@@ -177,14 +177,30 @@ the scripts handle each.
 The patches are not upstream yet, so you apply them to the engine installed in
 your container. The patcher edits the installed tree in place, verifies every
 anchor, writes a `.trimtab-orig` backup, and refuses if the version differs.
-**docs/running.md has the full per-engine steps, including the launch flags
-each feature needs** (`--enable-memory-saver` for SGLang warm reinit,
-`VLLM_SERVER_DEV_MODE=1` and `--enable-sleep-mode` for vLLM), version-drift
-handling, reverting, and the SM120 and hybrid-model notes. The short version:
+
+SGLang, end to end.
 
 ```
-python3 engine/sglang/apply_patch.py    # or engine/vllm/apply_patch.py, --check first
+pip install -e /path/to/trimtab
+python3 engine/sglang/apply_patch.py                      # --check first to dry-run
+python3 -m sglang.launch_server --model-path <model> --port 30000 --enable-memory-saver
+python3 -m trimtab.cli set --engine sglang --url http://localhost:30000 max_running_requests=64
 ```
+
+vLLM, end to end. `VLLM_SERVER_DEV_MODE=1` enables the routes,
+`--enable-sleep-mode` enables warm reinit.
+
+```
+pip install -e /path/to/trimtab
+python3 engine/vllm/apply_patch.py
+VLLM_SERVER_DEV_MODE=1 vllm serve <model> --served-model-name default --port 8000 --enable-sleep-mode
+python3 -m trimtab.cli set --engine vllm --url http://localhost:8000 max_num_seqs=64
+```
+
+`--enable-memory-saver` (SGLang) and `--enable-sleep-mode` (vLLM) are only
+needed for warm reinit; hot knobs work without them. **docs/running.md** has
+version-drift handling, reverting, the SM120 and hybrid-model flags, and how
+to verify the warm path.
 
 Change a knob on a live server.
 
@@ -373,14 +389,30 @@ the scripts handle each.
 The patches are not upstream yet, so you apply them to the engine installed in
 your container. The patcher edits the installed tree in place, verifies every
 anchor, writes a `.trimtab-orig` backup, and refuses if the version differs.
-**docs/running.md has the full per-engine steps, including the launch flags
-each feature needs** (`--enable-memory-saver` for SGLang warm reinit,
-`VLLM_SERVER_DEV_MODE=1` and `--enable-sleep-mode` for vLLM), version-drift
-handling, reverting, and the SM120 and hybrid-model notes. The short version:
+
+SGLang, end to end.
 
 ```
-python3 engine/sglang/apply_patch.py    # or engine/vllm/apply_patch.py, --check first
+pip install -e /path/to/trimtab
+python3 engine/sglang/apply_patch.py                      # --check first to dry-run
+python3 -m sglang.launch_server --model-path <model> --port 30000 --enable-memory-saver
+python3 -m trimtab.cli set --engine sglang --url http://localhost:30000 max_running_requests=64
 ```
+
+vLLM, end to end. `VLLM_SERVER_DEV_MODE=1` enables the routes,
+`--enable-sleep-mode` enables warm reinit.
+
+```
+pip install -e /path/to/trimtab
+python3 engine/vllm/apply_patch.py
+VLLM_SERVER_DEV_MODE=1 vllm serve <model> --served-model-name default --port 8000 --enable-sleep-mode
+python3 -m trimtab.cli set --engine vllm --url http://localhost:8000 max_num_seqs=64
+```
+
+`--enable-memory-saver` (SGLang) and `--enable-sleep-mode` (vLLM) are only
+needed for warm reinit; hot knobs work without them. **docs/running.md** has
+version-drift handling, reverting, the SM120 and hybrid-model flags, and how
+to verify the warm path.
 
 Change a knob on a live server.
 
