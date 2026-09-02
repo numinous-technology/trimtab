@@ -62,7 +62,12 @@ canary over a three-replica mock fleet, metrics parsing and quantiles,
 supervisor against a real subprocess including cold relaunch and crash
 recovery, and the CLI end to end including canary and supervise. The bench script and the on-pod runner both run in a
 dry mode against the mock engine with zero dropped requests at 32 concurrent
-load threads. GPU numbers are not yet measured and nothing here claims them.
+load threads. GPU numbers, measured. Six cells, two engines on three GPUs (H100, RTX PRO
+6000 Blackwell, B200), 20 of 20 swaps ok in every cell, zero dropped requests
+under load in every cell, control call p50 12 to 20 ms. The table with every
+column explained is in docs/results.md and the per-swap JSON is in
+bench/results. docs/environment-notes.md records the environment problems the
+vLLM lane hit and how the scripts handle them.
 
 ## Quickstart
 
