@@ -30,9 +30,37 @@ class State:
         self.str_choices = {"schedule_policy": ("fcfs", "lpm", "dfs-weight", "lof", "random", "priority"),
                             "log_level": ("DEBUG", "INFO", "WARNING", "ERROR")}
         self.applied_calls = 0
+        self.last_reinit = None
+
+    def reinit(self, fields):
+        """Model the warm reinit: sizes change, a small delay stands in for
+        graph capture, ceilings follow the new pool."""
+        allowed = {"mem_fraction_static", "max_total_tokens", "kv_cache_dtype", "max_running_requests"}
+        bad = sorted(set(fields) - allowed)
+        if bad:
+            return {"ok": False, "error": f"not warm-reinitable: {bad}"}
+        import time as _t
+        _t.sleep(0.05)
+        with self.lock:
+            if "max_total_tokens" in fields:
+                self.tokens = int(fields["max_total_tokens"])
+                if "max_prefill_tokens" in self.knobs:
+                    self.knobs["max_prefill_tokens"] = self.tokens; self.ceilings["max_prefill_tokens"] = self.tokens
+            if "max_running_requests" in fields:
+                self.knobs["max_running_requests"] = int(fields["max_running_requests"]); self.ceilings["max_running_requests"] = int(fields["max_running_requests"])
+            self.last_reinit = {"ok": True, "fields": fields, "max_total_num_tokens": self.tokens, "total_s": 0.05}
+        return self.last_reinit
 
     def apply(self, changes):
         applied, rejected = {}, {}
+        reinit = {k[7:]: changes[k] for k in list(changes) if k.startswith("reinit.")}
+        changes = {k: v for k, v in changes.items() if not k.startswith("reinit.")}
+        if reinit:
+            r = self.reinit(reinit)
+            if not r["ok"]:
+                rejected["reinit"] = r["error"]
+            else:
+                applied["reinit"] = r
         with self.lock:
             for k, v in changes.items():
                 if k not in self.knobs:
@@ -87,7 +115,7 @@ def make_handler(state):
                     "max_total_num_tokens": state.tokens,
                     "internal_states": [{
                         "effective_max_running_requests_per_dp": state.knobs["max_running_requests"],
-                        "trimtab": dict(state.knobs, ceilings=state.ceilings),
+                        "trimtab": dict(state.knobs, ceilings=state.ceilings, last_reinit=state.last_reinit, max_total_num_tokens=state.tokens),
                     }],
                 })
             if state.engine == "vllm" and self.path == "/trimtab/knobs":
@@ -124,7 +152,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--engine", choices=["sglang", "vllm"], required=True)
     ap.add_argument("--port", type=int, required=True)
-    ap.add_argument("--tokens", type=int, default=16384, help="stands in for a cold boot-time allocation")
+    ap.add_argument("--tokens", type=int, default=16384, help="stands in for a warm-reinitable allocation")
+    ap.add_argument("--tp", type=int, default=1, help="stands in for a flag that needs a relaunch")
     a = ap.parse_args()
     srv = serve(a.engine, a.port, tokens=a.tokens)
     print(f"mock {a.engine} engine on {a.port}", flush=True)

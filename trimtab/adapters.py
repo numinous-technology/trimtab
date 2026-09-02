@@ -65,11 +65,32 @@ class SGLangAdapter:
         rejected = {} if ok else {k: "engine rejected the update" for k in changes}
         return ApplyResult(ok and applied.keys() == changes.keys(), applied, rejected, ms, status)
 
+    WARM = ("mem_fraction_static", "max_total_tokens", "kv_cache_dtype", "max_running_requests")
+
+    def reinit_warm(self, fields: dict, timeout=900) -> ApplyResult:
+        """Rebuild pools, backends and graphs in place. Weights stay on the GPU.
+        The engine refuses unless idle, so drain first. Returns the engine's
+        timing in applied["last_reinit"]."""
+        bad = sorted(set(fields) - set(self.WARM))
+        if bad:
+            return ApplyResult(False, rejected={k: "not warm-reinitable" for k in bad})
+        t0 = time.perf_counter()
+        status, body = _post(f"{self.base}/set_internal_state", {"server_args": {f"reinit.{k}": v for k, v in fields.items()}}, timeout)
+        ms = (time.perf_counter() - t0) * 1000
+        ok = status == 200 and _all_updated(body)
+        last = self.read_raw().get("last_reinit") if ok else None
+        return ApplyResult(ok, {"last_reinit": last} if ok else {}, {} if ok else {k: "engine refused, see server log" for k in fields}, ms, status)
+
+    def read_raw(self) -> dict:
+        info = _get(f"{self.base}/get_server_info", self.timeout)
+        states = info.get("internal_states") or []
+        return states[0].get("trimtab", {}) if states else {}
+
     def read_knobs(self) -> dict:
         info = _get(f"{self.base}/get_server_info", self.timeout)
         states = info.get("internal_states") or []
         if states and "trimtab" in states[0]:
-            return {k: v for k, v in states[0]["trimtab"].items() if k != "ceilings"}
+            return {k: v for k, v in states[0]["trimtab"].items() if k not in ("ceilings", "last_reinit", "max_total_num_tokens")}
         if states:
             return {"max_running_requests": states[0].get("effective_max_running_requests_per_dp")}
         return {}

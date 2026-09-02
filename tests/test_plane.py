@@ -136,3 +136,15 @@ def test_new_hot_knobs_bad_values_rejected_at_manifest_and_engine(engine):
         assert not accepted and k in rejected
         assert not a.set_hot({k: v}).ok  # engine agrees even when the manifest is bypassed
     assert state.knobs == before
+
+
+def test_warm_reinit_on_sglang_adapter(engine):
+    name, url, state = engine
+    if name != "sglang":
+        pytest.skip("warm reinit is an sglang path today")
+    a = make_adapter(name, url)
+    before = a.read_raw()["max_total_num_tokens"]
+    r = a.reinit_warm({"max_total_tokens": before // 2, "max_running_requests": 4})
+    assert r.ok and r.applied["last_reinit"]["max_total_num_tokens"] == before // 2
+    assert a.read_knobs()["max_running_requests"] == 4
+    assert not a.reinit_warm({"tp_size": 2}).ok

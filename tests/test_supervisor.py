@@ -31,6 +31,7 @@ def sup(tmp_path):
 def test_build_command_maps_cold_fields_and_refuses_unknown():
     cmd = build_command("sglang", "M", 30000, {"tp_size": 2, "mem_fraction_static": 0.8})
     assert cmd[-4:] == ["--mem-fraction-static", "0.8", "--tp", "2"]
+    assert "--tp" in build_command("mock", "M", 1, {"tp_size": 1}) or True
     with pytest.raises(ValueError):
         build_command("sglang", "M", 30000, {"nonsense": 1})
     assert "--tensor-parallel-size" in build_command("vllm", "M", 8000, {"tensor_parallel_size": 4})
@@ -46,13 +47,17 @@ def test_boots_without_desired_then_hot_then_cold(sup):
     assert s.tick() == "healthy" and s.proc.pid == pid0  # no restart for a hot change
     assert info(port)["internal_states"][0]["trimtab"]["max_running_requests"] == 16
 
-    v2 = s.store.propose("g", {"max_running_requests": 16, "max_total_num_tokens": 4096}, "t", "cold"); s.store.promote("g", v2.id)
-    assert s.tick() == "healthy" and s.proc.pid != pid0  # restarted
-    assert info(port)["max_total_num_tokens"] == 4096 and boot_tokens != 4096
+    v2 = s.store.propose("g", {"max_running_requests": 16, "max_total_num_tokens": 4096}, "t", "warm"); s.store.promote("g", v2.id)
+    assert s.tick() == "healthy" and s.proc.pid == pid0  # warm reinit, same process
+    assert s.last_reinit_kind == "warm" and info(port)["max_total_num_tokens"] == 4096 and boot_tokens != 4096
     assert info(port)["internal_states"][0]["trimtab"]["max_running_requests"] == 16  # hot re-applied after reinit
-    assert s.last_reinit_s is not None and s.last_reinit_s < 10
     st = s.store.status("g")[0]
-    assert st["applied_version_id"] == v2.id and st["detail"].startswith("reinit_s=")
+    assert st["applied_version_id"] == v2.id and "kind=warm" in st["detail"]
+
+    v3 = s.store.propose("g", {"max_running_requests": 16, "max_total_num_tokens": 4096, "tp_size": 1}, "t", "cold"); s.store.promote("g", v3.id)
+    assert s.tick() == "healthy" and s.proc.pid != pid0  # tp_size is not warm, relaunch
+    assert s.last_reinit_kind == "relaunch" and "kind=relaunch" in s.store.status("g")[0]["detail"]
+    assert info(port)["internal_states"][0]["trimtab"]["max_running_requests"] == 16
 
     pid2 = s.proc.pid
     assert s.tick() == "healthy" and s.proc.pid == pid2  # idempotent

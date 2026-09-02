@@ -35,7 +35,7 @@ COLD_FLAGS = {
         "max_model_len": "--max-model-len", "cuda_graph_sizes": "--cuda-graph-sizes",
         "speculative_config": "--speculative-config",
     },
-    "mock": {"max_total_num_tokens": "--tokens"},
+    "mock": {"max_total_num_tokens": "--tokens", "tp_size": "--tp"},
 }
 
 
@@ -70,6 +70,7 @@ class Supervisor:
         self.adapter = make_adapter(adapter_engine, f"http://127.0.0.1:{port}")
         self.proc, self.cold_applied, self.applied_version_id = None, None, None
         self.last_reinit_s = None
+        self.last_reinit_kind = None
 
     def split(self, fields):
         hot, cold = {}, {}
@@ -126,9 +127,24 @@ class Supervisor:
 
         hot, cold = self.split(desired.fields)
         if not self.alive() or cold != (self.cold_applied or {}):
-            self.store.record_status(self.replica_id, self.group, self.applied_version_id, "reinit", f"cold fields {sorted(cold)}")
-            self.stop()
-            self.last_reinit_s = self.launch(cold)
+            changed = {k: v for k, v in cold.items() if (self.cold_applied or {}).get(k) != v}
+            removed = set(self.cold_applied or {}) - set(cold)
+            warm = getattr(self.adapter, "WARM", ())
+            if self.alive() and changed and not removed and set(changed) <= set(warm) and self.drain_s >= 0:
+                self.store.record_status(self.replica_id, self.group, self.applied_version_id, "reinit", f"warm reinit {sorted(changed)}")
+                t0 = time.perf_counter()
+                r = self.adapter.reinit_warm({("max_total_tokens" if k == "max_total_num_tokens" else k): v for k, v in changed.items()})
+                if r.ok:
+                    self.cold_applied = dict(cold)
+                    self.last_reinit_s = time.perf_counter() - t0
+                    self.last_reinit_kind = "warm"
+                else:
+                    self.store.record_status(self.replica_id, self.group, self.applied_version_id, "reinit", f"warm refused {r.rejected}, relaunching")
+            if cold != (self.cold_applied or {}) or not self.alive():
+                self.store.record_status(self.replica_id, self.group, self.applied_version_id, "reinit", f"relaunch for {sorted(cold)}")
+                self.stop()
+                self.last_reinit_s = self.launch(cold)
+                self.last_reinit_kind = "relaunch"
         if hot:
             accepted, rejected = self.manifest.validate(hot)
             if rejected:
@@ -139,7 +155,7 @@ class Supervisor:
                 self.store.record_status(self.replica_id, self.group, self.applied_version_id, "failed", f"engine rejected {r.rejected}")
                 return "failed"
         self.applied_version_id = desired.id
-        detail = f"reinit_s={self.last_reinit_s:.3f}" if self.last_reinit_s is not None else ""
+        detail = f"reinit_s={self.last_reinit_s:.3f} kind={self.last_reinit_kind}" if self.last_reinit_s is not None else ""
         self.store.record_status(self.replica_id, self.group, desired.id, "healthy", detail)
         return "healthy"
 

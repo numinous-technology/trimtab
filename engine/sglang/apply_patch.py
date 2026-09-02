@@ -57,6 +57,11 @@ def _trimtab_apply_hot_knobs(scheduler, args: dict):
         }
     ok = True
     msgs = []
+    reinit = {k[7:]: args.pop(k) for k in list(args) if k.startswith("reinit.")}
+    if reinit:
+        r = scheduler.trimtab_reinit(reinit)
+        ok = ok and r["ok"]
+        msgs.append(f"trimtab reinit {r}")
     if "max_running_requests" in args:
         v = args.pop("max_running_requests")
         ceiling = scheduler._trimtab_ceilings["max_running_requests"]
@@ -145,11 +150,16 @@ READBACK_BODY = READBACK_ANCHOR + '''        ret["trimtab"] = {
             "schedule_conservativeness": getattr(self, "_trimtab_conservativeness", None),
             "log_level": getattr(self, "_trimtab_log_level", None),
             "ceilings": dict(getattr(self, "_trimtab_ceilings", {}), max_prefill_tokens=self.max_total_num_tokens),
+            "last_reinit": getattr(self, "_trimtab_last_reinit", None),
+            "max_total_num_tokens": self.max_total_num_tokens,
         }
 '''
 
 IO_ANCHOR = "    server_args: Dict[str, Union[int, float]]\n"
 IO_BODY = "    server_args: Dict[str, Union[int, float, str]]  # trimtab: str for schedule_policy, log_level\n"
+
+REINIT_ANCHOR = "    def flush_cache(self, empty_cache: bool = True):\n"
+REINIT_BODY = open(__file__.replace("apply_patch.py", "reinit_body.py")).read() + REINIT_ANCHOR
 
 ANCHOR_RE = re.compile(
     r"(    def set_internal_state\(self, recv_req: SetInternalStateReq\):\n"
@@ -206,6 +216,9 @@ def main():
     shutil.copyfile(target, target + ".trimtab-orig")
     out = ANCHOR_RE.sub(lambda m: m.group(1) + INJECT_BODY, src, count=1)
     out = out.replace(READBACK_ANCHOR, READBACK_BODY, 1)
+    if out.count(REINIT_ANCHOR) != 1:
+        sys.exit(f"reinit anchor matched {out.count(REINIT_ANCHOR)} times, refusing to edit")
+    out = out.replace(REINIT_ANCHOR, REINIT_BODY, 1)
     out = out.rstrip("\n") + "\n" + TAIL
 
     try:
