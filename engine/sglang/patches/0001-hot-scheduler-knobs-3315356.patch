@@ -12,10 +12,10 @@ index d29ff30..f39f2d2 100644
  
  class SetInternalStateReqOutput(BaseReq, kw_only=True):
 diff --git a/python/sglang/srt/managers/scheduler.py b/python/sglang/srt/managers/scheduler.py
-index 454f754..06fb879 100644
+index 454f754..54321bc 100644
 --- a/python/sglang/srt/managers/scheduler.py
 +++ b/python/sglang/srt/managers/scheduler.py
-@@ -4734,6 +4734,208 @@ class Scheduler(
+@@ -4734,6 +4734,213 @@ class Scheduler(
  
          return DetachHiCacheStorageReqOutput(success=False, message=msg)
  
@@ -35,6 +35,11 @@ index 454f754..06fb879 100644
 +        bad = sorted(set(fields) - allowed)
 +        if bad:
 +            return {"ok": False, "error": f"not warm-reinitable: {bad}"}
++        _saver = getattr(self.tp_worker.model_runner, "memory_saver_adapter", None)
++        if _saver is None or "Noop" in type(_saver).__name__:
++            info = {"ok": False, "error": "warm reinit needs the server launched with --enable-memory-saver"}
++            self._trimtab_last_reinit = info
++            return info
 +        pending = getattr(self, "result_queue", None)
 +        if not self.is_fully_idle() or (pending is not None and len(pending)) or self.last_batch is not None:
 +            info = {"ok": False, "error": "scheduler busy, drain before a warm reinit"}
@@ -224,7 +229,7 @@ index 454f754..06fb879 100644
      def flush_cache(self, empty_cache: bool = True):
          """Flush memory pools (e.g., KV cache, Mamba cache) and optionally empty device allocator cache."""
          if self.is_fully_idle():
-@@ -4790,6 +4992,18 @@ class Scheduler(
+@@ -4790,6 +4997,18 @@ class Scheduler(
          )
          ret["startup_time"] = self.startup_time
          ret["effective_max_running_requests_per_dp"] = self.max_running_requests
@@ -243,7 +248,7 @@ index 454f754..06fb879 100644
  
          if get_exec().moe.elastic_ep_backend is not None:
              from sglang.srt.elastic_ep.elastic_ep import ElasticEPStateManager
-@@ -4828,6 +5042,20 @@ class Scheduler(
+@@ -4828,6 +5047,20 @@ class Scheduler(
  
      def set_internal_state(self, recv_req: SetInternalStateReq):
          server_args_dict = recv_req.server_args
@@ -264,7 +269,7 @@ index 454f754..06fb879 100644
          args_allow_update = set(
              [
                  "pp_max_micro_batch_size",
-@@ -5640,3 +5868,108 @@ def _make_abort_req(
+@@ -5640,3 +5873,108 @@ def _make_abort_req(
              num_output_tokens=len(req.output_ids),
          ),
      )

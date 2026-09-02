@@ -107,9 +107,11 @@ knobs:
   - field: kv_cache_dtype
     klass: cold
   - field: mem_fraction_static
-    klass: cold
+    klass: warm
+    note: in-place reinit, pools and graphs rebuilt, weights stay on the GPU, needs --enable-memory-saver
   - field: max_total_num_tokens
-    klass: cold
+    klass: warm
+    note: same path, sets --max-total-tokens for the rebuilt pool
   - field: cuda_graph_max_bs
     klass: cold
   - field: attention_backend

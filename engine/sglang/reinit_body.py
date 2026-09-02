@@ -14,6 +14,11 @@
         bad = sorted(set(fields) - allowed)
         if bad:
             return {"ok": False, "error": f"not warm-reinitable: {bad}"}
+        _saver = getattr(self.tp_worker.model_runner, "memory_saver_adapter", None)
+        if _saver is None or "Noop" in type(_saver).__name__:
+            info = {"ok": False, "error": "warm reinit needs the server launched with --enable-memory-saver"}
+            self._trimtab_last_reinit = info
+            return info
         pending = getattr(self, "result_queue", None)
         if not self.is_fully_idle() or (pending is not None and len(pending)) or self.last_batch is not None:
             info = {"ok": False, "error": "scheduler busy, drain before a warm reinit"}

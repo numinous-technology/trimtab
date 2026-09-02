@@ -35,7 +35,7 @@ class Reconciler:
             return HEALTHY
 
         hot, rejected = self.manifest.validate(desired.fields)
-        cold = {k: r for k, r in rejected.items() if "cold" in r}
+        cold = {k: r for k, r in rejected.items() if "cold" in r or "warm" in r}
         bad = {k: r for k, r in rejected.items() if k not in cold}
         if bad:
             self.store.record_status(self.replica_id, self.group, self.applied_version_id, FAILED, f"manifest rejected {bad}")

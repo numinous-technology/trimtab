@@ -10,7 +10,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-HOT, COLD, DEFERRED = "hot", "cold", "deferred"
+HOT, COLD, WARM, DEFERRED = "hot", "cold", "warm", "deferred"
 
 
 @dataclass(frozen=True)
@@ -37,7 +37,9 @@ class Manifest:
             if knob is None:
                 rejected[k] = "not in manifest"
             elif knob.klass == COLD:
-                rejected[k] = "cold knob, needs a reinit"
+                rejected[k] = "cold knob, needs a relaunch"
+            elif knob.klass == WARM:
+                rejected[k] = "warm knob, needs an in-place reinit"
             elif knob.klass == DEFERRED:
                 rejected[k] = "not hot in this engine version"
             elif knob.vtype == "str":

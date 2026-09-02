@@ -17,7 +17,7 @@ import time
 import urllib.request
 
 from .adapters import make_adapter
-from .manifest import COLD, Manifest
+from .manifest import COLD, WARM, Manifest
 from .store import Store
 
 COLD_FLAGS = {
@@ -41,7 +41,8 @@ COLD_FLAGS = {
 
 def base_command(engine, model, port, mock_engine="sglang"):
     if engine == "sglang":
-        return ["python3", "-m", "sglang.launch_server", "--model-path", model, "--host", "0.0.0.0", "--port", str(port)]
+        return ["python3", "-m", "sglang.launch_server", "--model-path", model, "--host", "0.0.0.0", "--port", str(port),
+                "--enable-memory-saver"]  # lets warm reinit unmap the old pools
     if engine == "vllm":
         return ["vllm", "serve", model, "--served-model-name", "default", "--host", "0.0.0.0", "--port", str(port)]
     if engine == "mock":
@@ -75,7 +76,7 @@ class Supervisor:
     def split(self, fields):
         hot, cold = {}, {}
         for k, v in fields.items():
-            (cold if self.manifest.knobs.get(k) and self.manifest.knobs[k].klass == COLD else hot)[k] = v
+            (cold if self.manifest.knobs.get(k) and self.manifest.knobs[k].klass in (COLD, WARM) else hot)[k] = v
         return hot, cold
 
     def healthy(self):

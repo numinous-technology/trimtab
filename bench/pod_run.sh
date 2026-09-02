@@ -44,7 +44,7 @@ boot(){ # $1 label -> writes $OUT/boot_$1_s, returns 1 on failure
     python3 -m trimtab.mock_engine --engine $ENGINE --port $PORT > $OUT/server_$1.log 2>&1 &
   elif [ $ENGINE = sglang ]; then
     python3 -m sglang.launch_server --model-path $MD --host 0.0.0.0 --port $PORT \
-      --mem-fraction-static 0.85 > $OUT/server_$1.log 2>&1 &
+      --mem-fraction-static 0.85 --enable-memory-saver ${SGLANG_EXTRA:-} > $OUT/server_$1.log 2>&1 &
   else
     # --max-num-seqs 256: vllm's default 1024 exceeds this hybrid model's Mamba cache blocks.
     # SM120 (RTX PRO 6000): the wheel's FlashInfer does not know the arch, Triton attention does.
