@@ -130,10 +130,11 @@ class Supervisor:
             changed = {k: v for k, v in cold.items() if (self.cold_applied or {}).get(k) != v}
             removed = set(self.cold_applied or {}) - set(cold)
             warm = getattr(self.adapter, "WARM", ())
-            if self.alive() and changed and not removed and set(changed) <= set(warm) and self.drain_s >= 0:
+            engine_names = {("max_total_tokens" if k == "max_total_num_tokens" else k): v for k, v in changed.items()}
+            if self.alive() and changed and not removed and set(engine_names) <= set(warm):
                 self.store.record_status(self.replica_id, self.group, self.applied_version_id, "reinit", f"warm reinit {sorted(changed)}")
                 t0 = time.perf_counter()
-                r = self.adapter.reinit_warm({("max_total_tokens" if k == "max_total_num_tokens" else k): v for k, v in changed.items()})
+                r = self.adapter.reinit_warm(engine_names)
                 if r.ok:
                     self.cold_applied = dict(cold)
                     self.last_reinit_s = time.perf_counter() - t0
