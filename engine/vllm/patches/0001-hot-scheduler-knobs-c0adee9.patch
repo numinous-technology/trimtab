@@ -16,10 +16,10 @@ new file mode 100644
 index 0000000..e69de29
 diff --git a/vllm/entrypoints/serve/dev/trimtab/api_router.py b/vllm/entrypoints/serve/dev/trimtab/api_router.py
 new file mode 100644
-index 0000000..f92d560
+index 0000000..54baeb3
 --- /dev/null
 +++ b/vllm/entrypoints/serve/dev/trimtab/api_router.py
-@@ -0,0 +1,27 @@
+@@ -0,0 +1,34 @@
 +# SPDX-License-Identifier: Apache-2.0
 +# trimtab (github.com/numinous-technology/trimtab) dev router.
 +
@@ -37,6 +37,13 @@ index 0000000..f92d560
 +async def trimtab_set_knobs(raw_request: Request):
 +    knobs = await raw_request.json()
 +    result = await _core(raw_request).call_utility_async("trimtab_set_knobs", knobs)
++    return JSONResponse(content=result, status_code=200 if result["ok"] else 400)
++
++
++@router.post("/trimtab/reinit")
++async def trimtab_reinit(raw_request: Request):
++    fields = await raw_request.json()
++    result = await _core(raw_request).call_utility_async("trimtab_reinit", fields)
 +    return JSONResponse(content=result, status_code=200 if result["ok"] else 400)
 +
 +
@@ -64,13 +71,83 @@ index b0fd3d2..5d53fc5 100644
          # There's no "decoding phase" nor "prefill phase" in the scheduler.
          # Each request just has the num_computed_tokens and
 diff --git a/vllm/v1/engine/core.py b/vllm/v1/engine/core.py
-index c734e67..e3b8da6 100644
+index c734e67..8c44ec5 100644
 --- a/vllm/v1/engine/core.py
 +++ b/vllm/v1/engine/core.py
-@@ -1572,6 +1572,70 @@ class EngineCoreProc(EngineCore):
+@@ -1572,6 +1572,142 @@ class EngineCoreProc(EngineCore):
                  "Unrecognized input request type encountered: %s", request_type
              )
  
++    def trimtab_reinit(self, fields: dict) -> dict:
++        """trimtab warm reinit. Rebuild the KV cache, attention groups, CUDA
++        graphs and the scheduler at a new size. Weights never leave the GPU.
++
++        Accepts gpu_memory_utilization, max_num_seqs, max_num_batched_tokens.
++        Needs an idle engine (callers drain) and --enable-sleep-mode.
++        """
++        import time as _time
++
++        t0 = _time.perf_counter()
++        allowed = {"gpu_memory_utilization", "max_num_seqs", "max_num_batched_tokens"}
++        bad = sorted(set(fields) - allowed)
++        if bad:
++            return {"ok": False, "error": f"not warm-reinitable: {bad}"}
++        if not self.vllm_config.model_config.enable_sleep_mode:
++            return {"ok": False, "error": "warm reinit needs the server launched with --enable-sleep-mode"}
++        if self.scheduler.has_requests():
++            return {"ok": False, "error": "engine busy, drain before a warm reinit"}
++
++        cc, sc = self.vllm_config.cache_config, self.vllm_config.scheduler_config
++        previous = {"gpu_memory_utilization": cc.gpu_memory_utilization,
++                    "max_num_seqs": sc.max_num_seqs, "max_num_batched_tokens": sc.max_num_batched_tokens}
++        released = self.collective_rpc("trimtab_release_kv")
++        freed_at = _time.perf_counter()
++
++        def _rebuild(values):
++            if "gpu_memory_utilization" in values:
++                cc.gpu_memory_utilization = float(values["gpu_memory_utilization"])
++            if "max_num_seqs" in values:
++                sc.max_num_seqs = int(values["max_num_seqs"])
++            if "max_num_batched_tokens" in values:
++                sc.max_num_batched_tokens = int(values["max_num_batched_tokens"])
++            cc.num_gpu_blocks = None
++            kv_cache_config = self._initialize_kv_caches(self.vllm_config)
++            block_size, hash_block_size = resolve_kv_cache_block_sizes(kv_cache_config, self.vllm_config)
++            old = self.scheduler
++            self.scheduler = type(old)(
++                vllm_config=self.vllm_config,
++                kv_cache_config=kv_cache_config,
++                structured_output_manager=self.structured_output_manager,
++                include_finished_set=old.finished_req_ids_dict is not None,
++                log_stats=self.log_stats,
++                block_size=block_size,
++                hash_block_size=hash_block_size,
++            )
++            return kv_cache_config
++
++        try:
++            kv_cache_config = _rebuild(fields)
++        except Exception as e:
++            logger.warning("trimtab reinit with %s failed (%s), restoring previous sizing", fields, e)
++            self.collective_rpc("trimtab_release_kv")
++            kv_cache_config = _rebuild(previous)
++            fields = {"error": str(e), "restored": previous}
++
++        sched = self.scheduler
++        sched._trimtab_ceilings = {"max_num_seqs": sched.max_num_running_reqs,
++                                   "max_num_batched_tokens": sched.max_num_scheduled_tokens}
++        done = _time.perf_counter()
++        info = {
++            "ok": "error" not in fields, "fields": fields,
++            "num_gpu_blocks": kv_cache_config.num_blocks,
++            "max_num_seqs": sched.max_num_running_reqs,
++            "freed_gib": [r.get("freed_gib") for r in released],
++            "free_s": round(freed_at - t0, 3), "rebuild_s": round(done - freed_at, 3), "total_s": round(done - t0, 3),
++        }
++        self._trimtab_last_reinit = info
++        logger.info("trimtab warm reinit %s", info)
++        return info
++
 +    def trimtab_set_knobs(self, knobs: dict) -> dict:
 +        """trimtab (github.com/numinous-technology/trimtab) hot scheduler knobs.
 +
@@ -133,8 +210,57 @@ index c734e67..e3b8da6 100644
 +            "log_level": getattr(sched, "_trimtab_log_level", None),
 +            "running": len(sched.running),
 +            "ceilings": getattr(sched, "_trimtab_ceilings", {}),
++            "last_reinit": getattr(self, "_trimtab_last_reinit", None),
++            "num_gpu_blocks": self.vllm_config.cache_config.num_gpu_blocks,
 +        }
 +
      def _reject_add_in_shutdown(self, request: Request) -> bool:
          if self.shutdown_state == EngineShutdownState.RUNNING:
              return False
+diff --git a/vllm/v1/worker/gpu_worker.py b/vllm/v1/worker/gpu_worker.py
+index 9ee2179..2f7eab5 100644
+--- a/vllm/v1/worker/gpu_worker.py
++++ b/vllm/v1/worker/gpu_worker.py
+@@ -234,6 +234,42 @@ class Worker(WorkerBase):
+             )
+         return self._sleep_mode_backend
+ 
++    def trimtab_release_kv(self) -> dict:
++        """trimtab warm reinit, worker side. Unmap the KV pool and drop the
++        captured CUDA graphs. Weights stay on the GPU.
++
++        Needs --enable-sleep-mode so the KV pool lives in the CuMemAllocator,
++        whose discard() unmaps a tag's physical pages regardless of who still
++        references the tensors. The old tensors are kept alive on purpose so
++        the allocator's pool never hands their unmapped segments to the new KV
++        cache. Only virtual address space is retained per reinit.
++        """
++        import gc
++
++        from vllm.compilation.cuda_graph import CUDAGraphWrapper
++        from vllm.device_allocator.cumem import CuMemAllocator
++
++        mr = self.model_runner
++        torch.cuda.synchronize()
++        free0 = torch.cuda.mem_get_info()[0]
++        self._trimtab_old_kv = getattr(self, "_trimtab_old_kv", []) + [list(mr.kv_caches)]
++        try:
++            from vllm.compilation.breakable_cudagraph import BreakableCUDAGraphWrapper
++
++            BreakableCUDAGraphWrapper.clear_all_graphs()
++        except Exception:
++            pass
++        CUDAGraphWrapper.clear_all_graphs()
++        for key_set in mr.cudagraph_dispatcher.cudagraph_keys.values():
++            key_set.clear()
++        mr.cudagraph_dispatcher.keys_initialized = False
++        mr._cleanup_profiling_kv_cache()
++        CuMemAllocator.get_instance().discard("kv_cache")
++        gc.collect()
++        torch.cuda.empty_cache()
++        torch.cuda.synchronize()
++        return {"freed_gib": round((torch.cuda.mem_get_info()[0] - free0) / 2**30, 2)}
++
+     def sleep(self, level: int = 1) -> None:
+         torch.accelerator.synchronize()
+         free_bytes_before_sleep = torch.accelerator.get_memory_info()[0]

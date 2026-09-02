@@ -44,7 +44,8 @@ def base_command(engine, model, port, mock_engine="sglang"):
         return ["python3", "-m", "sglang.launch_server", "--model-path", model, "--host", "0.0.0.0", "--port", str(port),
                 "--enable-memory-saver"]  # lets warm reinit unmap the old pools
     if engine == "vllm":
-        return ["vllm", "serve", model, "--served-model-name", "default", "--host", "0.0.0.0", "--port", str(port)]
+        return ["vllm", "serve", model, "--served-model-name", "default", "--host", "0.0.0.0", "--port", str(port),
+                "--enable-sleep-mode"]  # lets warm reinit unmap the old KV pool
     if engine == "mock":
         return [sys.executable, "-m", "trimtab.mock_engine", "--engine", mock_engine, "--port", str(port)]
     raise ValueError(engine)

@@ -124,9 +124,31 @@ class VLLMAdapter:
         ms = (time.perf_counter() - t0) * 1000
         return ApplyResult(bool(body.get("ok")), body.get("applied", {}), body.get("rejected", {}), ms, status)
 
+    WARM = ("gpu_memory_utilization", "max_num_seqs", "max_num_batched_tokens")
+
+    def reinit_warm(self, fields: dict, timeout=900) -> ApplyResult:
+        """Rebuild KV cache, graphs and scheduler in place. Weights stay on the
+        GPU. Needs --enable-sleep-mode. The engine refuses while busy, so drain
+        first, the call retries briefly on that."""
+        bad = sorted(set(fields) - set(self.WARM))
+        if bad:
+            return ApplyResult(False, rejected={k: "not warm-reinitable" for k in bad})
+        t0 = time.perf_counter()
+        for attempt in range(20):
+            status, body = _post(f"{self.base}/trimtab/reinit", fields, timeout)
+            if body.get("ok") or "busy" not in str(body.get("error", "")):
+                break
+            time.sleep(0.5)
+        ms = (time.perf_counter() - t0) * 1000
+        ok = bool(body.get("ok"))
+        return ApplyResult(ok, {"last_reinit": body} if ok else {}, {} if ok else {k: body.get("error", "engine refused") for k in fields}, ms, status)
+
+    def read_raw(self) -> dict:
+        return _get(f"{self.base}/trimtab/knobs", self.timeout)
+
     def read_knobs(self) -> dict:
         body = _get(f"{self.base}/trimtab/knobs", self.timeout)
-        return {k: v for k, v in body.items() if k not in ("ceilings", "running")}
+        return {k: v for k, v in body.items() if k not in ("ceilings", "running", "last_reinit", "num_gpu_blocks")}
 
     def healthy(self) -> bool:
         try:

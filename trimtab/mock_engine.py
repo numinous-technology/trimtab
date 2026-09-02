@@ -35,7 +35,8 @@ class State:
     def reinit(self, fields):
         """Model the warm reinit: sizes change, a small delay stands in for
         graph capture, ceilings follow the new pool."""
-        allowed = {"mem_fraction_static", "max_total_tokens", "kv_cache_dtype", "max_running_requests"}
+        allowed = ({"mem_fraction_static", "max_total_tokens", "kv_cache_dtype", "max_running_requests"} if self.engine == "sglang"
+                   else {"gpu_memory_utilization", "max_num_seqs", "max_num_batched_tokens"})
         bad = sorted(set(fields) - allowed)
         if bad:
             return {"ok": False, "error": f"not warm-reinitable: {bad}"}
@@ -48,7 +49,12 @@ class State:
                     self.knobs["max_prefill_tokens"] = self.tokens; self.ceilings["max_prefill_tokens"] = self.tokens
             if "max_running_requests" in fields:
                 self.knobs["max_running_requests"] = int(fields["max_running_requests"]); self.ceilings["max_running_requests"] = int(fields["max_running_requests"])
-            self.last_reinit = {"ok": True, "fields": fields, "max_total_num_tokens": self.tokens, "total_s": 0.05}
+            for k in ("max_num_seqs", "max_num_batched_tokens"):
+                if k in fields:
+                    self.knobs[k] = int(fields[k]); self.ceilings[k] = int(fields[k])
+            if "gpu_memory_utilization" in fields:
+                self.tokens = int(16384 * float(fields["gpu_memory_utilization"]))
+            self.last_reinit = {"ok": True, "fields": fields, "max_total_num_tokens": self.tokens, "num_gpu_blocks": self.tokens // 16, "total_s": 0.05}
         return self.last_reinit
 
     def apply(self, changes):
@@ -120,7 +126,7 @@ def make_handler(state):
                 })
             if state.engine == "vllm" and self.path == "/trimtab/knobs":
                 return self._json(200, dict(state.knobs, max_num_seqs_effective=state.knobs["max_num_seqs"],
-                                            running=0, ceilings=state.ceilings))
+                                            running=0, ceilings=state.ceilings, last_reinit=state.last_reinit, num_gpu_blocks=state.tokens // 16))
             self._json(404, {"error": "no route"})
 
         def do_POST(self):
@@ -128,6 +134,9 @@ def make_handler(state):
             if state.engine == "sglang" and self.path == "/set_internal_state":
                 applied, rejected = state.apply(body.get("server_args", {}))
                 return self._json(200, [not rejected])  # real SGLang returns one bool per rank
+            if state.engine == "vllm" and self.path == "/trimtab/reinit":
+                r = state.reinit(body)
+                return self._json(200 if r["ok"] else 400, r)
             if state.engine == "vllm" and self.path == "/trimtab/set_knobs":
                 applied, rejected = state.apply(body)
                 ok = not rejected

@@ -51,7 +51,7 @@ boot(){ # $1 label -> writes $OUT/boot_$1_s, returns 1 on failure
     VFLAGS="--max-num-seqs 256"
     case "$(nvidia-smi --query-gpu=compute_cap --format=csv,noheader | head -1)" in 12.*) VFLAGS="$VFLAGS --attention-backend TRITON_ATTN"; export VLLM_USE_FLASHINFER_SAMPLER=0;; esac
     VLLM_SERVER_DEV_MODE=1 vllm serve $MD --served-model-name default --host 0.0.0.0 --port $PORT \
-      --gpu-memory-utilization 0.85 --max-model-len 16384 $VFLAGS > $OUT/server_$1.log 2>&1 &
+      --gpu-memory-utilization 0.85 --max-model-len 16384 --enable-sleep-mode $VFLAGS > $OUT/server_$1.log 2>&1 &
   fi
   while true; do
     c=$(curl -s -m 3 -o /dev/null -w '%{http_code}' http://127.0.0.1:$PORT/health)
@@ -75,9 +75,7 @@ python3 $HERE/bench/hot_swap_bench.py --engine $ENGINE --base http://127.0.0.1:$
 BENCH_EXIT=$?
 python3 $HERE/bench/knob_sweep.py --engine $ENGINE --base http://127.0.0.1:$PORT --out $OUT/knob_sweep.json
 SWEEP_EXIT=$?
-if [ $ENGINE = sglang ]; then
-  python3 $HERE/bench/warm_reinit_bench.py --base http://127.0.0.1:$PORT --out $OUT/warm_reinit.json; WARM_EXIT=$?
-else echo '{"all_ok": null, "rows": []}' > $OUT/warm_reinit.json; WARM_EXIT=0; fi
+python3 $HERE/bench/warm_reinit_bench.py --engine $ENGINE --base http://127.0.0.1:$PORT --out $OUT/warm_reinit.json; WARM_EXIT=$?
 
 python3 - <<EOF
 import json, subprocess

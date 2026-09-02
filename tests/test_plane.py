@@ -148,3 +148,13 @@ def test_warm_reinit_on_sglang_adapter(engine):
     assert r.ok and r.applied["last_reinit"]["max_total_num_tokens"] == before // 2
     assert a.read_knobs()["max_running_requests"] == 4
     assert not a.reinit_warm({"tp_size": 2}).ok
+
+
+def test_warm_reinit_on_vllm_adapter(engine):
+    name, url, state = engine
+    if name != "vllm":
+        pytest.skip("vllm path")
+    a = make_adapter(name, url)
+    r = a.reinit_warm({"gpu_memory_utilization": 0.5, "max_num_seqs": 4})
+    assert r.ok and r.applied["last_reinit"]["ok"] and a.read_knobs()["max_num_seqs"] == 4
+    assert not a.reinit_warm({"tensor_parallel_size": 2}).ok

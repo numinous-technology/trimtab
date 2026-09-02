@@ -23,7 +23,12 @@ MARKER = "trimtab_set_knobs"
 
 CORE_ANCHOR = "    def _reject_add_in_shutdown(self, request: Request) -> bool:\n"
 
-CORE_BODY = '''    def trimtab_set_knobs(self, knobs: dict) -> dict:
+_HERE = __file__.rsplit("/", 1)[0]
+CORE_REINIT = open(f"{_HERE}/reinit_core_body.py").read()
+WORKER_ANCHOR = "    def sleep(self, level: int = 1) -> None:\n"
+WORKER_BODY = open(f"{_HERE}/reinit_worker_body.py").read() + WORKER_ANCHOR
+
+CORE_BODY = CORE_REINIT + '''    def trimtab_set_knobs(self, knobs: dict) -> dict:
         """trimtab (github.com/numinous-technology/trimtab) hot scheduler knobs.
 
         Applies validated values to the live scheduler, which reads them on
@@ -85,6 +90,8 @@ CORE_BODY = '''    def trimtab_set_knobs(self, knobs: dict) -> dict:
             "log_level": getattr(sched, "_trimtab_log_level", None),
             "running": len(sched.running),
             "ceilings": getattr(sched, "_trimtab_ceilings", {}),
+            "last_reinit": getattr(self, "_trimtab_last_reinit", None),
+            "num_gpu_blocks": self.vllm_config.cache_config.num_gpu_blocks,
         }
 
 '''
@@ -106,6 +113,13 @@ def _core(request: Request):
 async def trimtab_set_knobs(raw_request: Request):
     knobs = await raw_request.json()
     result = await _core(raw_request).call_utility_async("trimtab_set_knobs", knobs)
+    return JSONResponse(content=result, status_code=200 if result["ok"] else 400)
+
+
+@router.post("/trimtab/reinit")
+async def trimtab_reinit(raw_request: Request):
+    fields = await raw_request.json()
+    result = await _core(raw_request).call_utility_async("trimtab_reinit", fields)
     return JSONResponse(content=result, status_code=200 if result["ok"] else 400)
 
 
@@ -143,7 +157,7 @@ def root():
 
 def edit(path, anchor, body, check_only):
     src = open(path).read()
-    if MARKER in src or "attach_trimtab_router" in src or "_trimtab_pending_max_num_seqs" in src:
+    if MARKER in src or "attach_trimtab_router" in src or "_trimtab_pending_max_num_seqs" in src or "trimtab_release_kv" in src:
         return "already patched"
     n = src.count(anchor)
     if n != 1:
@@ -163,6 +177,7 @@ def main():
     print("core   ", edit(f"{r}/v1/engine/core.py", CORE_ANCHOR, CORE_BODY + CORE_ANCHOR, check_only))
     print("serve  ", edit(f"{r}/entrypoints/serve/__init__.py", INIT_ANCHOR, INIT_BODY, check_only))
     print("sched  ", edit(f"{r}/v1/core/sched/scheduler.py", SCHED_ANCHOR, SCHED_BODY, check_only))
+    print("worker ", edit(f"{r}/v1/worker/gpu_worker.py", WORKER_ANCHOR, WORKER_BODY, check_only))
     if not check_only:
         import os
         d = f"{r}/entrypoints/serve/dev/trimtab"
