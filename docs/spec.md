@@ -251,9 +251,12 @@ to boot_stock_s (cold disk after download). GPU-resident reinit is not built.
 Neither engine exposes an in-process pool rebuild, so claiming it would be a
 lie. It stays on the roadmap as an upstream conversation.
 
-M3, store with versioning and rollback. Built on SQLite with the schema the
-Postgres deployment will share. The admin surface is the CLI. A network API
-comes when a second machine needs to talk to the store.
+M3, store with versioning and rollback. Built. One class runs on SQLite or
+Postgres from the same schema, tested against a real Postgres. trimtab.server
+puts the store behind a token-guarded HTTP API and RemoteStore gives daemons
+on other machines the same interface. A Kubernetes operator turns
+InferenceConfig objects into versions and canaries, tested against a kind
+cluster.
 
 M4, canary orchestrator. Built. Per-replica overrides put a candidate on a
 subset, a Prometheus scraper turns engine metrics into rates and quantiles,

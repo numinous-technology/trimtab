@@ -250,7 +250,7 @@ trimtab/server.py                the store over HTTP, and RemoteStore with the S
 trimtab/operator.py              Kubernetes operator, InferenceConfig to store, stdlib api client
 trimtab/cli.py                   set, get, propose, promote, rollback, canary, daemon, supervise
 trimtab/mock_engine.py           both control surfaces without a GPU
-tests/                           43 tests on CPU, plus Postgres and kind-cluster tests that run when those exist
+tests/                           42 tests on CPU, plus Postgres and kind-cluster tests that run when those exist
 bench/                           bench, knob sweep, on-pod runner, RunPod and Modal launchers, results
 deploy/k8s/                      CRD, control plane and operator manifests, example object
 docs/upstream/                   ready-to-push patches for SGLang and vLLM with measured numbers in the messages
