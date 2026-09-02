@@ -1,62 +1,72 @@
-[21:00:44] weights at /workspace/Qwen_Qwen3.8-27B-FP8 (6s)
-[21:03:50] boot stock ready in 181s
+[02:36:08] weights at /workspace/Qwen_Qwen3.8-27B-FP8 (1s)
+[02:36:13] gpu memory used before boot stock: 5MiB
+[02:38:59] boot stock ready in 166s
 core    patched
 serve   patched
+sched   patched
 router  written /usr/local/lib/python3.12/dist-packages/vllm/entrypoints/serve/dev/trimtab/api_router.py
-[21:04:51] boot patched FAILED
-(APIServer pid=697)            ^^^^^^^^^^^^^^^^^^^^^
-(APIServer pid=697)   File "/usr/local/lib/python3.12/dist-packages/vllm/entrypoints/openai/api_server.py", line 163, in build_async_engine_client_from_engine_args
-(APIServer pid=697)     async_llm = AsyncLLM.from_vllm_config(
-(APIServer pid=697)                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
-(APIServer pid=697)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/async_llm.py", line 220, in from_vllm_config
-(APIServer pid=697)     return cls(
-(APIServer pid=697)            ^^^^
-(APIServer pid=697)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/async_llm.py", line 149, in __init__
-(APIServer pid=697)     self.engine_core = EngineCoreClient.make_async_mp_client(
-(APIServer pid=697)                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-(APIServer pid=697)   File "/usr/local/lib/python3.12/dist-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
-(APIServer pid=697)     return func(*args, **kwargs)
-(APIServer pid=697)            ^^^^^^^^^^^^^^^^^^^^^
-(APIServer pid=697)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/core_client.py", line 139, in make_async_mp_client
-(APIServer pid=697)     return AsyncMPClient(*client_args)
-(APIServer pid=697)            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-(APIServer pid=697)   File "/usr/local/lib/python3.12/dist-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
-(APIServer pid=697)     return func(*args, **kwargs)
-(APIServer pid=697)            ^^^^^^^^^^^^^^^^^^^^^
-(APIServer pid=697)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/core_client.py", line 990, in __init__
-(APIServer pid=697)     super().__init__(
-(APIServer pid=697)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/core_client.py", line 609, in __init__
-(APIServer pid=697)     with launch_core_engines(
-(APIServer pid=697)   File "/usr/lib/python3.12/contextlib.py", line 144, in __exit__
-(APIServer pid=697)     next(self.gen)
-(APIServer pid=697)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/utils.py", line 1206, in launch_core_engines
-(APIServer pid=697)     wait_for_engine_startup(
-(APIServer pid=697)   File "/usr/local/lib/python3.12/dist-packages/vllm/v1/engine/utils.py", line 1286, in wait_for_engine_startup
-(APIServer pid=697)     raise RuntimeError(
-(APIServer pid=697) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+[02:39:04] gpu memory used before boot patched: 5MiB
+[02:40:30] boot patched ready in 86s
+engine=vllm boot max_num_seqs=256
+iter  0 target=8     api=    6.6ms effect= 1258.2ms http=200 ok=True
+iter  1 target=256   api=   13.4ms effect=   40.0ms http=200 ok=True
+iter  2 target=8     api=   27.9ms effect= 1529.4ms http=200 ok=True
+iter  3 target=256   api=   11.4ms effect=   39.0ms http=200 ok=True
+iter  4 target=8     api=   15.3ms effect= 1511.3ms http=200 ok=True
+iter  5 target=256   api=   14.9ms effect=   40.7ms http=200 ok=True
+iter  6 target=8     api=    7.4ms effect= 1529.5ms http=200 ok=True
+iter  7 target=256   api=   13.5ms effect=   38.3ms http=200 ok=True
+iter  8 target=8     api=   10.2ms effect= 1503.1ms http=200 ok=True
+iter  9 target=256   api=   10.5ms effect=   37.9ms http=200 ok=True
+iter 10 target=8     api=   15.7ms effect= 1515.3ms http=200 ok=True
+iter 11 target=256   api=    7.7ms effect=   33.3ms http=200 ok=True
+iter 12 target=8     api=    5.5ms effect= 1518.1ms http=200 ok=True
+iter 13 target=256   api=    9.2ms effect=   33.6ms http=200 ok=True
+iter 14 target=8     api=   11.1ms effect= 1505.5ms http=200 ok=True
+iter 15 target=256   api=    5.8ms effect=   30.0ms http=200 ok=True
+iter 16 target=8     api=   11.7ms effect= 1521.6ms http=200 ok=True
+iter 17 target=256   api=   14.4ms effect=   39.1ms http=200 ok=True
+iter 18 target=8     api=   17.6ms effect= 1502.2ms http=200 ok=True
+iter 19 target=256   api=   13.7ms effect=   39.3ms http=200 ok=True
+{
+ "engine": "vllm",
+ "cap_knob": "max_num_seqs",
+ "boot_value": 256,
+ "iters": 20,
+ "all_ok": true,
+ "api_ms_median": 11.54,
+ "api_ms_p95": 17.61,
+ "effect_ms_median": 649.49,
+ "effect_ms_p95": 1529.43,
+ "background_completed": 947,
+ "background_failed": 0
+}
+{
+ "engine": "vllm",
+ "model": "Qwen/Qwen3.8-27B-FP8",
+ "gpu": "NVIDIA B200, 183359 MiB, 580.95.05",
+ "engine_version": "0.28.0",
+ "download_s": 1,
+ "boot_stock_s": 166,
+ "boot_patched_s": 86,
+ "bench_exit": 0
+}
+{
+ "engine": "vllm",
+ "cap_knob": "max_num_seqs",
+ "boot_value": 256,
+ "iters": 20,
+ "all_ok": true,
+ "api_ms_median": 11.54,
+ "api_ms_p95": 17.61,
+ "effect_ms_median": 649.49,
+ "effect_ms_p95": 1529.43,
+ "background_completed": 947,
+ "background_failed": 0
+}
+[02:41:44] done, results in /root/trimtab_results/vllm.json
 
 Fetching 81 files:   0%|          | 0/81 [00:00<?, ?it/s]
-Fetching 81 files:   1%|          | 1/81 [00:01<02:22,  1.78s/it]
-Fetching 81 files:   4%|▎         | 3/81 [00:02<00:43,  1.81it/s]
-Fetching 81 files:   6%|▌         | 5/81 [00:02<00:26,  2.91it/s]
-Fetching 81 files:  10%|▉         | 8/81 [00:02<00:15,  4.72it/s]
-Fetching 81 files:  19%|█▊        | 15/81 [00:02<00:06,  9.73it/s]
-Fetching 81 files:  25%|██▍       | 20/81 [00:02<00:04, 14.15it/s]
-Fetching 81 files:  28%|██▊       | 23/81 [00:03<00:04, 14.33it/s]
-Fetching 81 files:  35%|███▍      | 28/81 [00:03<00:02, 18.90it/s]
-Fetching 81 files:  38%|███▊      | 31/81 [00:03<00:02, 17.56it/s]
-Fetching 81 files:  46%|████▌     | 37/81 [00:03<00:02, 19.98it/s]
-Fetching 81 files:  51%|█████     | 41/81 [00:03<00:01, 22.54it/s]
-Fetching 81 files:  54%|█████▍    | 44/81 [00:04<00:01, 21.64it/s]
-Fetching 81 files:  58%|█████▊    | 47/81 [00:04<00:01, 21.83it/s]
-Fetching 81 files:  63%|██████▎   | 51/81 [00:04<00:01, 24.22it/s]
-Fetching 81 files:  67%|██████▋   | 54/81 [00:04<00:01, 22.57it/s]
-Fetching 81 files:  74%|███████▍  | 60/81 [00:04<00:00, 29.48it/s]
-Fetching 81 files:  79%|███████▉  | 64/81 [00:04<00:00, 23.28it/s]
-Fetching 81 files:  84%|████████▍ | 68/81 [00:04<00:00, 25.36it/s]
-Fetching 81 files:  88%|████████▊ | 71/81 [00:05<00:00, 24.96it/s]
-Fetching 81 files:  91%|█████████▏| 74/81 [00:05<00:00, 25.38it/s]
-Fetching 81 files:  95%|█████████▌| 77/81 [00:05<00:00, 23.24it/s]
-Fetching 81 files:  99%|█████████▉| 80/81 [00:05<00:00, 23.71it/s]
-Fetching 81 files: 100%|██████████| 81/81 [00:05<00:00, 14.62it/s]
-bench/pod_run.sh: line 29:    27 Killed                  VLLM_SERVER_DEV_MODE=1 vllm serve $MD --served-model-name default --host 0.0.0.0 --port $PORT --gpu-memory-utilization 0.85 --max-model-len 16384 > $OUT/server_$1.log 2>&1
+Fetching 81 files:  51%|█████     | 41/81 [00:00<00:00, 399.18it/s]
+Fetching 81 files: 100%|██████████| 81/81 [00:00<00:00, 459.14it/s]
+bench/pod_run.sh: line 33:    56 Killed                  VLLM_SERVER_DEV_MODE=1 vllm serve $MD --served-model-name default --host 0.0.0.0 --port $PORT --gpu-memory-utilization 0.85 --max-model-len 16384 $VFLAGS > $OUT/server_$1.log 2>&1
