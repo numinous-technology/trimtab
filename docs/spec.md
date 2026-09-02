@@ -242,14 +242,19 @@ bench proving a live max running requests and queue cap change under load,
 with the redeploy baseline measured on the same pod. This alone is a
 shippable, publishable result.
 
-M2, trimtabd. Built as a supervisor that owns the engine process, applies hot
-fields live, and relaunches with new flags for cold fields, with weights warm
-on local disk. That is the pinned-host path. It skips the image pull and
-weight download that make a redeploy slow, and its cost is one engine boot
-against a warm page cache, which pod_run.sh measures as boot_patched_s next
-to boot_stock_s (cold disk after download). GPU-resident reinit is not built.
-Neither engine exposes an in-process pool rebuild, so claiming it would be a
-lie. It stays on the roadmap as an upstream conversation.
+M2, trimtabd and the warm path. The supervisor owns the engine process,
+applies hot fields live, tries an in-place warm reinit for pool sizing, and
+relaunches only for fields that change the weights' layout. The warm reinit
+is built on SGLang and measured on RTX PRO 6000. The scheduler drains, unmaps
+the old KV pool and CUDA graphs through SGLang's memory saver (each reinit
+generation under its own region tag), rebuilds pools, attention backends and
+graphs at the new size, and rewires every scheduler component to the new
+objects. Weights stay on the GPU. Three consecutive resizes, each followed by
+a served generation, took 31 to 32 s call to first token with prefill CUDA
+graphs on and 2.0 to 2.4 s with them off. Freeing took under 0.6 s. A
+relaunch on the same GPU is 56 s warm and 141 to 181 s cold. vLLM's warm path
+is not built, the mechanism (CuMemAllocator under sleep mode) is identified
+in the README.
 
 M3, store with versioning and rollback. Built. One class runs on SQLite or
 Postgres from the same schema, tested against a real Postgres. trimtab.server
