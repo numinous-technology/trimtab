@@ -173,7 +173,7 @@ class Store:
     def record_status(self, replica_id, group, applied_version_id, state, detail=""):
         self._exec(
             "insert into replica_status(replica_id,replica_group,applied_version_id,state,detail,last_heartbeat) values(?,?,?,?,?,?) "
-            "on conflict(replica_id) do update set applied_version_id=excluded.applied_version_id, state=excluded.state, "
+            "on conflict(replica_id) do update set replica_group=excluded.replica_group, applied_version_id=excluded.applied_version_id, state=excluded.state, "
             "detail=excluded.detail, last_heartbeat=excluded.last_heartbeat",
             (replica_id, group, applied_version_id, state, detail, time.time()),
         )
