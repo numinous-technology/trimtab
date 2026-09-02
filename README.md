@@ -77,7 +77,9 @@ deadlines are per-request parameters.
 
 ### Warm knobs, rebuilt in place with weights resident
 
-SGLang only, today. `mem_fraction_static` and `max_total_num_tokens` (the
+SGLang today, with a working measured path. vLLM's equivalent is built but
+blocked on an allocator limitation (see the end of this README).
+`mem_fraction_static` and `max_total_num_tokens` (the
 KV pool size), and raising the `max_running_requests` ceiling. The engine
 drains, unmaps the old KV pool and CUDA graphs through its own memory saver,
 rebuilds pools, attention backends and graphs at the new size, and rewires
@@ -284,13 +286,25 @@ operator against a real kind cluster, and the CLI end to end. The mock was corre
 one bool per rank, and vLLM reports a target and an enforced cap separately.
 The mock now does both.
 
-## Not built
+## Warm reinit on vLLM, built and blocked upstream
 
-Warm reinit on vLLM. The mechanism exists there too, `CuMemAllocator` under
-`--enable-sleep-mode` can discard the KV pool while keeping weights, but its
-bookkeeping has to be cleared and `bind_kv_cache` asserts an empty cache list
-before a new allocation, so it is a deeper change than SGLang's and is not
-done. vLLM cold knobs relaunch.
+The warm path is built for vLLM as well. `EngineCore.trimtab_reinit`
+(POST /trimtab/reinit) drains, drops the KV tensors, clears the CUDA graphs,
+`CuMemAllocator.discard`s the KV pool, refreshes the memory snapshot, and
+rebuilds the KV cache and scheduler. Measured on H100 with vLLM 0.28.0, the
+discard frees the pool (49 GiB reported free) and the profiler sizes the new
+pool correctly.
+
+It stops one step short. After discard unmaps the pages, PyTorch's caching
+allocator still hands those segments to the next small allocation, which
+faults despite 49 GiB free. The documented fix,
+`PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`, is incompatible with the
+pluggable allocator vLLM installs for sleep mode. A clean vLLM warm reinit
+needs the allocator to release the PyTorch-side segment on discard, an
+upstream change. Until then vLLM pool sizing is marked cold and the supervisor
+relaunches rather than risk a crash. The code, the route, and the mock test
+stay. docs/environment-notes.md has the full trace. SGLang has no such
+constraint, which is why its warm path lands.
 
 ## License
 

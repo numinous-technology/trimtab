@@ -59,3 +59,32 @@ still holds. pod_run.sh kills the core children by name and waits for
 A pattern like `pkill -f "vllm serve"` matches the command line of the shell
 that contains the pkill, and kills it. Every pattern in these scripts uses the
 bracket idiom (`vllm [s]erve`) so it cannot match its own invocation.
+
+## vLLM warm reinit, implemented and blocked upstream
+
+The warm path is built for vLLM too. `EngineCore.trimtab_reinit` (POST
+/trimtab/reinit) drains, has each worker drop the KV tensors, clear the CUDA
+graphs, `CuMemAllocator.discard("kv_cache")` to unmap the pool, refresh the
+memory snapshot, then rebuilds the KV cache and scheduler at the new size.
+Measured on H100 with vLLM 0.28.0 and Qwen3.8-27B-FP8, `discard` frees the
+pool (35.7 GiB, then 49 GiB reported free), and the profiler sizes the new
+pool correctly once `init_snapshot` is refreshed.
+
+It stops one step short on real vLLM. After `discard` unmaps the pages,
+PyTorch's caching allocator still holds those segments and hands them to the
+next small allocation, which faults with `CUDA error: an illegal memory
+access` or `out of memory` despite 49 GiB free. The error text names the fix,
+`PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`, but expandable segments
+are incompatible with the pluggable allocator vLLM installs for sleep mode, so
+setting it is silently ignored. Freeing the tensors instead of `discard` does
+not release them either, because the hybrid GDN model holds mamba-state
+references that plain dereference does not reach.
+
+A clean vLLM warm reinit needs the allocator to release the PyTorch-side
+segment when it discards a tag (discard-and-forget), which is an upstream
+change. Until then the manifest marks vLLM pool sizing cold, so the supervisor
+relaunches rather than crash the engine. The code and the route stay, and the
+mock exercises the control path end to end. SGLang has no pluggable-allocator
+constraint (its memory saver reserves virtual address space per generation and
+keeps the tensors mapped-out but referenced), which is why the SGLang warm
+path lands and vLLM's does not, yet.
