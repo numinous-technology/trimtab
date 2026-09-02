@@ -88,17 +88,12 @@ was in force in under a tenth of a second on SGLang, and not one request
 failed. Doing the same thing today means a restart, which on these machines
 takes one to seven minutes.
 
-The experiment, step by step.
-
-1. Start the engine on one GPU with Qwen/Qwen3.8-27B-FP8.
-2. Run 32 threads that each send a generation request, wait, and send another,
-   so about 32 requests are always in flight.
-3. Tell the server to run only 8 requests at a time, then to go back to its
-   normal limit, twenty flips, two seconds apart.
-4. Time each flip twice. How long until the server acknowledges the command
-   (API), and how long until it is enforcing the new limit, checked by reading
-   the limit back from the scheduler (effect).
-5. Count generation requests that failed during the run (dropped).
+What the bench does. One GPU, Qwen/Qwen3.8-27B-FP8. 32 threads keep about 32
+generation requests in flight the whole time. The bench sets the concurrency
+limit to 8, then back to its boot value, twenty times, two seconds apart. For
+each change it records the time until the server acknowledges the command
+(API) and the time until the scheduler reports the new limit as in force
+(effect). Generation requests that fail during the run are counted as dropped.
 
 Columns. Boot cap is the normal limit the engine chose at startup, the value
 we flip against. p50 and p95 are medians and 95th percentiles over the twenty
