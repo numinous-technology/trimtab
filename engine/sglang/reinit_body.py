@@ -14,8 +14,11 @@
         bad = sorted(set(fields) - allowed)
         if bad:
             return {"ok": False, "error": f"not warm-reinitable: {bad}"}
-        if not self.is_fully_idle():
-            return {"ok": False, "error": "scheduler busy, drain before a warm reinit"}
+        pending = getattr(self, "result_queue", None)
+        if not self.is_fully_idle() or (pending is not None and len(pending)) or self.last_batch is not None:
+            info = {"ok": False, "error": "scheduler busy, drain before a warm reinit"}
+            self._trimtab_last_reinit = info
+            return info
 
         self.flush_cache(empty_cache=False)
         self.running_batch = ScheduleBatch(reqs=[], batch_is_full=False)
@@ -48,25 +51,68 @@
         self.tree_cache = None
         self.req_to_token_pool = None
         self.token_to_kv_pool_allocator = None
-        # Anything else still pointing at the old pools keeps their GPU memory
-        # alive. Release it generically and log the owner, so the explicit list
-        # above can grow from evidence rather than guesswork.
         released, slots = [], []
-        for kind, obj in old.items():
-            for ref in gc.get_referrers(obj):
-                if isinstance(ref, dict):
-                    for k, v in list(ref.items()):
-                        if v is obj:
-                            ref[k] = None
-                            released.append(f"{kind}<-{k}")
-                            slots.append((ref, k, kind))
-                elif isinstance(ref, list):
-                    for i, v in enumerate(ref):
-                        if v is obj:
-                            ref[i] = None
-                            released.append(f"{kind}<-list")
-                            slots.append((ref, i, kind))
-        del old, obj
+        def _hollow(o, depth=0):
+            """Drop every tensor and CUDA graph the object owns, one level deep,
+            so its GPU memory is released even while stale references to the
+            object itself survive elsewhere."""
+            d = getattr(o, "__dict__", None)
+            if d is None:
+                return
+            for k, v in list(d.items()):
+                if torch.is_tensor(v) or type(v).__name__ == "CUDAGraph":
+                    d[k] = None
+                elif isinstance(v, (list, tuple)) and v and all(torch.is_tensor(x) or type(x).__name__ == "CUDAGraph" for x in v):
+                    d[k] = type(v)()
+                elif isinstance(v, dict) and v and all(torch.is_tensor(x) or type(x).__name__ == "CUDAGraph" for x in v.values()):
+                    d[k] = {}
+                elif depth == 0 and hasattr(v, "__dict__") and not isinstance(v, type):
+                    _hollow(v, 1)
+        saver = getattr(mr, "memory_saver_adapter", None)
+        saver_on = saver is not None and "Noop" not in type(saver).__name__
+        gen = getattr(self, "_trimtab_gen", 0)
+        if saver_on:
+            # --enable-memory-saver: unmap the physical pages of every allocation
+            # tagged kv_cache and cuda_graph, whatever still references them.
+            # Each reinit generation allocates under its own tag suffix so a
+            # later pause never touches an already paused generation.
+            suffix = f".g{gen}" if gen else ""
+            for tag in ("kv_cache" + suffix, "cuda_graph" + suffix):
+                try:
+                    saver.pause(tag)
+                except Exception as e:
+                    logger.warning(f"trimtab reinit pause({tag}) skipped: {e}")
+            gen += 1
+            self._trimtab_gen = gen
+            # Pool classes create their own adapter instances, so the tag
+            # mapping lives on the class and follows the current generation.
+            cls = type(saver)
+            if not hasattr(cls, "_trimtab_real_region"):
+                cls._trimtab_real_region = cls.region
+
+                def _region(inst, tag, enable_cpu_backup=False):
+                    g = getattr(cls, "_trimtab_gen", 0)
+                    if g and tag in ("kv_cache", "cuda_graph"):
+                        tag = f"{tag}.g{g}"
+                    return cls._trimtab_real_region(inst, tag, enable_cpu_backup)
+
+                cls.region = _region
+            cls._trimtab_gen = gen
+        else:
+            for obj in old.values():
+                try:
+                    _hollow(obj)
+                except Exception as e:
+                    logger.warning(f"trimtab reinit hollow skipped: {e}")
+        # With the saver on, the old tensors stay alive on purpose. Their
+        # physical pages are unmapped, and keeping them referenced stops the
+        # caching allocator from handing their (now unmapped) segments to the
+        # new pools. Only virtual address space is retained per generation.
+        if saver_on:
+            self._trimtab_paused = getattr(self, "_trimtab_paused", []) + [old]
+        for attr in ("kv_cache_configurator", "canary_manager", "kv_index_translator"):
+            if hasattr(mr, attr):
+                setattr(mr, attr, None)
         gc.collect()
         torch.cuda.empty_cache()
         torch.cuda.synchronize()
@@ -120,18 +166,32 @@
         self.token_to_kv_pool_allocator = result.token_to_kv_pool_allocator
         self.tree_cache = result.tree_cache
         new = {k: (self.tree_cache if k == "tree_cache" else getattr(mr, k, None)) for k in kinds}
-        for ref, key, kind in slots:  # rewire every released slot to the rebuilt object of the same kind
-            try:
-                if ref[key] is None:
-                    ref[key] = new[kind]
-            except (KeyError, IndexError, TypeError):
-                pass
+        # Scheduler components (frozen slotted dataclasses, SchedulePolicy, workers)
+        # were built with the old pools and tree. Rewire every field that still
+        # points at an old object to the rebuilt one of the same kind.
+        rewired = []
+        components = list(vars(self).values()) + [self.tp_worker, mr] + ([self.draft_worker] if getattr(self, "draft_worker", None) else [])
+        for comp in components:
+            if comp is None or isinstance(comp, (int, float, str, bytes, list, dict, tuple, set, type)):
+                continue
+            for field in ("tree_cache", "token_to_kv_pool_allocator", "req_to_token_pool", "token_to_kv_pool"):
+                try:
+                    cur = getattr(comp, field)
+                except Exception:
+                    continue
+                target = new.get(field)
+                if target is None or cur is target or cur is None:
+                    continue
+                if type(cur) is type(target) or any(cur is o for o in old.values()):
+                    object.__setattr__(comp, field, target)
+                    rewired.append(f"{type(comp).__name__}.{field}")
         self.new_token_ratio_tracker.reset()
         self._trimtab_ceilings = {"max_running_requests": self.max_running_requests}
         done = _time.perf_counter()
         info = {
             "ok": "error" not in fields, "fields": fields,
             "released": sorted(set(released)), "freed_gib": round((free_after - free_before) / 2**30, 2),
+            "memory_saver": saver_on, "rewired": sorted(set(rewired)),
             "max_total_num_tokens": self.max_total_num_tokens,
             "max_running_requests": self.max_running_requests,
             "free_s": round(freed_at - t0, 3), "rebuild_s": round(done - freed_at, 3), "total_s": round(done - t0, 3),

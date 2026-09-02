@@ -1,0 +1,147 @@
+{
+ "boot_max_total_num_tokens": 445546,
+ "boot_max_running_requests": 33,
+ "all_ok": true,
+ "rows": [
+  {
+   "fields": {
+    "mem_fraction_static": 0.75
+   },
+   "ok": true,
+   "http": 200,
+   "engine": {
+    "ok": true,
+    "fields": {
+     "mem_fraction_static": 0.75
+    },
+    "released": [],
+    "freed_gib": 51.5,
+    "memory_saver": true,
+    "rewired": [
+     "SchedulePolicy.tree_cache",
+     "SchedulerBatchResultProcessor.req_to_token_pool",
+     "SchedulerBatchResultProcessor.token_to_kv_pool_allocator",
+     "SchedulerBatchResultProcessor.tree_cache",
+     "SchedulerDPAttnAdapter.req_to_token_pool",
+     "SchedulerDPAttnAdapter.token_to_kv_pool_allocator",
+     "SchedulerDPAttnAdapter.tree_cache",
+     "SchedulerInvariantChecker.req_to_token_pool",
+     "SchedulerInvariantChecker.token_to_kv_pool_allocator",
+     "SchedulerInvariantChecker.tree_cache",
+     "SchedulerKvEventsPublisher.tree_cache",
+     "SchedulerLoadInquirer.token_to_kv_pool_allocator",
+     "SchedulerOutputStreamer.tree_cache",
+     "SchedulerPoolStatsObserver.req_to_token_pool",
+     "SchedulerPoolStatsObserver.token_to_kv_pool_allocator",
+     "SchedulerPoolStatsObserver.tree_cache",
+     "SessionController.tree_cache"
+    ],
+    "max_total_num_tokens": 220234,
+    "max_running_requests": 33,
+    "free_s": 0.083,
+    "rebuild_s": 31.311,
+    "total_s": 31.394
+   },
+   "call_s": 31.4,
+   "call_to_first_token_s": 31.75,
+   "max_total_num_tokens_after": 220234,
+   "max_running_requests_after": 33,
+   "generate_ok": true,
+   "sample": " the wind turned, and the wind turned when the ship turned.\n"
+  },
+  {
+   "fields": {
+    "max_total_tokens": 111386,
+    "max_running_requests": 16
+   },
+   "ok": true,
+   "http": 200,
+   "engine": {
+    "ok": true,
+    "fields": {
+     "max_total_tokens": 111386,
+     "max_running_requests": 16
+    },
+    "released": [],
+    "freed_gib": 37.79,
+    "memory_saver": true,
+    "rewired": [
+     "SchedulePolicy.tree_cache",
+     "SchedulerBatchResultProcessor.req_to_token_pool",
+     "SchedulerBatchResultProcessor.token_to_kv_pool_allocator",
+     "SchedulerBatchResultProcessor.tree_cache",
+     "SchedulerDPAttnAdapter.req_to_token_pool",
+     "SchedulerDPAttnAdapter.token_to_kv_pool_allocator",
+     "SchedulerDPAttnAdapter.tree_cache",
+     "SchedulerInvariantChecker.req_to_token_pool",
+     "SchedulerInvariantChecker.token_to_kv_pool_allocator",
+     "SchedulerInvariantChecker.tree_cache",
+     "SchedulerKvEventsPublisher.tree_cache",
+     "SchedulerLoadInquirer.token_to_kv_pool_allocator",
+     "SchedulerOutputStreamer.tree_cache",
+     "SchedulerPoolStatsObserver.req_to_token_pool",
+     "SchedulerPoolStatsObserver.token_to_kv_pool_allocator",
+     "SchedulerPoolStatsObserver.tree_cache",
+     "SessionController.tree_cache"
+    ],
+    "max_total_num_tokens": 111386,
+    "max_running_requests": 16,
+    "free_s": 0.533,
+    "rebuild_s": 30.923,
+    "total_s": 31.456
+   },
+   "call_s": 31.46,
+   "call_to_first_token_s": 31.81,
+   "max_total_num_tokens_after": 111386,
+   "max_running_requests_after": 16,
+   "generate_ok": true,
+   "sample": " the wind turned, and the wind turned when the ship turned.\n"
+  },
+  {
+   "fields": {
+    "mem_fraction_static": 0.85
+   },
+   "ok": true,
+   "http": 200,
+   "engine": {
+    "ok": true,
+    "fields": {
+     "mem_fraction_static": 0.85
+    },
+    "released": [],
+    "freed_gib": 31.08,
+    "memory_saver": true,
+    "rewired": [
+     "SchedulePolicy.tree_cache",
+     "SchedulerBatchResultProcessor.req_to_token_pool",
+     "SchedulerBatchResultProcessor.token_to_kv_pool_allocator",
+     "SchedulerBatchResultProcessor.tree_cache",
+     "SchedulerDPAttnAdapter.req_to_token_pool",
+     "SchedulerDPAttnAdapter.token_to_kv_pool_allocator",
+     "SchedulerDPAttnAdapter.tree_cache",
+     "SchedulerInvariantChecker.req_to_token_pool",
+     "SchedulerInvariantChecker.token_to_kv_pool_allocator",
+     "SchedulerInvariantChecker.tree_cache",
+     "SchedulerKvEventsPublisher.tree_cache",
+     "SchedulerLoadInquirer.token_to_kv_pool_allocator",
+     "SchedulerOutputStreamer.tree_cache",
+     "SchedulerPoolStatsObserver.req_to_token_pool",
+     "SchedulerPoolStatsObserver.token_to_kv_pool_allocator",
+     "SchedulerPoolStatsObserver.tree_cache",
+     "SessionController.tree_cache"
+    ],
+    "max_total_num_tokens": 111386,
+    "max_running_requests": 16,
+    "free_s": 0.568,
+    "rebuild_s": 31.096,
+    "total_s": 31.664
+   },
+   "call_s": 31.67,
+   "call_to_first_token_s": 32.02,
+   "max_total_num_tokens_after": 111386,
+   "max_running_requests_after": 16,
+   "generate_ok": true,
+   "sample": " the wind turned, and the wind turned when the ship turned.\n"
+  }
+ ]
+}

@@ -75,11 +75,16 @@ class SGLangAdapter:
         if bad:
             return ApplyResult(False, rejected={k: "not warm-reinitable" for k in bad})
         t0 = time.perf_counter()
-        status, body = _post(f"{self.base}/set_internal_state", {"server_args": {f"reinit.{k}": v for k, v in fields.items()}}, timeout)
+        for attempt in range(20):  # the engine refuses while a batch is in flight, drain and retry
+            status, body = _post(f"{self.base}/set_internal_state", {"server_args": {f"reinit.{k}": v for k, v in fields.items()}}, timeout)
+            ok = status == 200 and _all_updated(body)
+            last = self.read_raw().get("last_reinit")
+            if ok or not (last and "busy" in str(last.get("error", ""))):
+                break
+            time.sleep(0.5)
         ms = (time.perf_counter() - t0) * 1000
-        ok = status == 200 and _all_updated(body)
-        last = self.read_raw().get("last_reinit") if ok else None
-        return ApplyResult(ok, {"last_reinit": last} if ok else {}, {} if ok else {k: "engine refused, see server log" for k in fields}, ms, status)
+        rejected = {} if ok else {k: (last or {}).get("error", "engine refused, see server log") for k in fields}
+        return ApplyResult(ok, {"last_reinit": last} if ok else {}, rejected, ms, status)
 
     def read_raw(self) -> dict:
         info = _get(f"{self.base}/get_server_info", self.timeout)

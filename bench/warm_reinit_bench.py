@@ -36,7 +36,7 @@ def main():
     boot_tokens, boot_mrr = raw["max_total_num_tokens"], raw["max_running_requests"]
     print(f"boot max_total_num_tokens={boot_tokens} max_running_requests={boot_mrr}")
     plan = [
-        {"mem_fraction_static": 0.6},
+        {"mem_fraction_static": 0.75},
         {"max_total_tokens": max(4096, boot_tokens // 4), "max_running_requests": max(1, boot_mrr // 2)},
         {"mem_fraction_static": 0.85},
     ]
