@@ -18,20 +18,26 @@ for f in sorted(glob.glob(str(HERE / "results" / "*.json"))):
         api50=h["api_ms_median"], api95=h["api_ms_p95"], eff50=h["effect_ms_median"], eff95=h["effect_ms_p95"],
         bg=h["background_completed"], drops=h["background_failed"],
         stock=r["boot_stock_s"], patched=r["boot_patched_s"],
+        sweep=(f'{r["knob_sweep"]["knobs_ok"]}/{r["knob_sweep"]["knobs_total"]}' if "knob_sweep" in r else "cap only"),
     ))
 
 hdr = ("| run | GPU | engine | boot cap | swaps ok | API p50 ms | API p95 ms | effect p50 ms | effect p95 ms "
-       "| requests under load | dropped | boot cold disk s | boot warm cache s |")
-sep = "|" + "---|" * 13
+       "| requests under load | dropped | hot knobs proven | boot cold disk s | boot warm cache s |")
+sep = "|" + "---|" * 14
 lines = [hdr, sep] + [
     f'| {x["target"]} | {x["gpu"]} | {x["engine"]} | {x["boot_value"]} | {x["ok"]} | {x["api50"]} | {x["api95"]} '
-    f'| {x["eff50"]} | {x["eff95"]} | {x["bg"]} | {x["drops"]} | {x["stock"]} | {x["patched"]} |' for x in ROWS]
+    f'| {x["eff50"]} | {x["eff95"]} | {x["bg"]} | {x["drops"]} | {x["sweep"]} | {x["stock"]} | {x["patched"]} |' for x in ROWS]
 
 doc = f"""# Measured results
 
 Model Qwen/Qwen3.8-27B-FP8 on one GPU. Each row is one run of bench/pod_run.sh.
 Every number is `measured`. The JSON behind each row is in bench/results with
 per-swap rows and the HTTP status of every control call.
+
+Hot knobs proven is the knob sweep, which sets every hot knob in the
+manifest on the live engine, reads it back, and restores it. Cells run before
+the sweep existed say "cap only", meaning only the concurrency cap was
+exercised there.
 
 What the columns mean. The bench runs 32 concurrent generation threads, then
 flips the running-request cap between 8 and its boot value twenty times.

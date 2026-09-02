@@ -1,72 +1,82 @@
-[02:36:08] weights at /workspace/Qwen_Qwen3.8-27B-FP8 (1s)
-[02:36:13] gpu memory used before boot stock: 5MiB
-[02:38:59] boot stock ready in 166s
+[03:24:06] weights at /workspace/Qwen_Qwen3.8-27B-FP8 (2s)
+[03:24:12] gpu memory used before boot stock: 68MiB
+[03:33:41] boot stock ready in 569s
 core    patched
 serve   patched
 sched   patched
 router  written /usr/local/lib/python3.12/dist-packages/vllm/entrypoints/serve/dev/trimtab/api_router.py
-[02:39:04] gpu memory used before boot patched: 5MiB
-[02:40:30] boot patched ready in 86s
+[03:33:47] gpu memory used before boot patched: 68MiB
+[03:37:20] boot patched ready in 213s
 engine=vllm boot max_num_seqs=256
-iter  0 target=8     api=    6.6ms effect= 1258.2ms http=200 ok=True
-iter  1 target=256   api=   13.4ms effect=   40.0ms http=200 ok=True
-iter  2 target=8     api=   27.9ms effect= 1529.4ms http=200 ok=True
-iter  3 target=256   api=   11.4ms effect=   39.0ms http=200 ok=True
-iter  4 target=8     api=   15.3ms effect= 1511.3ms http=200 ok=True
-iter  5 target=256   api=   14.9ms effect=   40.7ms http=200 ok=True
-iter  6 target=8     api=    7.4ms effect= 1529.5ms http=200 ok=True
-iter  7 target=256   api=   13.5ms effect=   38.3ms http=200 ok=True
-iter  8 target=8     api=   10.2ms effect= 1503.1ms http=200 ok=True
-iter  9 target=256   api=   10.5ms effect=   37.9ms http=200 ok=True
-iter 10 target=8     api=   15.7ms effect= 1515.3ms http=200 ok=True
-iter 11 target=256   api=    7.7ms effect=   33.3ms http=200 ok=True
-iter 12 target=8     api=    5.5ms effect= 1518.1ms http=200 ok=True
-iter 13 target=256   api=    9.2ms effect=   33.6ms http=200 ok=True
-iter 14 target=8     api=   11.1ms effect= 1505.5ms http=200 ok=True
-iter 15 target=256   api=    5.8ms effect=   30.0ms http=200 ok=True
-iter 16 target=8     api=   11.7ms effect= 1521.6ms http=200 ok=True
-iter 17 target=256   api=   14.4ms effect=   39.1ms http=200 ok=True
-iter 18 target=8     api=   17.6ms effect= 1502.2ms http=200 ok=True
-iter 19 target=256   api=   13.7ms effect=   39.3ms http=200 ok=True
+iter  0 target=8     api=   23.3ms effect= 1046.9ms http=200 ok=True
+iter  1 target=256   api=   21.0ms effect=   83.5ms http=200 ok=True
+iter  2 target=8     api=   18.6ms effect= 1114.6ms http=200 ok=True
+iter  3 target=256   api=   37.9ms effect=  102.0ms http=200 ok=True
+iter  4 target=8     api=   31.5ms effect= 1197.6ms http=200 ok=True
+iter  5 target=256   api=   20.3ms effect=   83.3ms http=200 ok=True
+iter  6 target=8     api=  137.2ms effect=  178.8ms http=200 ok=True
+iter  7 target=256   api=   34.0ms effect=   88.9ms http=200 ok=True
+iter  8 target=8     api=   82.1ms effect=  978.2ms http=200 ok=True
+iter  9 target=256   api=   35.5ms effect=   96.6ms http=200 ok=True
+iter 10 target=8     api=   66.0ms effect=  621.6ms http=200 ok=True
+iter 11 target=256   api=   17.6ms effect=   76.3ms http=200 ok=True
+iter 12 target=8     api=   38.6ms effect=  560.5ms http=200 ok=True
+iter 13 target=256   api=   19.5ms effect=   77.5ms http=200 ok=True
+iter 14 target=8     api=   22.8ms effect=  221.0ms http=200 ok=True
+iter 15 target=256   api=   19.0ms effect=   75.0ms http=200 ok=True
+iter 16 target=8     api=   18.2ms effect=  653.4ms http=200 ok=True
+iter 17 target=256   api=   13.0ms effect=   74.0ms http=200 ok=True
+iter 18 target=8     api=   42.8ms effect=  293.6ms http=200 ok=True
+iter 19 target=256   api=   25.4ms effect=   84.6ms http=200 ok=True
 {
  "engine": "vllm",
  "cap_knob": "max_num_seqs",
  "boot_value": 256,
  "iters": 20,
  "all_ok": true,
- "api_ms_median": 11.54,
- "api_ms_p95": 17.61,
- "effect_ms_median": 649.49,
- "effect_ms_p95": 1529.43,
- "background_completed": 947,
+ "api_ms_median": 24.36,
+ "api_ms_p95": 82.08,
+ "effect_ms_median": 140.41,
+ "effect_ms_p95": 1114.59,
+ "background_completed": 661,
  "background_failed": 0
 }
+log_level                    boot=None     set=WARNING  read=WARNING  http=200 ok=True
+long_prefill_token_threshold boot=0        set=2048     read=2048     http=200 ok=True
+max_num_batched_tokens       boot=16384    set=8192     read=8192     http=200 ok=True
+max_num_seqs                 boot=256      set=128      read=128      http=200 ok=True
 {
  "engine": "vllm",
  "model": "Qwen/Qwen3.8-27B-FP8",
  "gpu": "NVIDIA B200, 183359 MiB, 580.95.05",
  "engine_version": "0.28.0",
- "download_s": 1,
- "boot_stock_s": 166,
- "boot_patched_s": 86,
- "bench_exit": 0
+ "download_s": 2,
+ "boot_stock_s": 569,
+ "boot_patched_s": 213,
+ "bench_exit": 0,
+ "sweep_exit": 0
 }
+knob sweep 4 of 4
 {
  "engine": "vllm",
  "cap_knob": "max_num_seqs",
  "boot_value": 256,
  "iters": 20,
  "all_ok": true,
- "api_ms_median": 11.54,
- "api_ms_p95": 17.61,
- "effect_ms_median": 649.49,
- "effect_ms_p95": 1529.43,
- "background_completed": 947,
+ "api_ms_median": 24.36,
+ "api_ms_p95": 82.08,
+ "effect_ms_median": 140.41,
+ "effect_ms_p95": 1114.59,
+ "background_completed": 661,
  "background_failed": 0
 }
-[02:41:44] done, results in /root/trimtab_results/vllm.json
+[03:38:41] done, results in /root/trimtab_results/vllm.json
 
 Fetching 81 files:   0%|          | 0/81 [00:00<?, ?it/s]
-Fetching 81 files:  51%|█████     | 41/81 [00:00<00:00, 399.18it/s]
-Fetching 81 files: 100%|██████████| 81/81 [00:00<00:00, 459.14it/s]
+Fetching 81 files:  11%|█         | 9/81 [00:00<00:01, 69.41it/s]
+Fetching 81 files:  31%|███       | 25/81 [00:00<00:00, 99.07it/s]
+Fetching 81 files:  51%|█████     | 41/81 [00:00<00:00, 104.36it/s]
+Fetching 81 files:  70%|███████   | 57/81 [00:00<00:00, 103.59it/s]
+Fetching 81 files:  90%|█████████ | 73/81 [00:00<00:00, 104.15it/s]
+Fetching 81 files: 100%|██████████| 81/81 [00:00<00:00, 107.01it/s]
 bench/pod_run.sh: line 33:    56 Killed                  VLLM_SERVER_DEV_MODE=1 vllm serve $MD --served-model-name default --host 0.0.0.0 --port $PORT --gpu-memory-utilization 0.85 --max-model-len 16384 $VFLAGS > $OUT/server_$1.log 2>&1
