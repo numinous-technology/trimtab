@@ -81,34 +81,63 @@ vLLM lane hit and how the scripts handle them.
 
 ## Benchmarks
 
-Model Qwen/Qwen3.8-27B-FP8, one GPU per run, 32 concurrent generation threads
-as background load, the running-request cap flipped between 8 and its boot
-value twenty times. API is the control call round trip including every rank
-confirming. Effect is from the call until the value read back from the
-scheduler equals the target. Dropped is background requests that failed during
-the run. Boot cold disk is the first boot after weight download, boot warm
-cache is the second boot of the same weights, which is what the supervisor's
-cold-knob relaunch costs. Per-swap rows and the HTTP status of every control
-call are in bench/results.
+The short version. We started a real SGLang or vLLM server on one GPU, kept
+it busy with 32 concurrent generation requests, and changed its concurrency
+limit twenty times while it ran. The change was acknowledged in about 15 ms,
+was in force in under a tenth of a second on SGLang, and not one request
+failed. Doing the same thing today means a restart, which on these machines
+takes one to seven minutes.
 
-| run | GPU | engine | boot cap | swaps ok | API p50 ms | API p95 ms | effect p50 ms | effect p95 ms | requests under load | dropped | boot cold disk s | boot warm cache s |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| b200-sglang | NVIDIA B200 | sglang 0.5.18 | 80 | 20/20 | 16.64 | 47.96 | 78.39 | 123.82 | 806 | 0 | 428 | 281 |
-| b200-vllm | NVIDIA B200 | vllm 0.28.0 | 256 | 20/20 | 11.54 | 17.61 | 649.49 | 1529.43 | 947 | 0 | 166 | 86 |
-| h100-sglang | NVIDIA H100 80GB HBM3 | sglang 0.5.18 | 24 | 20/20 | 15.95 | 49.99 | 87.28 | 126.38 | 489 | 0 | 147 | 146 |
-| h100-vllm | NVIDIA H100 80GB HBM3 | vllm 0.28.0 | 256 | 20/20 | 16.97 | 80.15 | 346.89 | 1296.47 | 531 | 0 | 321 | 75 |
-| rtx6000-sglang | NVIDIA RTX PRO 6000 Blackwell Server Edition | sglang 0.5.18 | 33 | 20/20 | 19.36 | 31.97 | 78.72 | 99.72 | 429 | 0 | 141 | 56 |
-| rtx6000-vllm | NVIDIA RTX PRO 6000 Blackwell Server Edition | vllm 0.28.0 | 256 | 20/20 | 20.21 | 40.47 | 1304.39 | 2663.86 | 444 | 0 | 60 | 55 |
+The experiment, step by step.
 
-vLLM's effect number is larger for a reason. vLLM asserts running <= cap on
-every scheduler step, so a lowered cap cannot land while more requests are
-running than the new cap allows. trimtab stops admissions at once and
-tightens the enforced cap as requests finish, and the bench measures the
-enforced value, so those numbers include the drain. Raising the cap is
-immediate on both engines, and the control path itself is 12 to 20 ms on
-every cell. SGLang has no such assertion and applies a lowering immediately.
+1. Start the engine on one GPU with Qwen/Qwen3.8-27B-FP8.
+2. Run 32 threads that each send a generation request, wait, and send another,
+   so about 32 requests are always in flight.
+3. Tell the server to run only 8 requests at a time, then to go back to its
+   normal limit, twenty flips, two seconds apart.
+4. Time each flip twice. How long until the server acknowledges the command
+   (API), and how long until it is enforcing the new limit, checked by reading
+   the limit back from the scheduler (effect).
+5. Count generation requests that failed during the run (dropped).
 
-Reproduce a cell with one command, results land in bench/results.
+Columns. Boot cap is the normal limit the engine chose at startup, the value
+we flip against. p50 and p95 are medians and 95th percentiles over the twenty
+flips. Requests under load is how many generations the 32 threads completed
+during the run.
+
+| run | GPU | engine | boot cap | swaps ok | API p50 ms | API p95 ms | effect p50 ms | effect p95 ms | requests under load | dropped |
+|---|---|---|---|---|---|---|---|---|---|---|
+| b200-sglang | NVIDIA B200 | sglang 0.5.18 | 80 | 20/20 | 16.64 | 47.96 | 78.39 | 123.82 | 806 | 0 |
+| b200-vllm | NVIDIA B200 | vllm 0.28.0 | 256 | 20/20 | 11.54 | 17.61 | 649.49 | 1529.43 | 947 | 0 |
+| h100-sglang | NVIDIA H100 80GB HBM3 | sglang 0.5.18 | 24 | 20/20 | 15.95 | 49.99 | 87.28 | 126.38 | 489 | 0 |
+| h100-vllm | NVIDIA H100 80GB HBM3 | vllm 0.28.0 | 256 | 20/20 | 16.97 | 80.15 | 346.89 | 1296.47 | 531 | 0 |
+| rtx6000-sglang | NVIDIA RTX PRO 6000 Blackwell Server Edition | sglang 0.5.18 | 33 | 20/20 | 19.36 | 31.97 | 78.72 | 99.72 | 429 | 0 |
+| rtx6000-vllm | NVIDIA RTX PRO 6000 Blackwell Server Edition | vllm 0.28.0 | 256 | 20/20 | 20.21 | 40.47 | 1304.39 | 2663.86 | 444 | 0 |
+
+What a restart costs on the same machines, for comparison. Cold disk is the
+first boot after downloading weights, warm cache is the second boot of the
+same weights. Warm cache is what trimtab's supervisor pays when a knob really
+does need a relaunch.
+
+| run | boot cold disk s | boot warm cache s |
+|---|---|---|
+| b200-sglang | 428 | 281 |
+| b200-vllm | 166 | 86 |
+| h100-sglang | 147 | 146 |
+| h100-vllm | 321 | 75 |
+| rtx6000-sglang | 141 | 56 |
+| rtx6000-vllm | 60 | 55 |
+
+Why vLLM's effect number is bigger. vLLM checks on every step that no more
+requests are running than the limit allows, so a lower limit cannot fully
+apply until enough in-flight requests finish. trimtab stops new admissions
+immediately and tightens the enforced limit as requests complete, and the
+bench measures the enforced value, so vLLM's number includes that drain.
+Raising the limit is immediate on both engines. SGLang applies a lower limit
+immediately and lets in-flight requests finish above it.
+
+Per-swap rows and the HTTP status of every control call are in bench/results.
+Reproduce a cell with one command.
 
 ```
 bench/launch_runpod.sh h100 sglang
@@ -117,9 +146,8 @@ modal run bench/launch_modal_b200.py
 modal run bench/launch_modal_b200_vllm.py
 ```
 
-docs/environment-notes.md lists the environment problems these runs hit
-(image entrypoints, driver floors, SM120 attention, hybrid model caps) and how
-the scripts handle each.
+docs/environment-notes.md lists the environment problems these runs hit and
+how the scripts handle each.
 
 ## Quickstart
 
@@ -215,21 +243,31 @@ and the published results. Use it, fork it, ship it.
 Some things we build on top of trimtab are not open source and are not in
 this repository.
 
-Fleet management. Many clusters and replica groups under one desired-state
-view, with tenancy, RBAC, SSO, and audit export.
+### Fleet management
 
-Hosted control plane. The store and reconciler run as a service with a
-Postgres backend, an agent on each pod talks to it, you never run the plane.
+Many clusters and replica groups under one desired-state view, with tenancy,
+RBAC, SSO, and audit export.
 
-Configuration recipes. A corpus of measured serving configurations per model
-and per GPU, with the evidence attached, from our inference pricing work.
-Starting points that already have the knobs where they should be.
+### Hosted control plane
 
-Canary policy library. Preregistered gate sets per traffic shape that the
-open canary consumes as data.
+The store and reconciler run as a service with a Postgres backend. An agent
+on each pod talks to it. You never run the plane yourself.
 
-Support and engineering on the open code, including new engine versions and
-engines, on a contract basis.
+### Configuration recipes
+
+A corpus of measured serving configurations per model and per GPU, with the
+evidence attached, from our inference pricing work. Starting points that
+already have the knobs where they should be.
+
+### Canary policy library
+
+Preregistered gate sets per traffic shape that the open canary consumes as
+data.
+
+### Support and engineering
+
+Work on the open code under contract, including new engine versions and new
+engines.
 
 If you run inference at a scale where any of that matters, or you want the
 hot path in an engine or engine version we do not cover yet, reach out.
