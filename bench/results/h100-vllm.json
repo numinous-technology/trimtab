@@ -3,160 +3,301 @@
  "model": "Qwen/Qwen3.8-27B-FP8",
  "gpu": "NVIDIA H100 80GB HBM3, 81559 MiB, 580.126.09",
  "engine_version": "0.28.0",
- "download_s": 121,
- "boot_stock_s": 321,
- "boot_patched_s": 75,
+ "download_s": 1,
+ "boot_stock_s": 75,
+ "boot_patched_s": 70,
  "bench_exit": 0,
+ "sweep_exit": 0,
+ "knob_sweep": {
+  "engine": "vllm",
+  "knobs_ok": 4,
+  "knobs_total": 4,
+  "rows": [
+   {
+    "knob": "log_level",
+    "boot": null,
+    "target": "WARNING",
+    "read_back": "WARNING",
+    "http": 200,
+    "api_ms": 5.97,
+    "ok": true,
+    "restored": false
+   },
+   {
+    "knob": "long_prefill_token_threshold",
+    "boot": 0,
+    "target": 2048,
+    "read_back": 2048,
+    "http": 200,
+    "api_ms": 3.87,
+    "ok": true,
+    "restored": true
+   },
+   {
+    "knob": "max_num_batched_tokens",
+    "boot": 8192,
+    "target": 4096,
+    "read_back": 4096,
+    "http": 200,
+    "api_ms": 4.23,
+    "ok": true,
+    "restored": true
+   },
+   {
+    "knob": "max_num_seqs",
+    "boot": 256,
+    "target": 128,
+    "read_back": 128,
+    "http": 200,
+    "api_ms": 4.22,
+    "ok": true,
+    "restored": true
+   }
+  ]
+ },
+ "warm_exit": 0,
+ "warm_reinit": {
+  "boot_max_total_num_tokens": 746,
+  "boot_max_running_requests": 256,
+  "all_ok": true,
+  "rows": [
+   {
+    "fields": {
+     "gpu_memory_utilization": 0.7
+    },
+    "ok": true,
+    "http": 200,
+    "engine": {
+     "ok": true,
+     "fields": {
+      "gpu_memory_utilization": 0.7
+     },
+     "num_gpu_blocks": 742,
+     "max_num_seqs": 256,
+     "freed_gib": [
+      null
+     ],
+     "free_s": 0.334,
+     "rebuild_s": 9.841,
+     "total_s": 10.174
+    },
+    "call_s": 10.18,
+    "call_to_first_token_s": 10.44,
+    "max_total_num_tokens_after": 742,
+    "max_running_requests_after": 256,
+    "generate_ok": true,
+    "sample": " the wind shifted, and the crew had to adjust the sails.\nA."
+   },
+   {
+    "fields": {
+     "gpu_memory_utilization": 0.6,
+     "max_num_seqs": 128
+    },
+    "ok": true,
+    "http": 200,
+    "engine": {
+     "ok": true,
+     "fields": {
+      "gpu_memory_utilization": 0.6,
+      "max_num_seqs": 128
+     },
+     "num_gpu_blocks": 743,
+     "max_num_seqs": 128,
+     "freed_gib": [
+      null
+     ],
+     "free_s": 0.233,
+     "rebuild_s": 7.924,
+     "total_s": 8.157
+    },
+    "call_s": 8.16,
+    "call_to_first_token_s": 8.42,
+    "max_total_num_tokens_after": 743,
+    "max_running_requests_after": 128,
+    "generate_ok": true,
+    "sample": " the wind shifted, and the crew had to adjust the sails.\nA."
+   },
+   {
+    "fields": {
+     "gpu_memory_utilization": 0.85,
+     "max_num_seqs": 256
+    },
+    "ok": true,
+    "http": 200,
+    "engine": {
+     "ok": true,
+     "fields": {
+      "gpu_memory_utilization": 0.85,
+      "max_num_seqs": 256
+     },
+     "num_gpu_blocks": 742,
+     "max_num_seqs": 256,
+     "freed_gib": [
+      null
+     ],
+     "free_s": 0.21,
+     "rebuild_s": 9.065,
+     "total_s": 9.275
+    },
+    "call_s": 9.28,
+    "call_to_first_token_s": 9.54,
+    "max_total_num_tokens_after": 742,
+    "max_running_requests_after": 256,
+    "generate_ok": true,
+    "sample": " the wind shifted, and the crew had to adjust the sails.\nA."
+   }
+  ]
+ },
  "hot_swap": {
   "engine": "vllm",
   "cap_knob": "max_num_seqs",
   "boot_value": 256,
   "iters": 20,
   "all_ok": true,
-  "api_ms_median": 16.97,
-  "api_ms_p95": 80.15,
-  "effect_ms_median": 346.89,
-  "effect_ms_p95": 1296.47,
-  "background_completed": 531,
+  "api_ms_median": 18.81,
+  "api_ms_p95": 62.11,
+  "effect_ms_median": 325.39,
+  "effect_ms_p95": 1152.01,
+  "background_completed": 516,
   "background_failed": 0,
   "rows": [
    {
     "target": 8,
-    "api_ms": 28.117120265960693,
-    "effect_ms": 855.843722820282,
+    "api_ms": 19.012298434972763,
+    "effect_ms": 1152.0135663449764,
     "http": 200,
     "ok": true
    },
    {
     "target": 256,
-    "api_ms": 15.576321631669998,
-    "effect_ms": 108.8237389922142,
+    "api_ms": 25.826986879110336,
+    "effect_ms": 113.57535049319267,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 80.15383407473564,
-    "effect_ms": 652.2770896553993,
+    "api_ms": 13.447776436805725,
+    "effect_ms": 708.3624638617039,
     "http": 200,
     "ok": true
    },
    {
     "target": 256,
-    "api_ms": 17.61331409215927,
-    "effect_ms": 94.03593838214874,
+    "api_ms": 14.380726963281631,
+    "effect_ms": 98.27236831188202,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 12.530054897069931,
-    "effect_ms": 1314.040768891573,
+    "api_ms": 16.63195714354515,
+    "effect_ms": 675.1016937196255,
     "http": 200,
     "ok": true
    },
    {
     "target": 256,
-    "api_ms": 16.327906399965286,
-    "effect_ms": 106.81421309709549,
+    "api_ms": 26.475679129362106,
+    "effect_ms": 114.04765397310257,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 11.379685252904892,
-    "effect_ms": 1007.9616419970989,
+    "api_ms": 18.281124532222748,
+    "effect_ms": 1350.9443402290344,
     "http": 200,
     "ok": true
    },
    {
     "target": 256,
-    "api_ms": 17.847131937742233,
-    "effect_ms": 105.9761755168438,
+    "api_ms": 10.300714522600174,
+    "effect_ms": 55.61574921011925,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 19.764728844165802,
-    "effect_ms": 1296.4699417352676,
+    "api_ms": 8.777238428592682,
+    "effect_ms": 796.7240996658802,
     "http": 200,
     "ok": true
    },
    {
     "target": 256,
-    "api_ms": 13.748273253440857,
-    "effect_ms": 100.30868649482727,
+    "api_ms": 16.308870166540146,
+    "effect_ms": 71.95494696497917,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 23.39698001742363,
-    "effect_ms": 1028.6558084189892,
+    "api_ms": 62.11187317967415,
+    "effect_ms": 696.8447379767895,
     "http": 200,
     "ok": true
    },
    {
     "target": 256,
-    "api_ms": 9.90898534655571,
-    "effect_ms": 78.1366229057312,
+    "api_ms": 19.20490339398384,
+    "effect_ms": 105.05258291959763,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 13.29004392027855,
-    "effect_ms": 1008.8998526334763,
+    "api_ms": 10.967958718538284,
+    "effect_ms": 595.3116081655025,
     "http": 200,
     "ok": true
    },
    {
     "target": 256,
-    "api_ms": 23.950282484292984,
-    "effect_ms": 111.81473731994629,
+    "api_ms": 18.603969365358353,
+    "effect_ms": 104.41314429044724,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 13.193219900131226,
-    "effect_ms": 577.5647722184658,
+    "api_ms": 53.00820991396904,
+    "effect_ms": 518.7558084726334,
     "http": 200,
     "ok": true
    },
    {
     "target": 256,
-    "api_ms": 26.539143174886703,
-    "effect_ms": 116.20666459202766,
+    "api_ms": 12.978240847587585,
+    "effect_ms": 99.58413243293762,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 14.454662799835205,
-    "effect_ms": 1187.6122690737247,
+    "api_ms": 22.003207355737686,
+    "effect_ms": 603.6429926753044,
     "http": 200,
     "ok": true
    },
    {
     "target": 256,
-    "api_ms": 21.4390866458416,
-    "effect_ms": 108.450997620821,
+    "api_ms": 21.265730261802673,
+    "effect_ms": 106.24080151319504,
     "http": 200,
     "ok": true
    },
    {
     "target": 8,
-    "api_ms": 99.73806887865067,
-    "effect_ms": 1101.9838973879814,
+    "api_ms": 23.041635751724243,
+    "effect_ms": 666.2128195166588,
     "http": 200,
     "ok": true
    },
    {
     "target": 256,
-    "api_ms": 14.100313186645508,
-    "effect_ms": 103.92313450574875,
+    "api_ms": 86.32243052124977,
+    "effect_ms": 132.02205300331116,
     "http": 200,
     "ok": true
    }

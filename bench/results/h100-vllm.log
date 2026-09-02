@@ -1,71 +1,83 @@
-[02:40:35] vllm installed in 96s, 0.28.0
-Fetching 81 files:   0%|          | 0/81 [00:00<?, ?it/s]Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-Fetching 81 files:   1%|          | 1/81 [00:00<00:13,  5.97it/s]Fetching 81 files:   2%|▏         | 2/81 [00:00<00:11,  6.86it/s]Fetching 81 files:  10%|▉         | 8/81 [00:03<00:38,  1.92it/s]Fetching 81 files:  11%|█         | 9/81 [00:04<00:33,  2.12it/s]Fetching 81 files:  12%|█▏        | 10/81 [00:05<00:43,  1.61it/s]Fetching 81 files:  14%|█▎        | 11/81 [00:05<00:36,  1.91it/s]Fetching 81 files:  15%|█▍        | 12/81 [00:06<00:36,  1.89it/s]Fetching 81 files:  16%|█▌        | 13/81 [00:06<00:34,  1.98it/s]Fetching 81 files:  17%|█▋        | 14/81 [00:08<00:52,  1.27it/s]Fetching 81 files:  19%|█▊        | 15/81 [00:08<00:39,  1.66it/s]Fetching 81 files:  20%|█▉        | 16/81 [00:10<01:12,  1.11s/it]Fetching 81 files:  21%|██        | 17/81 [00:11<01:02,  1.02it/s]Fetching 81 files:  22%|██▏       | 18/81 [00:13<01:30,  1.43s/it]Fetching 81 files:  23%|██▎       | 19/81 [00:16<01:44,  1.69s/it]Fetching 81 files:  25%|██▍       | 20/81 [00:18<02:04,  2.05s/it]Fetching 81 files:  26%|██▌       | 21/81 [00:20<01:47,  1.79s/it]Fetching 81 files:  27%|██▋       | 22/81 [00:21<01:38,  1.67s/it]Fetching 81 files:  28%|██▊       | 23/81 [00:23<01:38,  1.70s/it]Fetching 81 files:  30%|██▉       | 24/81 [00:26<02:04,  2.18s/it]Fetching 81 files:  31%|███       | 25/81 [00:27<01:39,  1.77s/it]Fetching 81 files:  32%|███▏      | 26/81 [00:29<01:37,  1.77s/it]Fetching 81 files:  33%|███▎      | 27/81 [00:30<01:29,  1.65s/it]Fetching 81 files:  35%|███▍      | 28/81 [00:32<01:33,  1.76s/it]Fetching 81 files:  36%|███▌      | 29/81 [00:33<01:14,  1.44s/it]Fetching 81 files:  38%|███▊      | 31/81 [00:34<00:49,  1.02it/s]Fetching 81 files:  40%|███▉      | 32/81 [00:39<01:39,  2.04s/it]Fetching 81 files:  41%|████      | 33/81 [00:40<01:23,  1.74s/it]Fetching 81 files:  42%|████▏     | 34/81 [00:41<01:19,  1.68s/it]Fetching 81 files:  43%|████▎     | 35/81 [00:43<01:21,  1.78s/it]Fetching 81 files:  44%|████▍     | 36/81 [00:45<01:13,  1.64s/it]Fetching 81 files:  46%|████▌     | 37/81 [00:45<00:58,  1.34s/it]Fetching 81 files:  48%|████▊     | 39/81 [00:45<00:32,  1.29it/s]Fetching 81 files:  49%|████▉     | 40/81 [00:50<01:12,  1.78s/it]Fetching 81 files:  51%|█████     | 41/81 [00:51<00:58,  1.47s/it]Fetching 81 files:  52%|█████▏    | 42/81 [00:54<01:14,  1.90s/it]Fetching 81 files:  53%|█████▎    | 43/81 [00:54<00:55,  1.47s/it]Fetching 81 files:  54%|█████▍    | 44/81 [00:57<01:07,  1.83s/it]Fetching 81 files:  56%|█████▌    | 45/81 [00:58<00:56,  1.56s/it]Fetching 81 files:  57%|█████▋    | 46/81 [00:59<00:47,  1.35s/it]Fetching 81 files:  58%|█████▊    | 47/81 [00:59<00:35,  1.05s/it]Fetching 81 files:  59%|█████▉    | 48/81 [01:03<01:01,  1.86s/it]Fetching 81 files:  60%|██████    | 49/81 [01:04<00:47,  1.49s/it]Fetching 81 files:  62%|██████▏   | 50/81 [01:05<00:49,  1.59s/it]Fetching 81 files:  63%|██████▎   | 51/81 [01:07<00:47,  1.58s/it]Fetching 81 files:  64%|██████▍   | 52/81 [01:09<00:53,  1.86s/it]Fetching 81 files:  65%|██████▌   | 53/81 [01:10<00:40,  1.43s/it]Fetching 81 files:  67%|██████▋   | 54/81 [01:11<00:37,  1.40s/it]Fetching 81 files:  68%|██████▊   | 55/81 [01:12<00:34,  1.31s/it]Fetching 81 files:  69%|██████▉   | 56/81 [01:15<00:44,  1.76s/it]Fetching 81 files:  72%|███████▏  | 58/81 [01:17<00:33,  1.44s/it]Fetching 81 files:  73%|███████▎  | 59/81 [01:20<00:41,  1.86s/it]Fetching 81 files:  74%|███████▍  | 60/81 [01:21<00:31,  1.51s/it]Fetching 81 files:  75%|███████▌  | 61/81 [01:22<00:26,  1.32s/it]Fetching 81 files:  77%|███████▋  | 62/81 [01:22<00:21,  1.13s/it]Fetching 81 files:  78%|███████▊  | 63/81 [01:25<00:29,  1.64s/it]Fetching 81 files:  79%|███████▉  | 64/81 [01:27<00:30,  1.79s/it]Fetching 81 files:  80%|████████  | 65/81 [01:28<00:22,  1.38s/it]Fetching 81 files:  81%|████████▏ | 66/81 [01:28<00:15,  1.01s/it]Fetching 81 files:  83%|████████▎ | 67/81 [01:29<00:12,  1.14it/s]Fetching 81 files:  84%|████████▍ | 68/81 [01:29<00:08,  1.49it/s]Fetching 81 files:  85%|████████▌ | 69/81 [01:29<00:06,  1.95it/s]Fetching 81 files:  86%|████████▋ | 70/81 [01:29<00:04,  2.56it/s]Fetching 81 files:  88%|████████▊ | 71/81 [01:31<00:08,  1.18it/s]Fetching 81 files:  89%|████████▉ | 72/81 [01:31<00:05,  1.59it/s]Fetching 81 files:  90%|█████████ | 73/81 [01:31<00:03,  2.11it/s]Fetching 81 files:  91%|█████████▏| 74/81 [01:32<00:03,  1.89it/s]Fetching 81 files:  93%|█████████▎| 75/81 [01:34<00:05,  1.09it/s]Fetching 81 files:  94%|█████████▍| 76/81 [01:35<00:04,  1.00it/s]Fetching 81 files:  95%|█████████▌| 77/81 [01:37<00:05,  1.35s/it]Fetching 81 files:  96%|█████████▋| 78/81 [01:37<00:03,  1.01s/it]Fetching 81 files:  98%|█████████▊| 79/81 [01:42<00:04,  2.06s/it]Fetching 81 files:  99%|█████████▉| 80/81 [01:44<00:02,  2.07s/it]Fetching 81 files: 100%|██████████| 81/81 [02:00<00:00,  6.22s/it]Fetching 81 files: 100%|██████████| 81/81 [02:00<00:00,  1.48s/it]
-[02:42:36] weights at /workspace/Qwen_Qwen3.8-27B-FP8 (121s)
-[02:42:41] gpu memory used before boot stock: 0MiB
-[02:48:02] boot stock ready in 321s
-core    patched
-serve   patched
-sched   patched
+Fetching 81 files:   0%|          | 0/81 [00:00<?, ?it/s]Fetching 81 files:  36%|███▌      | 29/81 [00:00<00:00, 289.35it/s]Fetching 81 files:  72%|███████▏  | 58/81 [00:00<00:00, 247.82it/s]Fetching 81 files: 100%|██████████| 81/81 [00:00<00:00, 268.21it/s]
+[20:46:15] weights at /workspace/Qwen_Qwen3.8-27B-FP8 (1s)
+[20:46:20] gpu memory used before boot stock: 0MiB
+[20:47:35] boot stock ready in 75s
+core    already patched
+serve   already patched
+sched   already patched
+worker  already patched
 router  written /usr/local/lib/python3.11/dist-packages/vllm/entrypoints/serve/dev/trimtab/api_router.py
-bench/pod_run.sh: line 33:  1561 Killed                  VLLM_SERVER_DEV_MODE=1 vllm serve $MD --served-model-name default --host 0.0.0.0 --port $PORT --gpu-memory-utilization 0.85 --max-model-len 16384 $VFLAGS > $OUT/server_$1.log 2>&1
-[02:48:07] gpu memory used before boot patched: 0MiB
-[02:49:22] boot patched ready in 75s
+bench/pod_run.sh: line 33: 10627 Killed                  VLLM_SERVER_DEV_MODE=1 vllm serve $MD --served-model-name default --host 0.0.0.0 --port $PORT --gpu-memory-utilization 0.85 --max-model-len 16384 --enable-sleep-mode $VFLAGS > $OUT/server_$1.log 2>&1
+[20:47:40] gpu memory used before boot patched: 0MiB
+[20:48:50] boot patched ready in 70s
 engine=vllm boot max_num_seqs=256
-iter  0 target=8     api=   28.1ms effect=  855.8ms http=200 ok=True
-iter  1 target=256   api=   15.6ms effect=  108.8ms http=200 ok=True
-iter  2 target=8     api=   80.2ms effect=  652.3ms http=200 ok=True
-iter  3 target=256   api=   17.6ms effect=   94.0ms http=200 ok=True
-iter  4 target=8     api=   12.5ms effect= 1314.0ms http=200 ok=True
-iter  5 target=256   api=   16.3ms effect=  106.8ms http=200 ok=True
-iter  6 target=8     api=   11.4ms effect= 1008.0ms http=200 ok=True
-iter  7 target=256   api=   17.8ms effect=  106.0ms http=200 ok=True
-iter  8 target=8     api=   19.8ms effect= 1296.5ms http=200 ok=True
-iter  9 target=256   api=   13.7ms effect=  100.3ms http=200 ok=True
-iter 10 target=8     api=   23.4ms effect= 1028.7ms http=200 ok=True
-iter 11 target=256   api=    9.9ms effect=   78.1ms http=200 ok=True
-iter 12 target=8     api=   13.3ms effect= 1008.9ms http=200 ok=True
-iter 13 target=256   api=   24.0ms effect=  111.8ms http=200 ok=True
-iter 14 target=8     api=   13.2ms effect=  577.6ms http=200 ok=True
-iter 15 target=256   api=   26.5ms effect=  116.2ms http=200 ok=True
-iter 16 target=8     api=   14.5ms effect= 1187.6ms http=200 ok=True
-iter 17 target=256   api=   21.4ms effect=  108.5ms http=200 ok=True
-iter 18 target=8     api=   99.7ms effect= 1102.0ms http=200 ok=True
-iter 19 target=256   api=   14.1ms effect=  103.9ms http=200 ok=True
+iter  0 target=8     api=   19.0ms effect= 1152.0ms http=200 ok=True
+iter  1 target=256   api=   25.8ms effect=  113.6ms http=200 ok=True
+iter  2 target=8     api=   13.4ms effect=  708.4ms http=200 ok=True
+iter  3 target=256   api=   14.4ms effect=   98.3ms http=200 ok=True
+iter  4 target=8     api=   16.6ms effect=  675.1ms http=200 ok=True
+iter  5 target=256   api=   26.5ms effect=  114.0ms http=200 ok=True
+iter  6 target=8     api=   18.3ms effect= 1350.9ms http=200 ok=True
+iter  7 target=256   api=   10.3ms effect=   55.6ms http=200 ok=True
+iter  8 target=8     api=    8.8ms effect=  796.7ms http=200 ok=True
+iter  9 target=256   api=   16.3ms effect=   72.0ms http=200 ok=True
+iter 10 target=8     api=   62.1ms effect=  696.8ms http=200 ok=True
+iter 11 target=256   api=   19.2ms effect=  105.1ms http=200 ok=True
+iter 12 target=8     api=   11.0ms effect=  595.3ms http=200 ok=True
+iter 13 target=256   api=   18.6ms effect=  104.4ms http=200 ok=True
+iter 14 target=8     api=   53.0ms effect=  518.8ms http=200 ok=True
+iter 15 target=256   api=   13.0ms effect=   99.6ms http=200 ok=True
+iter 16 target=8     api=   22.0ms effect=  603.6ms http=200 ok=True
+iter 17 target=256   api=   21.3ms effect=  106.2ms http=200 ok=True
+iter 18 target=8     api=   23.0ms effect=  666.2ms http=200 ok=True
+iter 19 target=256   api=   86.3ms effect=  132.0ms http=200 ok=True
 {
  "engine": "vllm",
  "cap_knob": "max_num_seqs",
  "boot_value": 256,
  "iters": 20,
  "all_ok": true,
- "api_ms_median": 16.97,
- "api_ms_p95": 80.15,
- "effect_ms_median": 346.89,
- "effect_ms_p95": 1296.47,
- "background_completed": 531,
+ "api_ms_median": 18.81,
+ "api_ms_p95": 62.11,
+ "effect_ms_median": 325.39,
+ "effect_ms_p95": 1152.01,
+ "background_completed": 516,
  "background_failed": 0
 }
+log_level                    boot=None     set=WARNING  read=WARNING  http=200 ok=True
+long_prefill_token_threshold boot=0        set=2048     read=2048     http=200 ok=True
+max_num_batched_tokens       boot=8192     set=4096     read=4096     http=200 ok=True
+max_num_seqs                 boot=256      set=128      read=128      http=200 ok=True
+boot num_gpu_blocks=746 cap=256
+{"fields": {"gpu_memory_utilization": 0.7}, "ok": true, "http": 200, "engine": {"ok": true, "fields": {"gpu_memory_utilization": 0.7}, "num_gpu_blocks": 742, "max_num_seqs": 256, "freed_gib": [null], "free_s": 0.334, "rebuild_s": 9.841, "total_s": 10.174}, "call_s": 10.18, "call_to_first_token_s": 10.44, "max_total_num_tokens_after": 742, "max_running_requests_after": 256, "generate_ok": true}
+{"fields": {"gpu_memory_utilization": 0.6, "max_num_seqs": 128}, "ok": true, "http": 200, "engine": {"ok": true, "fields": {"gpu_memory_utilization": 0.6, "max_num_seqs": 128}, "num_gpu_blocks": 743, "max_num_seqs": 128, "freed_gib": [null], "free_s": 0.233, "rebuild_s": 7.924, "total_s": 8.157}, "call_s": 8.16, "call_to_first_token_s": 8.42, "max_total_num_tokens_after": 743, "max_running_requests_after": 128, "generate_ok": true}
+{"fields": {"gpu_memory_utilization": 0.85, "max_num_seqs": 256}, "ok": true, "http": 200, "engine": {"ok": true, "fields": {"gpu_memory_utilization": 0.85, "max_num_seqs": 256}, "num_gpu_blocks": 742, "max_num_seqs": 256, "freed_gib": [null], "free_s": 0.21, "rebuild_s": 9.065, "total_s": 9.275}, "call_s": 9.28, "call_to_first_token_s": 9.54, "max_total_num_tokens_after": 742, "max_running_requests_after": 256, "generate_ok": true}
+{"boot_max_total_num_tokens": 746, "boot_max_running_requests": 256, "all_ok": true}
 {
  "engine": "vllm",
  "model": "Qwen/Qwen3.8-27B-FP8",
  "gpu": "NVIDIA H100 80GB HBM3, 81559 MiB, 580.126.09",
  "engine_version": "0.28.0",
- "download_s": 121,
- "boot_stock_s": 321,
- "boot_patched_s": 75,
- "bench_exit": 0
+ "download_s": 1,
+ "boot_stock_s": 75,
+ "boot_patched_s": 70,
+ "bench_exit": 0,
+ "sweep_exit": 0,
+ "warm_exit": 0
 }
+warm reinit True [10.44, 8.42, 9.54]
+knob sweep 4 of 4
 {
  "engine": "vllm",
  "cap_knob": "max_num_seqs",
  "boot_value": 256,
  "iters": 20,
  "all_ok": true,
- "api_ms_median": 16.97,
- "api_ms_p95": 80.15,
- "effect_ms_median": 346.89,
- "effect_ms_p95": 1296.47,
- "background_completed": 531,
+ "api_ms_median": 18.81,
+ "api_ms_p95": 62.11,
+ "effect_ms_median": 325.39,
+ "effect_ms_p95": 1152.01,
+ "background_completed": 516,
  "background_failed": 0
 }
-[02:50:32] done, results in /root/trimtab_results/vllm.json
+[20:50:26] done, results in /root/trimtab_results/vllm.json
