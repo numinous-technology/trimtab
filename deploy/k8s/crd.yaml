@@ -1,0 +1,58 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: inferenceconfigs.trimtab.numinous.technology
+spec:
+  group: trimtab.numinous.technology
+  scope: Namespaced
+  names:
+    plural: inferenceconfigs
+    singular: inferenceconfig
+    kind: InferenceConfig
+    shortNames: [icfg]
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: Group
+          type: string
+          jsonPath: .spec.group
+        - name: Phase
+          type: string
+          jsonPath: .status.phase
+        - name: Version
+          type: integer
+          jsonPath: .status.versionId
+        - name: Desired
+          type: integer
+          jsonPath: .status.desiredVersionId
+      schema:
+        openAPIV3Schema:
+          type: object
+          required: [spec]
+          properties:
+            spec:
+              type: object
+              required: [group, fields]
+              properties:
+                group: {type: string}
+                reason: {type: string}
+                fields:
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                canary:
+                  type: object
+                  properties:
+                    scope: {type: array, items: {type: string}}
+                    window_s: {type: number}
+                    gates:
+                      type: array
+                      items:
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+            status:
+              type: object
+              x-kubernetes-preserve-unknown-fields: true

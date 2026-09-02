@@ -1,0 +1,7 @@
+apiVersion: trimtab.numinous.technology/v1alpha1
+kind: InferenceConfig
+metadata: {name: prod-cap, namespace: default}
+spec:
+  group: prod
+  reason: lower the cap for the evening
+  fields: {max_running_requests: 64}
