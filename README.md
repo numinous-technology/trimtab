@@ -1,6 +1,19 @@
 # trimtab
 
-Change SGLang and vLLM scheduler settings while the server runs.
+Change SGLang and vLLM scheduler settings while the server runs. No restart,
+weights never leave the GPU.
+
+- Concurrency cap, queue limit, prefill size, schedule policy, log level change
+  live in about 15 ms. Was a full redeploy.
+- KV pool resize with weights resident in 2 s on SGLang, 8 to 10 s on vLLM.
+  Was a 1 to 7 minute redeploy plus a weight reload.
+- Zero dropped requests across every run, measured on H100, RTX PRO 6000, and
+  B200 with both engines.
+- Every scheduler knob is live or seconds-warm. Only changing the weights
+  themselves (parallelism, quantization, the model) still needs a restart.
+- A patch of about 100 lines per engine, upstream PRs open on both
+  ([sglang #37661](https://github.com/sgl-project/sglang/pull/37661),
+  [vllm #55018](https://github.com/vllm-project/vllm/pull/55018)).
 
 A trim tab is the small surface on a ship's rudder that steers the rudder
 that steers the ship. trimtab is a small patch and a control plane that steer
